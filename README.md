@@ -14,7 +14,8 @@ status](https://www.r-pkg.org/badges/version/glyparse)](https://CRAN.R-project.o
 coverage](https://codecov.io/gh/fubin1999/glyparse/graph/badge.svg)](https://app.codecov.io/gh/fubin1999/glyparse)
 <!-- badges: end -->
 
-The goal of glyparse is to …
+The goal of glyparse is to parse glycan structure text strings into a
+`glyrepr` glycan graph.
 
 ## Installation
 
