@@ -4,13 +4,15 @@
 \alias{struc_parser_wrapper}
 \title{Wrapper for Structure Parsers}
 \usage{
-struc_parser_wrapper(x, parser)
+struc_parser_wrapper(x, parser, mode = "ne")
 }
 \arguments{
 \item{x}{A character vector of structure strings.}
 
 \item{parser}{A function that parses a single structure string
 and returns a glycan graph (see \code{\link[glyrepr:as_glycan_graph]{glyrepr::as_glycan_graph()}}).}
+
+\item{mode}{A character string, either "ne" or "dn".}
 }
 \value{
 A glycan graph if \code{x} is a single character,

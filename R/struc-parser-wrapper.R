@@ -15,12 +15,13 @@
 #' @param x A character vector of structure strings.
 #' @param parser A function that parses a single structure string
 #' and returns a glycan graph (see [glyrepr::as_glycan_graph()]).
+#' @param mode A character string, either "ne" or "dn".
 #'
 #' @return A glycan graph if `x` is a single character,
 #' or a list of glycan graphs if `x` is a character vector.
 #'
 #' @export
-struc_parser_wrapper <- function(x, parser) {
+struc_parser_wrapper <- function(x, parser, mode = "ne") {
   # Check input type
   if (!is.character(x)) {
     cli::cli_abort("`x` must be a character vector.")
@@ -28,15 +29,22 @@ struc_parser_wrapper <- function(x, parser) {
   if (!is.function(parser)) {
     cli::cli_abort("`parser` must be a function.")
   }
+  if (!(mode %in% c("ne", "dn"))) {
+    cli::cli_abort("`mode` must be either 'ne' or 'dn'.")
+  }
 
   # One character
   if (length(x) == 1) {
-    tryCatch(
-      return(parser(x)),
+    glycan <- tryCatch(
+      parser(x),
       error = function(e) {
         cli::cli_abort("Could not be parsed.")
       }
     )
+    if (mode == "dn") {
+      glycan <- glyrepr::convert_ne_to_dn(glycan)
+    }
+    return(glycan)
   } else {  # Multiple characters
     result <- vector("list", length = length(x))
     failed <- rep(FALSE, length(x))
@@ -48,6 +56,9 @@ struc_parser_wrapper <- function(x, parser) {
     }
     if (any(failed)) {
       cli::cli_abort("These could not be parsed: {.val {x[failed]}}")
+    }
+    if (mode == "dn") {
+      result <- lapply(result, glyrepr::convert_ne_to_dn)
     }
     return(result)
   }

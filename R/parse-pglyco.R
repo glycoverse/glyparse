@@ -4,6 +4,10 @@
 #' See example below for the structure format.
 #'
 #' @param x A character vector of pGlyco-style structure strings.
+#' @param mode A character string, either "ne" or "dn". Default to "ne".
+#' "ne" is recommended in this case, for pGlyco-style structures
+#' don't have linkage information.
+#' For more information about "ne" and "dn", see [glyrepr::as_glycan_graph()].
 #'
 #' @return A glycan graph if `x` is a single character,
 #' or a list of glycan graphs if `x` is a character vector.
@@ -13,8 +17,8 @@
 #' print(glycan, verbose = TRUE)
 #'
 #' @export
-parse_pglyco_struc <- function(x) {
-  struc_parser_wrapper(x, do_parse_pglyco_struc)
+parse_pglyco_struc <- function(x, mode = "ne") {
+  struc_parser_wrapper(x, do_parse_pglyco_struc, mode = mode)
 }
 
 
@@ -23,6 +27,7 @@ do_parse_pglyco_struc <- function(x) {
   x <- stringr::str_replace_all(x, "A", "S")
   monos <- stringr::str_split_1(stringr::str_replace_all(x, "[//(, \\)]", ""), "")
   g <- igraph::make_empty_graph(n = length(monos), directed = TRUE)
+  igraph::V(g)$name <- seq_along(monos)
   igraph::V(g)$mono <- monos
 
   parentheses <- stringr::str_split_1(stringr::str_replace_all(x, "[^()]", ""), "")
