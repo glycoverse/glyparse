@@ -14,33 +14,7 @@
 #'
 #' @export
 parse_pglyco_struc <- function(x) {
-  # Check input type
-  if (!is.character(x)) {
-    cli::cli_abort("`x` must be a character vector.")
-  }
-
-  # One character
-  if (length(x) == 1) {
-    tryCatch(
-      return(do_parse_pglyco_struc(x)),
-      error = function(e) {
-        cli::cli_abort("Could not be parsed.")
-      }
-    )
-  } else {  # Multiple characters
-    result <- vector("list", length = length(x))
-    failed <- rep(FALSE, length(x))
-    for (i in seq_along(x)){
-      tryCatch(
-        result[[i]] <- do_parse_pglyco_struc(x[[i]]),
-        error = function(e) failed[[i]] <<- TRUE
-      )
-    }
-    if (any(failed)) {
-      cli::cli_abort("These could not be parsed: {.val {x[failed]}}")
-    }
-    return(result)
-  }
+  struc_parser_wrapper(x, do_parse_pglyco_struc)
 }
 
 
