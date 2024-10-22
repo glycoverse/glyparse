@@ -14,5 +14,8 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 URL: https://fubin1999.github.io/glyparse/
 Imports: 
+    cli,
     glyrepr,
-    rstackdeque
+    igraph,
+    rstackdeque,
+    stringr
