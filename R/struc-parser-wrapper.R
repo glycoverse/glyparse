@@ -38,7 +38,7 @@ struc_parser_wrapper <- function(x, parser, mode = "ne") {
     glycan <- tryCatch(
       parser(x),
       error = function(e) {
-        cli::cli_abort("Could not be parsed.")
+        cli::cli_abort(c("Could not be parsed.", i = conditionMessage(e)))
       }
     )
     if (mode == "dn") {
