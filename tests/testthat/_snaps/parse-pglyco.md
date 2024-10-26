@@ -22,7 +22,7 @@
       print(glycan, verbose = TRUE)
     Output
       Glycan Graph (NE)
-      F: 1, H: 5, N: 4, S: 1
+      A: 1, F: 1, H: 5, N: 4
       ------------------
       N
       ├─F
@@ -34,5 +34,5 @@
           └─H
             └─N
               └─H
-                └─S
+                └─A
 

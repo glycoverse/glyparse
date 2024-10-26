@@ -24,7 +24,6 @@ parse_pglyco_struc <- function(x, mode = "ne") {
 
 # Parsing logic of `parse_pglyco_struc()`
 do_parse_pglyco_struc <- function(x) {
-  x <- stringr::str_replace_all(x, "A", "S")
   monos <- stringr::str_split_1(stringr::str_replace_all(x, "[//(, \\)]", ""), "")
   g <- igraph::make_empty_graph(n = length(monos), directed = TRUE)
   igraph::V(g)$name <- seq_along(monos)
