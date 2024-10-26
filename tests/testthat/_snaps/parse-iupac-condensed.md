@@ -34,3 +34,16 @@
             └─Man (a1-2)
               └─Man (a1-2)
 
+# IUPAC-condensed: unknown linkages
+
+    Code
+      print(glycan, verbose = TRUE)
+    Output
+      Glycan Graph (NE)
+      Man: 4
+      ------------------
+      Man
+      └─Man
+        └─Man (?1-3)
+          └─Man (a1-?)
+
