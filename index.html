@@ -5,14 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>What the Package Does (One Line, Title Case) • glyparse</title>
+<title>Parsing glycan structure text representations. • glyparse</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="What the Package Does (One Line, Title Case)">
-<meta name="description" content="What the package does (one paragraph).">
-<meta property="og:description" content="What the package does (one paragraph).">
+<script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Parsing glycan structure text representations.">
+<meta name="description" content="This package provides functions to parse glycan structure text representations into a graph representation. Currently, it supports StrucGP-style, pGlyco-style, and condensed IUPAC glycan structure text representations.">
+<meta property="og:description" content="This package provides functions to parse glycan structure text representations into a graph representation. Currently, it supports StrucGP-style, pGlyco-style, and condensed IUPAC glycan structure text representations.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -61,7 +61,47 @@
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p>Coming soon…</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://fubin1999.github.io/glyparse/">glyparse</a></span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Parse a StrucGP-style structure string</span></span>
+<span><span class="fu"><a href="reference/parse_strucgp_struc.html">parse_strucgp_struc</a></span><span class="op">(</span><span class="st">"A2B2C1D1E2F1fedD1E2edcbB5ba"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Glycan Graph (NE)</span></span>
+<span><span class="co">#&gt; dHex: 1, Hex: 4, HexNAc: 4</span></span>
+<span><span class="co">#&gt; ------------------</span></span>
+<span><span class="co">#&gt; HexNAc</span></span>
+<span><span class="co">#&gt; ├─HexNAc</span></span>
+<span><span class="co">#&gt; │ └─Hex</span></span>
+<span><span class="co">#&gt; │   ├─Hex</span></span>
+<span><span class="co">#&gt; │   │ └─HexNAc</span></span>
+<span><span class="co">#&gt; │   │   └─Hex</span></span>
+<span><span class="co">#&gt; │   └─Hex</span></span>
+<span><span class="co">#&gt; │     └─HexNAc</span></span>
+<span><span class="co">#&gt; └─dHex</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Parse a pGlyco-style structure string</span></span>
+<span><span class="fu"><a href="reference/parse_pglyco_struc.html">parse_pglyco_struc</a></span><span class="op">(</span><span class="st">"(N(F)(N(H(H(N))(H(N(H))))))"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Glycan Graph (NE)</span></span>
+<span><span class="co">#&gt; F: 1, H: 4, N: 4</span></span>
+<span><span class="co">#&gt; ------------------</span></span>
+<span><span class="co">#&gt; N</span></span>
+<span><span class="co">#&gt; ├─F</span></span>
+<span><span class="co">#&gt; └─N</span></span>
+<span><span class="co">#&gt;   └─H</span></span>
+<span><span class="co">#&gt;     ├─H</span></span>
+<span><span class="co">#&gt;     │ └─N</span></span>
+<span><span class="co">#&gt;     └─H</span></span>
+<span><span class="co">#&gt;       └─N</span></span>
+<span><span class="co">#&gt;         └─H</span></span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Parse a condensed IUPAC structure string</span></span>
+<span><span class="fu"><a href="reference/parse_iupac_condensed.html">parse_iupac_condensed</a></span><span class="op">(</span><span class="st">"Gal(b1-3)GlcNAc(b1-4)Glc"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Glycan Graph (NE)</span></span>
+<span><span class="co">#&gt; Gal: 1, Glc: 1, GlcNAc: 1</span></span>
+<span><span class="co">#&gt; ------------------</span></span>
+<span><span class="co">#&gt; Glc</span></span>
+<span><span class="co">#&gt; └─GlcNAc (b1-4)</span></span>
+<span><span class="co">#&gt;   └─Gal (b1-3)</span></span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="license">
@@ -91,7 +131,7 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>First Last <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/YOUR-ORCID-ID" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Bin Fu <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0001-8567-2997" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 </ul>
 </div>
 
@@ -110,7 +150,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by First Last.</p>
+  <p>Developed by Bin Fu.</p>
 </div>
 
 <div class="pkgdown-footer-right">
