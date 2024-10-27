@@ -47,3 +47,13 @@
         └─Man (?1-3)
           └─Man (a1-?)
 
+# IUPAC-condensed: single monosaccharide
+
+    Code
+      print(glycan, verbose = TRUE)
+    Output
+      Glycan Graph (NE)
+      Man: 1
+      ------------------
+      Man
+

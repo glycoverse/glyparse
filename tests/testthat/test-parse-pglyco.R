@@ -10,3 +10,10 @@ test_that("(N(F)(N(H(H(N(H)))(H(N(H(A)))))))", {
   glycan <- parse_pglyco_struc("(N(F)(N(H(H(N(H)))(H(N(H(A)))))))")
   expect_snapshot(print(glycan, verbose = TRUE))
 })
+
+
+test_that("single monosaccharide", {
+  skip_on_old_win()
+  glycan <- parse_pglyco_struc("(N)")
+  expect_snapshot(print(glycan, verbose = TRUE))
+})

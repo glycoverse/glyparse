@@ -29,6 +29,11 @@ do_parse_iupac_condensed <- function(x) {
   graph <- igraph::make_empty_graph()
   graph <- igraph::add_vertices(graph, 1, name = "1", mono = tokens[[1]])
 
+  if (length(tokens) == 1) {
+    graph <- igraph::set_edge_attr(graph, "linkage", value = character(0))
+    return(glyrepr::as_ne_glycan_graph(graph))
+  }
+
   # Iterate over the tokens
   node_stack <- rstackdeque::rstack()
   node_stack <- rstackdeque::insert_top(node_stack, 1)

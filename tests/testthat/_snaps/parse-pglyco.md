@@ -36,3 +36,13 @@
               └─H
                 └─A
 
+# single monosaccharide
+
+    Code
+      print(glycan, verbose = TRUE)
+    Output
+      Glycan Graph (NE)
+      N: 1
+      ------------------
+      N
+
