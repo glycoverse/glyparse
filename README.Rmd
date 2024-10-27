@@ -36,4 +36,22 @@ pak::pak("fubin1999/glyparse")
 
 ## Example
 
-Coming soon...
+```{r}
+library(glyparse)
+```
+
+```{r}
+# Parse a StrucGP-style structure string
+parse_strucgp_struc("A2B2C1D1E2F1fedD1E2edcbB5ba")
+```
+
+```{r}
+# Parse a pGlyco-style structure string
+parse_pglyco_struc("(N(F)(N(H(H(N))(H(N(H))))))")
+```
+
+```{r}
+# Parse a condensed IUPAC structure string
+parse_iupac_condensed("Gal(b1-3)GlcNAc(b1-4)Glc")
+```
+

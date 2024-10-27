@@ -29,4 +29,51 @@ pak::pak("fubin1999/glyparse")
 
 ## Example
 
-Coming soon…
+``` r
+library(glyparse)
+```
+
+``` r
+# Parse a StrucGP-style structure string
+parse_strucgp_struc("A2B2C1D1E2F1fedD1E2edcbB5ba")
+#> Glycan Graph (NE)
+#> dHex: 1, Hex: 4, HexNAc: 4
+#> ------------------
+#> HexNAc
+#> ├─HexNAc
+#> │ └─Hex
+#> │   ├─Hex
+#> │   │ └─HexNAc
+#> │   │   └─Hex
+#> │   └─Hex
+#> │     └─HexNAc
+#> └─dHex
+```
+
+``` r
+# Parse a pGlyco-style structure string
+parse_pglyco_struc("(N(F)(N(H(H(N))(H(N(H))))))")
+#> Glycan Graph (NE)
+#> F: 1, H: 4, N: 4
+#> ------------------
+#> N
+#> ├─F
+#> └─N
+#>   └─H
+#>     ├─H
+#>     │ └─N
+#>     └─H
+#>       └─N
+#>         └─H
+```
+
+``` r
+# Parse a condensed IUPAC structure string
+parse_iupac_condensed("Gal(b1-3)GlcNAc(b1-4)Glc")
+#> Glycan Graph (NE)
+#> Gal: 1, Glc: 1, GlcNAc: 1
+#> ------------------
+#> Glc
+#> └─GlcNAc (b1-4)
+#>   └─Gal (b1-3)
+```
