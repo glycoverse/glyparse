@@ -19,8 +19,6 @@
 #'
 #' @return A glycan graph if `x` is a single character,
 #' or a list of glycan graphs if `x` is a character vector.
-#'
-#' @export
 struc_parser_wrapper <- function(x, parser, mode = "ne") {
   # Check input type
   if (!is.character(x)) {
