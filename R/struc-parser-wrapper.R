@@ -42,7 +42,7 @@ struc_parser_wrapper <- function(x, parser, mode = "ne") {
       }
     )
     if (mode == "dn") {
-      glycan <- glyrepr::convert_ne_to_dn(glycan)
+      glycan <- glyrepr::convert_graph_mode(glycan, to = "dn")
     }
     return(glycan)
   } else {  # Multiple characters
@@ -58,7 +58,7 @@ struc_parser_wrapper <- function(x, parser, mode = "ne") {
       cli::cli_abort("These could not be parsed: {.val {x[failed]}}")
     }
     if (mode == "dn") {
-      result <- lapply(result, glyrepr::convert_ne_to_dn)
+      result <- purrr::map(result, glyrepr::convert_graph_mode, to = "dn")
     }
     return(result)
   }
