@@ -18,7 +18,7 @@ RoxygenNote: 7.3.2
 URL: https://fubin1999.github.io/glyparse/
 Imports: 
     cli,
-    glyrepr (== 0.0.0.9008),
+    glyrepr (>= 0.0.0.9011),
     igraph,
     rstackdeque,
     stringr
