@@ -57,3 +57,34 @@
       ------------------
       Man
 
+# IUPAC-condensed: substituent
+
+    Code
+      print(glycan, verbose = TRUE)
+    Output
+      Glycan Graph (NE)
+      Gal: 1, Man: 1
+      ------------------
+      Gal-6Ac
+      └─Man-3S (a1-2)
+
+# IUPAC-condensed: Neu5Ac
+
+    Code
+      print(glycan, verbose = TRUE)
+    Output
+      Glycan Graph (NE)
+      Neu5Ac: 1
+      ------------------
+      Neu5Ac
+
+# IUPAC-condensed: Neu5Ac9Ac
+
+    Code
+      print(glycan, verbose = TRUE)
+    Output
+      Glycan Graph (NE)
+      Neu5Ac: 1
+      ------------------
+      Neu5Ac
+

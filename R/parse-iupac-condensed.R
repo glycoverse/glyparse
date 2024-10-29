@@ -27,7 +27,12 @@ do_parse_iupac_condensed <- function(x) {
 
   # Create a new graph and add the first node
   graph <- igraph::make_empty_graph()
-  graph <- igraph::add_vertices(graph, 1, name = "1", mono = tokens[[1]])
+  first_mono_sub_res <- extract_substituent(tokens[[1]])
+  graph <- igraph::add_vertices(
+    graph, 1, name = "1",
+    mono = first_mono_sub_res[["mono"]],
+    sub = first_mono_sub_res[["sub"]]
+  )
 
   if (length(tokens) == 1) {
     graph <- igraph::set_edge_attr(graph, "linkage", value = character(0))
@@ -50,7 +55,8 @@ do_parse_iupac_condensed <- function(x) {
       graph <- igraph::add_vertices(
         graph, 1,
         name = as.character(new_node_id),
-        mono = parsed_token[["mono"]]
+        mono = parsed_token[["mono"]],
+        sub = parsed_token[["sub"]]
       )
       graph <- igraph::add_edges(
         graph,
@@ -89,9 +95,31 @@ tokenize_iupac <- function(iupac) {
 
 parse_token <- function(token) {
   # This function parses a token (e.g. "Gal(b1-3)) into monosaccharide and linkage.
-  # It returns c(mono, linkage).
+  # It returns c(mono, sub, linkage).
   left_bracket_pos <- stringr::str_locate(token, "\\(")[1]
   mono <- stringr::str_sub(token, 1, left_bracket_pos - 1)
+  mono_sub_res <- extract_substituent(mono)
+  mono <- mono_sub_res[["mono"]]
+  sub <- mono_sub_res[["sub"]]
   linkage <- stringr::str_sub(token, left_bracket_pos + 1, -2)
-  c(mono = mono, linkage = linkage)
+  c(mono = mono, sub = sub, linkage = linkage)
+}
+
+
+extract_substituent <- function(mono) {
+  # This function extract substituent, if any.
+  # It returns c(mono, sub).
+  # e.g. "Neu5Ac9Ac" -> c(mono = "Neu5Ac", sub = "9Ac")
+  if (mono == "Neu5Ac") {
+    # "Neu5Ac" is special that it satisfies the regex below,
+    # but should not be split.
+    c(mono = mono, sub = "")
+  } else if (stringr::str_detect(mono, "\\d(S|P|Ac)$")) {
+    sub_loc <- stringr::str_locate(mono, "\\d(S|P|Ac)$")[1]
+    sub <- stringr::str_sub(mono, sub_loc, -1)
+    mono <- stringr::str_sub(mono, 1, sub_loc - 1)
+    c(mono = mono, sub = sub)
+  } else {
+    c(mono = mono, sub = "")
+  }
 }

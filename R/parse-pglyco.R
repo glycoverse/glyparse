@@ -28,6 +28,7 @@ do_parse_pglyco_struc <- function(x) {
   g <- igraph::make_empty_graph(n = length(monos), directed = TRUE)
   igraph::V(g)$name <- seq_along(monos)
   igraph::V(g)$mono <- monos
+  igraph::V(g)$sub <- ""
 
   parentheses <- stringr::str_split_1(stringr::str_replace_all(x, "[^()]", ""), "")
   current_node <- 1

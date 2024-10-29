@@ -28,6 +28,7 @@ do_parse_strucgp_struc <- function(x) {
   graph <- recur_parse_strucgp(x, graph_env, 0)$graph
   mono_map <- c("1" = "Hex", "2" = "HexNAc", "3" = "NeuAc", "4" = "NeuGc", "5" = "dHex")
   igraph::V(graph)$mono <- mono_map[igraph::V(graph)$mono]
+  igraph::V(graph)$sub <- ""
   igraph::E(graph)$linkage <- NA_character_
   glyrepr::as_ne_glycan_graph(graph)
 }

@@ -28,3 +28,27 @@ test_that("IUPAC-condensed: single monosaccharide", {
   glycan <- parse_iupac_condensed(to_parse)
   expect_snapshot(print(glycan, verbose = TRUE))
 })
+
+
+test_that("IUPAC-condensed: substituent", {
+  skip_on_old_win()
+  to_parse <- "Man3S(a1-2)Gal6Ac"
+  glycan <- parse_iupac_condensed(to_parse)
+  expect_snapshot(print(glycan, verbose = TRUE))
+})
+
+
+test_that("IUPAC-condensed: Neu5Ac", {
+  skip_on_old_win()
+  to_parse <- "Neu5Ac"
+  glycan <- parse_iupac_condensed(to_parse)
+  expect_snapshot(print(glycan, verbose = TRUE))
+})
+
+
+test_that("IUPAC-condensed: Neu5Ac9Ac", {
+  skip_on_old_win()
+  to_parse <- "Neu5Ac9Ac"
+  glycan <- parse_iupac_condensed(to_parse)
+  expect_snapshot(print(glycan, verbose = TRUE))
+})

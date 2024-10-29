@@ -5,6 +5,7 @@ simple_parser <- function(x) {
   graph <- igraph::add_edges(graph, c(1:(igraph::vcount(graph) - 1), 2:igraph::vcount(graph)))
   igraph::V(graph)$name <- as.character(1:igraph::vcount(graph))
   igraph::V(graph)$mono <- stringr::str_split(x, "")[[1]]
+  igraph::V(graph)$sub <- ""
   igraph::E(graph)$linkage <- NA_character_
   glyrepr::as_ne_glycan_graph(graph)
 }
