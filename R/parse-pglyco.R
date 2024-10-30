@@ -45,5 +45,6 @@ do_parse_pglyco_struc <- function(x) {
   }
 
   igraph::E(g)$linkage <- "??-?"
+  g$anomer <- "??"
   glyrepr::as_ne_glycan_graph(g)
 }

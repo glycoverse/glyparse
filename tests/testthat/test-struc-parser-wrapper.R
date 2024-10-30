@@ -7,6 +7,7 @@ simple_parser <- function(x) {
   igraph::V(graph)$mono <- stringr::str_split(x, "")[[1]]
   igraph::V(graph)$sub <- ""
   igraph::E(graph)$linkage <- "??-?"
+  graph$anomer <- "??"
   glyrepr::as_ne_glycan_graph(graph)
 }
 

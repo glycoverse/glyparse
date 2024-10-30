@@ -23,6 +23,13 @@ parse_iupac_condensed <- function(x, mode = "ne") {
 
 # The parsing logic of `parse_iupac_condensed()`
 do_parse_iupac_condensed <- function(x) {
+  anomer <- extract_anomer(x)
+  if (!is.na(anomer)) {
+    x <- stringr::str_sub(x, 1, -stringr::str_length(anomer)-3)
+  } else {
+    anomer <- "??"
+  }
+
   tokens <- tokenize_iupac(x)
 
   # Create a new graph and add the first node
@@ -36,6 +43,7 @@ do_parse_iupac_condensed <- function(x) {
 
   if (length(tokens) == 1) {
     graph <- igraph::set_edge_attr(graph, "linkage", value = character(0))
+    graph$anomer <- anomer
     return(glyrepr::as_ne_glycan_graph(graph))
   }
 
@@ -67,7 +75,21 @@ do_parse_iupac_condensed <- function(x) {
     }
   }
 
+  graph$anomer <- anomer
   glyrepr::as_ne_glycan_graph(graph)
+}
+
+
+extract_anomer <- function(iupac) {
+  # This function extracts the anomer of a IUPAC condensed string.
+  # e.g. "Neu5Ac(a2-" -> "a2"
+  # e.g. "Neu5Ac" -> NA
+  p <- "\\(([ab\\?][\\d\\?])-$"
+  if (stringr::str_detect(iupac, p)) {
+    stringr::str_extract(iupac, p, group = 1)
+  } else {
+    NA_character_
+  }
 }
 
 
