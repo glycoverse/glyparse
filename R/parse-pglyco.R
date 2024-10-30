@@ -44,6 +44,6 @@ do_parse_pglyco_struc <- function(x) {
     }
   }
 
-  igraph::E(g)$linkage <- NA_character_
+  igraph::E(g)$linkage <- "??-?"
   glyrepr::as_ne_glycan_graph(g)
 }
