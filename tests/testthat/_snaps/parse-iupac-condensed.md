@@ -47,6 +47,17 @@
         └─Man (?1-3)
           └─Man (a1-?)
 
+---
+
+    Code
+      print(glycan, verbose = TRUE)
+    Output
+      Glycan Graph (NE)
+      Gal: 1, Neu5Ac: 1
+      ------------------
+      Gal
+      └─Neu5Ac (a2-3/6)
+
 # IUPAC-condensed: single monosaccharide
 
     Code

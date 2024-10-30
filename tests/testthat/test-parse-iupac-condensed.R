@@ -22,6 +22,14 @@ test_that("IUPAC-condensed: unknown linkages", {
 })
 
 
+test_that("IUPAC-condensed: unknown linkages", {
+  skip_on_old_win()
+  to_parse <- "Neu5Ac(a2-3/6)Gal"
+  glycan <- parse_iupac_condensed(to_parse)
+  expect_snapshot(print(glycan, verbose = TRUE))
+})
+
+
 test_that("IUPAC-condensed: single monosaccharide", {
   skip_on_old_win()
   to_parse <- "Man"

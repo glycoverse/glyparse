@@ -103,7 +103,10 @@ tokenize_iupac <- function(iupac) {
   # This order is not suitable for graph construction.
   # After reversing, the first monosaacharide is the reducing end.
   # Note that we also swap "[" and "]" to reduce confusion when parsing.
-  linkage_pattern <- "[ab\\?][\\d\\?]-[\\d\\?]"
+  anomer_p <- "[ab\\?]"
+  pos1_p <- "([12]|\\?)"
+  pos2_p <- "([1-9](/[1-9])*|\\?)"
+  linkage_pattern <- stringr::str_glue("{anomer_p}{pos1_p}-{pos2_p}")
   mono_linkage_pattern <- stringr::str_glue("\\w+(\\({linkage_pattern}\\))?")
   pattern <- paste(mono_linkage_pattern, "\\[", "\\]", sep = "|")
   tokens <- stringr::str_extract_all(iupac, pattern)[[1]]
