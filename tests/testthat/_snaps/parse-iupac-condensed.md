@@ -97,5 +97,35 @@
       Glycan Graph (NE)
       Neu5Ac: 1
       ------------------
-      Neu5Ac
+      Neu5Ac-9Ac
+
+# IUPAC-condensed: Neu5Ac(a2-
+
+    Code
+      print(glycan, verbose = TRUE)
+    Output
+      Glycan Graph (NE)
+      Neu5Ac: 1
+      ------------------
+      Neu5Ac (a2-)
+
+# IUPAC-condensed: Neu5Ac(a?-
+
+    Code
+      print(glycan, verbose = TRUE)
+    Output
+      Glycan Graph (NE)
+      Neu5Ac: 1
+      ------------------
+      Neu5Ac (a?-)
+
+# IUPAC-condensed: Neu5Ac?Ac
+
+    Code
+      print(glycan, verbose = TRUE)
+    Output
+      Glycan Graph (NE)
+      Neu5Ac: 1
+      ------------------
+      Neu5Ac-?Ac
 

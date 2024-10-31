@@ -63,21 +63,24 @@ test_that("IUPAC-condensed: Neu5Ac9Ac", {
 
 
 test_that("IUPAC-condensed: Neu5Ac(a2-", {
+  skip_on_old_win()
   to_parse <- "Neu5Ac(a2-"
   glycan <- parse_iupac_condensed(to_parse)
-  expect_identical(glycan$anomer, "a2")
+  expect_snapshot(print(glycan, verbose = TRUE))
 })
 
 
 test_that("IUPAC-condensed: Neu5Ac(a?-", {
+  skip_on_old_win()
   to_parse <- "Neu5Ac(a?-"
   glycan <- parse_iupac_condensed(to_parse)
-  expect_identical(glycan$anomer, "a?")
+  expect_snapshot(print(glycan, verbose = TRUE))
 })
 
 
 test_that("IUPAC-condensed: Neu5Ac?Ac", {
+  skip_on_old_win()
   to_parse <- "Neu5Ac?Ac"
   glycan <- parse_iupac_condensed(to_parse)
-  expect_identical(igraph::V(glycan)$sub[[1]], "?Ac")
+  expect_snapshot(print(glycan, verbose = TRUE))
 })
