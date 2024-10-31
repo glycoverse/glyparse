@@ -103,17 +103,35 @@ tokenize_iupac <- function(iupac) {
   # This order is not suitable for graph construction.
   # After reversing, the first monosaacharide is the reducing end.
   # Note that we also swap "[" and "]" to reduce confusion when parsing.
+
+  # anomer is either "a", "b", or "?".
   anomer_p <- "[ab\\?]"
-  pos1_p <- "([12]|\\?)"
+
+  # pos1 is either "1", "2", or "?".
+  pos1_p <- "([12\\?])"
+
+  # pos2 is "1"-"9" (followed by any number of "/1-9"), or "?"
+  # e.g. "1", "2/3", "?" are all valid
   pos2_p <- "([1-9](/[1-9])*|\\?)"
+
+  # Linkage pattern is "a1-2", "b1-3/6", "a?-3", etc.
   linkage_pattern <- stringr::str_glue("{anomer_p}{pos1_p}-{pos2_p}")
-  mono_linkage_pattern <- stringr::str_glue("\\w+(\\({linkage_pattern}\\))?")
+
+  # Monosaccharide name contains only word characters and "?",
+  # and linkages are optional.
+  # e.g. Glc(b1-3), GlcNAc
+  mono_linkage_pattern <- stringr::str_glue("[\\w\\?]+(\\({linkage_pattern}\\))?")
+
+  # The pattern is either a monosaccharide name or a bracket.
   pattern <- paste(mono_linkage_pattern, "\\[", "\\]", sep = "|")
+
   tokens <- stringr::str_extract_all(iupac, pattern)[[1]]
   tokens <- stringr::str_replace(tokens, "\\[", "TEMP_LEFT")
   tokens <- stringr::str_replace(tokens, "\\]", "TEMP_RIGHT")
   tokens <- stringr::str_replace(tokens, "TEMP_LEFT", "\\]")
   tokens <- stringr::str_replace(tokens, "TEMP_RIGHT", "\\[")
+
+  # Reverse the tokens to make the first monosaccharide the reducing end.
   rev(tokens)
 }
 
@@ -139,8 +157,8 @@ extract_substituent <- function(mono) {
     # "Neu5Ac" is special that it satisfies the regex below,
     # but should not be split.
     c(mono = mono, sub = "")
-  } else if (stringr::str_detect(mono, "\\d(S|P|Ac)$")) {
-    sub_loc <- stringr::str_locate(mono, "\\d(S|P|Ac)$")[1]
+  } else if (stringr::str_detect(mono, "[\\d\\?](S|P|Ac)$")) {
+    sub_loc <- stringr::str_locate(mono, "[\\d\\?](S|P|Ac)$")[1]
     sub <- stringr::str_sub(mono, sub_loc, -1)
     mono <- stringr::str_sub(mono, 1, sub_loc - 1)
     c(mono = mono, sub = sub)
