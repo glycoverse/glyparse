@@ -30,6 +30,11 @@ do_parse_iupac_condensed <- function(x) {
     anomer <- "??"
   }
 
+  alditol <- extract_alditol(x)
+  if (alditol) {
+    x <- stringr::str_replace(x, "-ol", "")
+  }
+
   tokens <- tokenize_iupac(x)
 
   # Create a new graph and add the first node
@@ -44,6 +49,7 @@ do_parse_iupac_condensed <- function(x) {
   if (length(tokens) == 1) {
     graph <- igraph::set_edge_attr(graph, "linkage", value = character(0))
     graph$anomer <- anomer
+    graph$alditol <- alditol
     return(glyrepr::as_ne_glycan_graph(graph))
   }
 
@@ -76,6 +82,7 @@ do_parse_iupac_condensed <- function(x) {
   }
 
   graph$anomer <- anomer
+  graph$alditol <- alditol
   glyrepr::as_ne_glycan_graph(graph)
 }
 
@@ -90,6 +97,12 @@ extract_anomer <- function(iupac) {
   } else {
     NA_character_
   }
+}
+
+
+extract_alditol <- function(iupac) {
+  # This function extracts the alditol of a IUPAC condensed string.
+  stringr::str_detect(iupac, "-ol")
 }
 
 

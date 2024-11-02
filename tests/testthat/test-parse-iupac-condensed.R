@@ -84,3 +84,11 @@ test_that("IUPAC-condensed: Neu5Ac?Ac", {
   glycan <- parse_iupac_condensed(to_parse)
   expect_snapshot(print(glycan, verbose = TRUE))
 })
+
+
+test_that("IUPAC-condensed: GlcNAc(b1-4)GlcNAc-ol", {
+  skip_on_old_win()
+  to_parse <- "GlcNAc(b1-4)GlcNAc-ol"
+  glycan <- parse_iupac_condensed(to_parse)
+  expect_true(glycan$alditol)
+})

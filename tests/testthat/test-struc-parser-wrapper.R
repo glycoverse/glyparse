@@ -8,6 +8,7 @@ simple_parser <- function(x) {
   igraph::V(graph)$sub <- ""
   igraph::E(graph)$linkage <- "??-?"
   graph$anomer <- "??"
+  graph$alditol <- FALSE
   glyrepr::as_ne_glycan_graph(graph)
 }
 
