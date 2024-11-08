@@ -62,6 +62,14 @@ test_that("IUPAC-condensed: Neu5Ac9Ac", {
 })
 
 
+test_that("IUPAC-condensed: Neu5Ac9NAc", {
+  skip_on_old_win()
+  to_parse <- "Neu5Ac9NAc"
+  glycan <- parse_iupac_condensed(to_parse)
+  expect_snapshot(print(glycan, verbose = TRUE))
+})
+
+
 test_that("IUPAC-condensed: Neu5Ac(a2-", {
   skip_on_old_win()
   to_parse <- "Neu5Ac(a2-"

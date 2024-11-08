@@ -99,6 +99,16 @@
       ------------------
       Neu5Ac-9Ac
 
+# IUPAC-condensed: Neu5Ac9NAc
+
+    Code
+      print(glycan, verbose = TRUE)
+    Output
+      Glycan Graph (NE)
+      Neu5Ac: 1
+      ------------------
+      Neu5Ac-9NAc
+
 # IUPAC-condensed: Neu5Ac(a2-
 
     Code
