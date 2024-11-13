@@ -21,15 +21,9 @@
 #' or a list of glycan graphs if `x` is a character vector.
 struc_parser_wrapper <- function(x, parser, mode = "ne") {
   # Check input type
-  if (!is.character(x)) {
-    cli::cli_abort("`x` must be a character vector.")
-  }
-  if (!is.function(parser)) {
-    cli::cli_abort("`parser` must be a function.")
-  }
-  if (!(mode %in% c("ne", "dn"))) {
-    cli::cli_abort("`mode` must be either 'ne' or 'dn'.")
-  }
+  checkmate::assert_character(x)
+  checkmate::assert_function(parser)
+  checkmate::assert_choice(mode, c("ne", "dn"))
 
   # One character
   if (length(x) == 1) {

@@ -19,26 +19,17 @@ bad_parser <- function(x) {
 
 
 test_that("x is not a character", {
-  expect_error(
-    struc_parser_wrapper(1, simple_parser),
-    "`x` must be a character vector."
-  )
+  expect_error(struc_parser_wrapper(1, simple_parser))
 })
 
 
 test_that("parser is not a function", {
-  expect_error(
-    struc_parser_wrapper("x", "not_a_function"),
-    "`parser` must be a function."
-  )
+  expect_error(struc_parser_wrapper("x", "not_a_function"))
 })
 
 
 test_that("mode is not 'ne' or 'dn'", {
-  expect_error(
-    struc_parser_wrapper("x", simple_parser, "x"),
-    "`mode` must be either 'ne' or 'dn'."
-  )
+  expect_error(struc_parser_wrapper("x", simple_parser, "x"))
 })
 
 
