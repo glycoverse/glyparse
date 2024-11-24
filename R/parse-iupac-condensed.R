@@ -166,12 +166,17 @@ extract_substituent <- function(mono) {
   # This function extract substituent, if any.
   # It returns c(mono, sub).
   # e.g. "Neu5Ac9Ac" -> c(mono = "Neu5Ac", sub = "9Ac")
+  # e.g. "Neu4Ac5Ac" -> c(mono = "Neu5Ac", sub = "4Ac")
   subs_pattern <- stringr::str_c(glyrepr::available_substituents(), collapse = "|")
   subs_pattern <- stringr::str_glue("[\\d\\?]({subs_pattern})$")
   if (mono == "Neu5Ac") {
     # "Neu5Ac" is special that it satisfies the regex below,
     # but should not be split.
     c(mono = mono, sub = "")
+  } else if (mono == "Neu4Ac5Ac") {
+    c(mono = "Neu5Ac", sub = "4Ac")
+  } else if (mono == "Neu4Ac5Gc") {
+    c(mono = "Neu5Gc", sub = "4Ac")
   } else if (stringr::str_detect(mono, subs_pattern)) {
     sub_loc <- stringr::str_locate(mono, subs_pattern)[1]
     sub <- stringr::str_sub(mono, sub_loc, -1)

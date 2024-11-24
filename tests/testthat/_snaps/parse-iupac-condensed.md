@@ -79,36 +79,6 @@
       Gal-6Ac
       └─Man-3S (a1-2)
 
-# IUPAC-condensed: Neu5Ac
-
-    Code
-      print(glycan, verbose = TRUE)
-    Output
-      Glycan Graph (NE)
-      Neu5Ac: 1
-      ------------------
-      Neu5Ac
-
-# IUPAC-condensed: Neu5Ac9Ac
-
-    Code
-      print(glycan, verbose = TRUE)
-    Output
-      Glycan Graph (NE)
-      Neu5Ac: 1
-      ------------------
-      Neu5Ac-9Ac
-
-# IUPAC-condensed: Neu5Ac9NAc
-
-    Code
-      print(glycan, verbose = TRUE)
-    Output
-      Glycan Graph (NE)
-      Neu5Ac: 1
-      ------------------
-      Neu5Ac-9NAc
-
 # IUPAC-condensed: Neu5Ac(a2-
 
     Code
@@ -128,14 +98,4 @@
       Neu5Ac: 1
       ------------------
       Neu5Ac (a?-)
-
-# IUPAC-condensed: Neu5Ac?Ac
-
-    Code
-      print(glycan, verbose = TRUE)
-    Output
-      Glycan Graph (NE)
-      Neu5Ac: 1
-      ------------------
-      Neu5Ac-?Ac
 

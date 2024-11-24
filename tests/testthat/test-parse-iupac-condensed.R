@@ -46,27 +46,18 @@ test_that("IUPAC-condensed: substituent", {
 })
 
 
-test_that("IUPAC-condensed: Neu5Ac", {
-  skip_on_old_win()
-  to_parse <- "Neu5Ac"
-  glycan <- parse_iupac_condensed(to_parse)
-  expect_snapshot(print(glycan, verbose = TRUE))
-})
+test_that("extracting substituents for Neu5Ac and Neu5Gc", {
+  # Neu5Ac
+  expect_equal(extract_substituent("Neu5Ac"), c(mono = "Neu5Ac", sub = ""))
+  expect_equal(extract_substituent("Neu5Ac9Ac"), c(mono = "Neu5Ac", sub = "9Ac"))
+  expect_equal(extract_substituent("Neu4Ac5Ac"), c(mono = "Neu5Ac", sub = "4Ac"))
+  expect_equal(extract_substituent("Neu5Ac?Ac"), c(mono = "Neu5Ac", sub = "?Ac"))
 
-
-test_that("IUPAC-condensed: Neu5Ac9Ac", {
-  skip_on_old_win()
-  to_parse <- "Neu5Ac9Ac"
-  glycan <- parse_iupac_condensed(to_parse)
-  expect_snapshot(print(glycan, verbose = TRUE))
-})
-
-
-test_that("IUPAC-condensed: Neu5Ac9NAc", {
-  skip_on_old_win()
-  to_parse <- "Neu5Ac9NAc"
-  glycan <- parse_iupac_condensed(to_parse)
-  expect_snapshot(print(glycan, verbose = TRUE))
+  # Neu5Gc
+  expect_equal(extract_substituent("Neu5Gc"), c(mono = "Neu5Gc", sub = ""))
+  expect_equal(extract_substituent("Neu5Gc9Ac"), c(mono = "Neu5Gc", sub = "9Ac"))
+  expect_equal(extract_substituent("Neu4Ac5Gc"), c(mono = "Neu5Gc", sub = "4Ac"))
+  expect_equal(extract_substituent("Neu5Gc?Ac"), c(mono = "Neu5Gc", sub = "?Ac"))
 })
 
 
@@ -81,14 +72,6 @@ test_that("IUPAC-condensed: Neu5Ac(a2-", {
 test_that("IUPAC-condensed: Neu5Ac(a?-", {
   skip_on_old_win()
   to_parse <- "Neu5Ac(a?-"
-  glycan <- parse_iupac_condensed(to_parse)
-  expect_snapshot(print(glycan, verbose = TRUE))
-})
-
-
-test_that("IUPAC-condensed: Neu5Ac?Ac", {
-  skip_on_old_win()
-  to_parse <- "Neu5Ac?Ac"
   glycan <- parse_iupac_condensed(to_parse)
   expect_snapshot(print(glycan, verbose = TRUE))
 })
