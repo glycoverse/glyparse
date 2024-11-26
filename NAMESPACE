@@ -3,3 +3,4 @@
 export(parse_iupac_condensed)
 export(parse_pglyco_struc)
 export(parse_strucgp_struc)
+export(parse_wurcs)
