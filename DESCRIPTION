@@ -19,6 +19,7 @@ URL: https://glycoverse.github.io/glyparse/
 Imports: 
     checkmate,
     cli,
+    dplyr,
     glyrepr (>= 0.1.0.9012),
     igraph,
     purrr,
