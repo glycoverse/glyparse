@@ -23,6 +23,7 @@ Imports:
     glyrepr (>= 0.1.0.9015),
     igraph,
     purrr,
+    rlang,
     rstackdeque,
     stringr
 Remotes: 
