@@ -2,7 +2,7 @@
 % Please edit documentation in R/parse-wurcs.R
 \name{parse_wurcs}
 \alias{parse_wurcs}
-\title{Parse WURCS Strings}
+\title{Parse WURCS Structures}
 \usage{
 parse_wurcs(x, mode = "ne")
 }

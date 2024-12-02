@@ -1,4 +1,4 @@
-#' Parse WURCS Strings
+#' Parse WURCS Structures
 #'
 #' This function parses WURCS strings into a glycan graph.
 #' Currently, only WURCS 2.0 is supported.
