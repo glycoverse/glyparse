@@ -20,7 +20,7 @@
 #' - "Neu5Ac"
 #'
 #' In the first case, the anomer is "a2".
-#' In the second case, the anomer is "??", which means unknown.
+#' In the second case, the anomer is "?2".
 #'
 #' @param x A character vector of IUPAC-condensed strings.
 #' @param mode A character string, either "ne" or "dn". Default is "ne".
@@ -43,11 +43,9 @@ parse_iupac_condensed <- function(x, mode = "ne") {
 
 # The parsing logic of `parse_iupac_condensed()`
 do_parse_iupac_condensed <- function(x) {
-  anomer <- extract_anomer(x)
+  anomer <- extract_anomer(x)  # may be NA
   if (!is.na(anomer)) {
     x <- stringr::str_sub(x, 1, -stringr::str_length(anomer)-3)
-  } else {
-    anomer <- "??"
   }
 
   alditol <- extract_alditol(x)
@@ -57,9 +55,17 @@ do_parse_iupac_condensed <- function(x) {
 
   tokens <- tokenize_iupac(x)
 
+  # Deal with missing anomer
+  first_mono_sub_res <- extract_substituent(tokens[[1]])
+  if (is.na(anomer)) {
+    anomer <- local({
+      anomer_pos <- decide_anomer_pos(first_mono_sub_res[["mono"]])
+      paste0("?", anomer_pos)
+    })
+  }
+
   # Create a new graph and add the first node
   graph <- igraph::make_empty_graph()
-  first_mono_sub_res <- extract_substituent(tokens[[1]])
   graph <- igraph::add_vertices(
     graph, 1, name = "1",
     mono = first_mono_sub_res[["mono"]],

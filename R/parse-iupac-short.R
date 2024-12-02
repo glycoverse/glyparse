@@ -69,16 +69,6 @@ convert_short_to_condensed <- function(x) {
     rlang::abort("Failed to parse the IUPAC-short string.")
   }
 
-  # The anomer positions are fix for known monosaccharides.
-  # Except for the monosaccharides with C2 anomer, all others are on C1.
-  decide_pos1 <- function(mono) {
-    anomer_on_pos2 <- c(
-      "Neu5Ac", "Neu5Gc", "Neu", "Kdn", "Pse", "Leg", "Aci",
-      "4eLeg", "Kdo", "Dha", "Fru", "Tag", "Sor", "Psi"
-    )
-    dplyr::if_else(mono %in% anomer_on_pos2, "2", "1")
-  }
-
   # Convert "(" and ")" to "[" and "]", respectively.
   # For residues, convert them to the condensed format.
   # This does not handle the last residue yet.
@@ -92,7 +82,7 @@ convert_short_to_condensed <- function(x) {
         mono <- match[, 2]
         anomer <- match[, 3]
         pos2 <- match[, 4]
-        pos1 <- decide_pos1(mono)
+        pos1 <- decide_anomer_pos(mono)
         if (is.na(pos2)) {
           paste0(mono, "(", anomer, pos1, "-")
         } else {
@@ -108,7 +98,7 @@ convert_short_to_condensed <- function(x) {
     match <- stringr::str_match(last_token, last_residue_pattern)
     mono <- match[, 2]
     anomer <- match[, 3]
-    pos1 <- decide_pos1(mono)
+    pos1 <- decide_anomer_pos(mono)
     if (is.na(anomer)) {
       mono
     } else {

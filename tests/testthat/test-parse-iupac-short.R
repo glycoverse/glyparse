@@ -30,7 +30,8 @@ test_that("anomers are correctly parsed", {
   expect_anomer <- function(x, anomer) {
     expect_equal(parse_iupac_short(x)$anomer, anomer)
   }
-  expect_anomer("Glc", "??")
+  expect_anomer("Glc", "?1")
+  expect_anomer("Neu5Ac", "?2")
   expect_anomer("Glca-", "a1")
   expect_anomer("GlcAa-", "a1")
   expect_anomer("GlcAb-", "b1")

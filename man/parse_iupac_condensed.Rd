@@ -41,7 +41,7 @@ For example, the two strings below are all valid:
 }
 
 In the first case, the anomer is "a2".
-In the second case, the anomer is "??", which means unknown.
+In the second case, the anomer is "?2".
 }
 \examples{
 iupac <- "Gal(b1-3)GlcNAc(b1-4)Glc(a1-"

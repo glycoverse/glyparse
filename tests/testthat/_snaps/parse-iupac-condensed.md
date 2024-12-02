@@ -6,7 +6,7 @@
       Glycan Graph (NE)
       Fuc: 1, Gal: 2, GalNAc: 1, GlcNAc: 1, Neu5Ac: 2
       ------------------
-      GalNAc
+      GalNAc (?1-)
       ├─Gal (b1-3)
       │ └─Neu5Ac (a2-3)
       └─GlcNAc (b1-6)
@@ -22,7 +22,7 @@
       Glycan Graph (NE)
       GlcNAc: 2, Man: 9
       ------------------
-      GlcNAc
+      GlcNAc (?1-)
       └─GlcNAc (b1-4)
         └─Man (b1-4)
           ├─Man (a1-6)
@@ -42,7 +42,7 @@
       Glycan Graph (NE)
       Man: 4
       ------------------
-      Man
+      Man (?1-)
       └─Man (??-?)
         └─Man (?1-3)
           └─Man (a1-?)
@@ -55,7 +55,7 @@
       Glycan Graph (NE)
       Gal: 1, Neu5Ac: 1
       ------------------
-      Gal
+      Gal (?1-)
       └─Neu5Ac (a2-3/6)
 
 # IUPAC-condensed: single monosaccharide
@@ -66,7 +66,7 @@
       Glycan Graph (NE)
       Man: 1
       ------------------
-      Man
+      Man (?1-)
 
 # IUPAC-condensed: substituent
 
@@ -76,7 +76,7 @@
       Glycan Graph (NE)
       Gal: 1, Man: 1
       ------------------
-      Gal-6Ac
+      Gal-6Ac (?1-)
       └─Man-3S (a1-2)
 
 # IUPAC-condensed: Neu5Ac(a2-
