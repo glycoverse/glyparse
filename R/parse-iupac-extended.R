@@ -2,7 +2,7 @@
 #'
 #' Parse IUPAC-extended-style structure characters into glycan graphs.
 #' For more information about IUPAC-extended format, see
-#' https://doi.org/10.1351/pac199668101919.
+#' [https://doi.org/10.1351/pac199668101919](https://doi.org/10.1351/pac199668101919).
 #'
 #' @param x A character vector of IUPAC-extended strings.
 #' @param mode A character string, either "ne" or "dn". Default is "ne".
@@ -14,6 +14,8 @@
 #' @examples
 #' iupac <- "β-D-Galp-(1→3)[β-D-Galp-(1→4)-β-D-GlcpNAc-(1→6)]-α-D-GalpNAc-(1→"
 #' parse_iupac_extended(iupac)
+#'
+#' @seealso [parse_iupac_condensed()], [parse_iupac_short()]
 #'
 #' @export
 parse_iupac_extended <- function(x, mode = "ne") {

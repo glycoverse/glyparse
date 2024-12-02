@@ -19,10 +19,35 @@ or a list of glycan graphs if \code{x} is a character vector.
 \description{
 This function parses IUPAC-condensed strings into a glycan graph.
 For more information about IUPAC-condensed notation, see
-https://doi.org/10.1351/pac199668101919.
+\url{https://doi.org/10.1351/pac199668101919}.
+}
+\details{
+The IUPAC-condensed notation is a compact form of IUPAC-extended notation.
+It is used by the \href{https://glyconnect.expasy.org/}{GlyConnect} database.
+It contains the following information:
+\itemize{
+\item Monosaccharide name, e.g. "Gal", "GlcNAc", "Neu5Ac".
+\item Substituent, e.g. "9Ac", "4Ac", "3Me", "?S".
+\item Linkage, e.g. "b1-3", "a1-2", "a1-?".
+}
+
+An example of IUPAC-condensed string is "Gal(b1-3)GlcNAc(b1-4)Glc(a1-".
+
+The reducing-end monosaccharide can be with or without anomer information.
+For example, the two strings below are all valid:
+\itemize{
+\item "Neu5Ac(a2-"
+\item "Neu5Ac"
+}
+
+In the first case, the anomer is "a2".
+In the second case, the anomer is "??", which means unknown.
 }
 \examples{
-glycan <- parse_iupac_condensed("Gal(b1-6)Glc(a1-2)GalNAc")
-print(glycan, verbose = TRUE)
+iupac <- "Gal(b1-3)GlcNAc(b1-4)Glc(a1-"
+parse_iupac_condensed(iupac)
 
+}
+\seealso{
+\code{\link[=parse_iupac_short]{parse_iupac_short()}}, \code{\link[=parse_iupac_extended]{parse_iupac_extended()}}
 }

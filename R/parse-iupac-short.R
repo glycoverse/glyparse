@@ -2,7 +2,23 @@
 #'
 #' Parse IUPAC-short-style structure characters into glycan graphs.
 #' For more information about IUPAC-short format, see
-#' https://doi.org/10.1351/pac199668101919.
+#' [https://doi.org/10.1351/pac199668101919](https://doi.org/10.1351/pac199668101919).
+#'
+#' @details
+#' The IUPAC-short notation is a compact form of IUPAC-condensed notation.
+#' It is rarely used in database, but appears a lot in literature for its
+#' conciseness. Compared with IUPAC-condensed notation, IUPAC-short notation
+#' ignore the anomer positions, assuming they are known for common monosaccharides.
+#' For example, "Neu5Aca3Gala-" assumes the anomer of Neu5Ac is C2 (a2-3 linked).
+#' Also, the parentheses around linkages are omitted, and parentheses are used
+#' to indicate branching, e.g. "Neu5Aca3Gala3(Fuca3)GlcNAcb-".
+#'
+#' Same as IUPAC-condensed notation, the reducing-end monosaccharide can be with
+#' or without anomer information. For example, the two strings below are all valid:
+#' - "Neu5Aca-"
+#' - "Neu5Ac"
+#'
+#' In the first case, the anomer is "a2". In the second case, the anomer is "?2".
 #'
 #' @param x A character vector of IUPAC-short strings.
 #' @param mode A character string, either "ne" or "dn". Default is "ne".
@@ -14,6 +30,8 @@
 #' @examples
 #' iupac <- "Neu5Aca3Gala3(Fuca3)GlcNAcb-"
 #' parse_iupac_short(iupac)
+#'
+#' @seealso [parse_iupac_condensed()], [parse_iupac_extended()]
 #'
 #' @export
 parse_iupac_short <- function(x, mode = "ne") {
