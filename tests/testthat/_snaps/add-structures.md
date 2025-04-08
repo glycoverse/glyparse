@@ -3,7 +3,7 @@
     Code
       exp$glycan_structures
     Output
-      [[1]]
+      $`(N(N(H(H(H))(H(H)))))`
       Glycan Graph (NE)
       H: 5, N: 2
       ------------------
@@ -15,7 +15,7 @@
           └─H
             └─H
       
-      [[2]]
+      $`(N(N(H(H(H)))))`
       Glycan Graph (NE)
       H: 3, N: 2
       ------------------
@@ -31,7 +31,7 @@
     Code
       exp$glycan_structures
     Output
-      [[1]]
+      $`(N(N(H(H(H))(H(H)))))`
       Glycan Graph (NE)
       H: 5, N: 2
       ------------------
@@ -43,7 +43,7 @@
           └─H
             └─H
       
-      [[2]]
+      $`(N(N(H(H(H)))))`
       Glycan Graph (NE)
       H: 3, N: 2
       ------------------

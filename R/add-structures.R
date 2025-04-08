@@ -69,6 +69,7 @@ add_structures <- function(exp, mode = "ne", override = FALSE, silence = FALSE) 
   )
   structure_strings <- unique(exp$var_info$glycan_structure)
   glycan_structures <- parser(structure_strings, mode = mode)
+  names(glycan_structures) <- structure_strings
   exp$glycan_structures <- glycan_structures
   exp
 }
