@@ -20,11 +20,13 @@ Imports:
     checkmate,
     cli,
     dplyr,
+    glyexp (>= 0.1.5),
     glyrepr (>= 0.1.0.9015),
     igraph,
     purrr,
     rlang,
     rstackdeque,
     stringr
-Remotes: 
-    glycoverse/glyrepr
+Remotes:  
+    glycoverse/glyrepr,
+    glycoverse/glyexp
