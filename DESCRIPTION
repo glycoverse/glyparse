@@ -10,7 +10,8 @@ Description:
     pGlyco-style, and condensed IUPAC glycan structure text representations.
 License: MIT + file LICENSE
 Suggests: 
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    glyexp (>= 0.1.5),
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -20,7 +21,6 @@ Imports:
     checkmate,
     cli,
     dplyr,
-    glyexp (>= 0.1.5),
     glyrepr (>= 0.1.0.9015),
     igraph,
     purrr,
