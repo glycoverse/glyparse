@@ -1,6 +1,6 @@
 Package: glyparse
 Title: Parsing glycan structure text representations
-Version: 0.0.0.9022
+Version: 0.0.0.9023
 Authors@R: 
     person("Bin", "Fu", , "23110220018@m.fudan.edu.cn", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-8567-2997"))
@@ -10,8 +10,7 @@ Description:
     pGlyco-style, and condensed IUPAC glycan structure text representations.
 License: MIT + file LICENSE
 Suggests: 
-    testthat (>= 3.0.0),
-    glyexp (>= 0.1.5),
+    testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -28,5 +27,4 @@ Imports:
     rstackdeque,
     stringr
 Remotes:  
-    glycoverse/glyrepr,
-    glycoverse/glyexp
+    glycoverse/glyrepr
