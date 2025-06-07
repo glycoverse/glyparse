@@ -36,7 +36,7 @@ library(glyparse)
 ``` r
 # Parse a StrucGP-style structure string
 parse_strucgp_struc("A2B2C1D1E2F1fedD1E2edcbB5ba")
-#> Glycan Graph (NE)
+#> Glycan Graph
 #> dHex: 1, Hex: 4, HexNAc: 4
 #> ------------------
 #> HexNAc
@@ -53,7 +53,7 @@ parse_strucgp_struc("A2B2C1D1E2F1fedD1E2edcbB5ba")
 ``` r
 # Parse a pGlyco-style structure string
 parse_pglyco_struc("(N(F)(N(H(H(N))(H(N(H))))))")
-#> Glycan Graph (NE)
+#> Glycan Graph
 #> F: 1, H: 4, N: 4
 #> ------------------
 #> N
@@ -70,10 +70,10 @@ parse_pglyco_struc("(N(F)(N(H(H(N))(H(N(H))))))")
 ``` r
 # Parse a condensed IUPAC structure string
 parse_iupac_condensed("Gal(b1-3)GlcNAc(b1-4)Glc")
-#> Glycan Graph (NE)
+#> Glycan Graph
 #> Gal: 1, Glc: 1, GlcNAc: 1
 #> ------------------
-#> Glc
+#> Glc (?1-)
 #> └─GlcNAc (b1-4)
 #>   └─Gal (b1-3)
 ```
