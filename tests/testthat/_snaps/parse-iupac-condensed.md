@@ -3,7 +3,7 @@
     Code
       print(glycan, verbose = TRUE)
     Output
-      Glycan Graph (NE)
+      Glycan Graph
       Fuc: 1, Gal: 2, GalNAc: 1, GlcNAc: 1, Neu5Ac: 2
       ------------------
       GalNAc (?1-)
@@ -19,7 +19,7 @@
     Code
       print(glycan, verbose = TRUE)
     Output
-      Glycan Graph (NE)
+      Glycan Graph
       GlcNAc: 2, Man: 9
       ------------------
       GlcNAc (?1-)
@@ -39,7 +39,7 @@
     Code
       print(glycan, verbose = TRUE)
     Output
-      Glycan Graph (NE)
+      Glycan Graph
       Man: 4
       ------------------
       Man (?1-)
@@ -52,7 +52,7 @@
     Code
       print(glycan, verbose = TRUE)
     Output
-      Glycan Graph (NE)
+      Glycan Graph
       Gal: 1, Neu5Ac: 1
       ------------------
       Gal (?1-)
@@ -63,7 +63,7 @@
     Code
       print(glycan, verbose = TRUE)
     Output
-      Glycan Graph (NE)
+      Glycan Graph
       Man: 1
       ------------------
       Man (?1-)
@@ -73,7 +73,7 @@
     Code
       print(glycan, verbose = TRUE)
     Output
-      Glycan Graph (NE)
+      Glycan Graph
       Gal: 1, Man: 1
       ------------------
       Gal-6Ac (?1-)
@@ -84,7 +84,7 @@
     Code
       print(glycan, verbose = TRUE)
     Output
-      Glycan Graph (NE)
+      Glycan Graph
       Neu5Ac: 1
       ------------------
       Neu5Ac (a2-)
@@ -94,7 +94,7 @@
     Code
       print(glycan, verbose = TRUE)
     Output
-      Glycan Graph (NE)
+      Glycan Graph
       Neu5Ac: 1
       ------------------
       Neu5Ac (a?-)

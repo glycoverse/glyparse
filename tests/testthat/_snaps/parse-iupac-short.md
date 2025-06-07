@@ -3,7 +3,7 @@
     Code
       parse_iupac_short(x)
     Output
-      Glycan Graph (NE)
+      Glycan Graph
       Fuc: 1, Gal: 2, GlcNAc: 4, Man: 3, Neu5Ac: 2
       ------------------
       GlcNAc (b1-)

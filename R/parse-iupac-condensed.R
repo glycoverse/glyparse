@@ -74,7 +74,7 @@ do_parse_iupac_condensed <- function(x) {
     graph <- igraph::set_edge_attr(graph, "linkage", value = character(0))
     graph$anomer <- anomer
     graph$alditol <- alditol
-    return(glyrepr::as_ne_glycan_graph(graph))
+    return(glyrepr::as_glycan_graph(graph))
   }
 
   # Iterate over the tokens
@@ -107,7 +107,7 @@ do_parse_iupac_condensed <- function(x) {
 
   graph$anomer <- anomer
   graph$alditol <- alditol
-  glyrepr::as_ne_glycan_graph(graph)
+  glyrepr::as_glycan_graph(graph)
 }
 
 

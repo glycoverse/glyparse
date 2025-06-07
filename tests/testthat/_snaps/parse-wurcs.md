@@ -3,7 +3,7 @@
     Code
       parse_wurcs(wurcs)
     Output
-      Glycan Graph (NE)
+      Glycan Graph
       GlcNAc: 1
       ------------------
       GlcNAc (b1-)
@@ -13,7 +13,7 @@
     Code
       parse_wurcs(wurcs)
     Output
-      Glycan Graph (NE)
+      Glycan Graph
       GlcNAc: 2, Man: 3
       ------------------
       GlcNAc (?1-)
@@ -27,7 +27,7 @@
     Code
       parse_wurcs(wurcs)
     Output
-      Glycan Graph (NE)
+      Glycan Graph
       Fuc: 1, Gal: 2, GlcNAc: 4, Man: 3, Neu5Ac: 2
       ------------------
       GlcNAc (b1-)

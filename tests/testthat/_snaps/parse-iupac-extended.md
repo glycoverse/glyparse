@@ -3,7 +3,7 @@
     Code
       parse_iupac_extended(iupac)
     Output
-      Glycan Graph (NE)
+      Glycan Graph
       GlcNAc: 2, Man: 3
       ------------------
       GlcNAc (b1-)

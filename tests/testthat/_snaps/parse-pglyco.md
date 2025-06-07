@@ -3,7 +3,7 @@
     Code
       print(glycan, verbose = TRUE)
     Output
-      Glycan Graph (NE)
+      Glycan Graph
       F: 1, H: 4, N: 4
       ------------------
       N
@@ -21,7 +21,7 @@
     Code
       print(glycan, verbose = TRUE)
     Output
-      Glycan Graph (NE)
+      Glycan Graph
       A: 1, F: 1, H: 5, N: 4
       ------------------
       N
@@ -41,7 +41,7 @@
     Code
       print(glycan, verbose = TRUE)
     Output
-      Glycan Graph (NE)
+      Glycan Graph
       N: 1
       ------------------
       N

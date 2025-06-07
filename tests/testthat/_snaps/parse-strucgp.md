@@ -3,7 +3,7 @@
     Code
       print(glycan, verbose = TRUE)
     Output
-      Glycan Graph (NE)
+      Glycan Graph
       Hex: 6, HexNAc: 5, NeuAc: 1, dHex: 1
       ------------------
       HexNAc
@@ -25,7 +25,7 @@
     Code
       print(glycan, verbose = TRUE)
     Output
-      Glycan Graph (NE)
+      Glycan Graph
       Hex: 9, HexNAc: 2
       ------------------
       HexNAc

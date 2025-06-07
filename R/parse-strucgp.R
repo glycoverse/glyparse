@@ -28,7 +28,7 @@ do_parse_strucgp_struc <- function(x) {
   igraph::E(graph)$linkage <- "??-?"
   graph$anomer <- "??"
   graph$alditol <- FALSE
-  glyrepr::as_ne_glycan_graph(graph)
+  glyrepr::as_glycan_graph(graph)
 }
 
 
