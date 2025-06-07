@@ -28,11 +28,6 @@ test_that("parser is not a function", {
 })
 
 
-test_that("mode is not 'ne' or 'dn'", {
-  expect_error(struc_parser_wrapper("x", simple_parser, "x"))
-})
-
-
 test_that("parsing single character", {
   expect_s3_class(
     struc_parser_wrapper("HHN", simple_parser),
@@ -61,10 +56,4 @@ test_that("parsing multiple characters with failures", {
     struc_parser_wrapper(c("x", "y", "z"), bad_parser),
     'These could not be parsed: "x", "y", and "z"'
   )
-})
-
-
-test_that("mode is 'dn'", {
-  result <- struc_parser_wrapper("HHN", simple_parser, "dn")
-  expect_s3_class(result, "dn_glycan_graph")
 })

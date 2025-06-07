@@ -5,8 +5,6 @@
 #' For more information about WURCS, see [WURCS](https://github.com/glycoinfo/WURCS/wiki).
 #'
 #' @param x A character vector of WURCS strings.
-#' @param mode A character string, either "ne" or "dn". Default to "ne".
-#' For more information about "ne" and "dn", see [glyrepr::as_glycan_graph()].
 #'
 #' @return A glycan graph if `x` is a single character,
 #' or a list of glycan graphs if `x` is a character vector.
@@ -20,8 +18,8 @@
 #' parse_wurcs(wurcs)
 #'
 #' @export
-parse_wurcs <- function(x, mode = "ne") {
-  struc_parser_wrapper(x, do_parse_wurcs, mode = mode)
+parse_wurcs <- function(x) {
+  struc_parser_wrapper(x, do_parse_wurcs)
 }
 
 

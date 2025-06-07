@@ -5,8 +5,6 @@
 #' [https://doi.org/10.1351/pac199668101919](https://doi.org/10.1351/pac199668101919).
 #'
 #' @param x A character vector of IUPAC-extended strings.
-#' @param mode A character string, either "ne" or "dn". Default is "ne".
-#' For more information about "ne" and "dn", see [glyrepr::as_glycan_graph()].
 #'
 #' @return A glycan graph if `x` is a single character,
 #' or a list of glycan graphs if `x` is a character vector.
@@ -18,7 +16,7 @@
 #' @seealso [parse_iupac_condensed()], [parse_iupac_short()]
 #'
 #' @export
-parse_iupac_extended <- function(x, mode = "ne") {
+parse_iupac_extended <- function(x) {
   struc_parser_wrapper(x, do_parse_iupac_extended)
 }
 

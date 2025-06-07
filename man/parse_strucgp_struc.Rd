@@ -4,15 +4,10 @@
 \alias{parse_strucgp_struc}
 \title{Parse StrucGP Structures}
 \usage{
-parse_strucgp_struc(x, mode = "ne")
+parse_strucgp_struc(x)
 }
 \arguments{
 \item{x}{A character vector of StrucGP-style structure strings.}
-
-\item{mode}{A character string, either "ne" or "dn". Default to "ne".
-"ne" is recommended in this case, for StrucGP-style structures
-don't have linkage information.
-For more information about "ne" and "dn", see \code{\link[glyrepr:as_glycan_graph]{glyrepr::as_glycan_graph()}}.}
 }
 \value{
 A glycan graph if \code{x} is a single character,

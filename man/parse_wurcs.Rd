@@ -4,13 +4,10 @@
 \alias{parse_wurcs}
 \title{Parse WURCS Structures}
 \usage{
-parse_wurcs(x, mode = "ne")
+parse_wurcs(x)
 }
 \arguments{
 \item{x}{A character vector of WURCS strings.}
-
-\item{mode}{A character string, either "ne" or "dn". Default to "ne".
-For more information about "ne" and "dn", see \code{\link[glyrepr:as_glycan_graph]{glyrepr::as_glycan_graph()}}.}
 }
 \value{
 A glycan graph if \code{x} is a single character,

@@ -4,13 +4,10 @@
 \alias{parse_iupac_condensed}
 \title{Parse IUPAC-condensed Structures}
 \usage{
-parse_iupac_condensed(x, mode = "ne")
+parse_iupac_condensed(x)
 }
 \arguments{
 \item{x}{A character vector of IUPAC-condensed strings.}
-
-\item{mode}{A character string, either "ne" or "dn". Default is "ne".
-For more information about "ne" and "dn", see \code{\link[glyrepr:as_glycan_graph]{glyrepr::as_glycan_graph()}}.}
 }
 \value{
 A glycan graph if \code{x} is a single character,

@@ -23,8 +23,6 @@
 #' In the second case, the anomer is "?2".
 #'
 #' @param x A character vector of IUPAC-condensed strings.
-#' @param mode A character string, either "ne" or "dn". Default is "ne".
-#' For more information about "ne" and "dn", see [glyrepr::as_glycan_graph()].
 #'
 #' @return A glycan graph if `x` is a single character,
 #' or a list of glycan graphs if `x` is a character vector.
@@ -36,8 +34,8 @@
 #' @seealso [parse_iupac_short()], [parse_iupac_extended()]
 #'
 #' @export
-parse_iupac_condensed <- function(x, mode = "ne") {
-  struc_parser_wrapper(x, do_parse_iupac_condensed, mode = mode)
+parse_iupac_condensed <- function(x) {
+  struc_parser_wrapper(x, do_parse_iupac_condensed)
 }
 
 
