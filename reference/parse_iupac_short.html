@@ -81,8 +81,13 @@ or without anomer information. For example, the two strings below are all valid:
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">iupac</span> <span class="op">&lt;-</span> <span class="st">"Neu5Aca3Gala3(Fuca3)GlcNAcb-"</span></span></span>
 <span class="r-in"><span><span class="fu">parse_iupac_short</span><span class="op">(</span><span class="va">iupac</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in value[[3L]](cond):</span> Could not be parsed.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> 'as_ne_glycan_graph' is not an exported object from 'namespace:glyrepr'</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Glycan Graph</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Fuc: 1, Gal: 1, GlcNAc: 1, Neu5Ac: 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ------------------</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #0087D7;">GlcNAc</span> (b1-)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ├─<span style="color: #FF0000;">Fuc</span> (a1-3)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> └─<span style="color: #FFD700;">Gal</span> (a1-3)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   └─<span style="color: #AF5FAF;">Neu5Ac</span> (a2-3)</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
