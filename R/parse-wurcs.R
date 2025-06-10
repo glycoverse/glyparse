@@ -308,5 +308,5 @@ do_parse_wurcs <- function(x) {
   residues <- unique_residues[residue_sequence]
   graph_dfs <- prepare_graph_dfs(residues, linkages)
   graph <- build_glycan_graph(graph_dfs$edgelist, graph_dfs$vertex)
-  glyrepr::as_glycan_graph(graph)
+  graph
 }

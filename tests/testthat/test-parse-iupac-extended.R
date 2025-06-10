@@ -1,6 +1,8 @@
 test_that("monosaccharides are parsed correctly", {
   expect_mono <- function(iupac_ext, mono) {
-    expect_equal(igraph::V(parse_iupac_extended(iupac_ext))$mono, mono)
+    structure <- parse_iupac_extended(iupac_ext)
+    graph <- glyrepr::get_structure_graphs(structure)
+    expect_equal(igraph::V(graph)$mono, mono)
   }
   expect_mono("α-D-Glcp-(1→", "Glc")
   expect_mono("α-D-GlcpNAc-(1→", "GlcNAc")
@@ -17,8 +19,10 @@ test_that("monosaccharides are parsed correctly", {
 
 test_that("substituents are parsed correctly", {
   expect_mono_and_sub <- function(iupac_ext, mono, sub) {
-    expect_equal(igraph::V(parse_iupac_extended(iupac_ext))$mono, mono)
-    expect_equal(igraph::V(parse_iupac_extended(iupac_ext))$sub, sub)
+    structure <- parse_iupac_extended(iupac_ext)
+    graph <- glyrepr::get_structure_graphs(structure)
+    expect_equal(igraph::V(graph)$mono, mono)
+    expect_equal(igraph::V(graph)$sub, sub)
   }
   expect_mono_and_sub("α-D-Glcp3Me-(1→", "Glc", "3Me")
   expect_mono_and_sub("α-D-GlcpNAc9Ac-(1→", "GlcNAc", "9Ac")
@@ -29,7 +33,9 @@ test_that("substituents are parsed correctly", {
 
 test_that("anomers are parsed correctly", {
   expect_anomer <- function(iupac_ext, anomer) {
-    expect_equal(parse_iupac_extended(iupac_ext)$anomer, anomer)
+    structure <- parse_iupac_extended(iupac_ext)
+    graph <- glyrepr::get_structure_graphs(structure)
+    expect_equal(graph$anomer, anomer)
   }
   expect_anomer("α-D-Glcp-(1→", "a1")
   expect_anomer("β-D-Glcp-(1→", "b1")
@@ -39,7 +45,9 @@ test_that("anomers are parsed correctly", {
 
 test_that("linkages are parsed correctly", {
   expect_linkage <- function(iupac_ext, linkage) {
-    expect_equal(igraph::E(parse_iupac_extended(iupac_ext))$linkage, linkage)
+    structure <- parse_iupac_extended(iupac_ext)
+    graph <- glyrepr::get_structure_graphs(structure)
+    expect_equal(igraph::E(graph)$linkage, linkage)
   }
   expect_linkage("α-D-Galp-(1→4)-β-D-Galp-(1→", "a1-4")
   expect_linkage("β-D-Galp-(1→4)-β-D-Galp-(1→", "b1-4")

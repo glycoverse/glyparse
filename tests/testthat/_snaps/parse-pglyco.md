@@ -3,46 +3,25 @@
     Code
       print(glycan, verbose = TRUE)
     Output
-      Glycan Graph
-      F: 1, H: 4, N: 4
-      ------------------
-      N
-      ├─F
-      └─N
-        └─H
-          ├─H
-          │ └─N
-          └─H
-            └─N
-              └─H
+      <glycan_structure[1]>
+      [1] Hex(??-?)HexNAc(??-?)Hex(??-?)[HexNAc(??-?)Hex(??-?)]Hex(??-?)HexNAc(??-?)[dHex(??-?)]HexNAc(??-
+      # Unique structures: 1
 
 # (N(F)(N(H(H(N(H)))(H(N(H(A)))))))
 
     Code
       print(glycan, verbose = TRUE)
     Output
-      Glycan Graph
-      A: 1, F: 1, H: 5, N: 4
-      ------------------
-      N
-      ├─F
-      └─N
-        └─H
-          ├─H
-          │ └─N
-          │   └─H
-          └─H
-            └─N
-              └─H
-                └─A
+      <glycan_structure[1]>
+      [1] NeuAc(??-?)Hex(??-?)HexNAc(??-?)Hex(??-?)[Hex(??-?)HexNAc(??-?)Hex(??-?)]Hex(??-?)HexNAc(??-?)[dHex(??-?)]HexNAc(??-
+      # Unique structures: 1
 
 # single monosaccharide
 
     Code
       print(glycan, verbose = TRUE)
     Output
-      Glycan Graph
-      N: 1
-      ------------------
-      N
+      <glycan_structure[1]>
+      [1] HexNAc(??-
+      # Unique structures: 1
 

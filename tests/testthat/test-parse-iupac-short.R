@@ -1,6 +1,8 @@
 test_that("Monosaccharides are correctly parsed", {
   expect_mono <- function(x, mono) {
-    expect_equal(igraph::V(parse_iupac_short(x))$mono, mono)
+    structure <- parse_iupac_short(x)
+    graph <- glyrepr::get_structure_graphs(structure)
+    expect_equal(igraph::V(graph)$mono, mono)
   }
   expect_mono("Glc", "Glc")
   expect_mono("GlcNAc", "GlcNAc")
@@ -12,7 +14,9 @@ test_that("Monosaccharides are correctly parsed", {
 
 test_that("substituents are correctly parsed", {
   expect_sub <- function(x, sub) {
-    expect_equal(igraph::V(parse_iupac_short(x))$sub, sub)
+    structure <- parse_iupac_short(x)
+    graph <- glyrepr::get_structure_graphs(structure)
+    expect_equal(igraph::V(graph)$sub, sub)
   }
   expect_sub("Glc", "")
   expect_sub("GlcNAc", "")
@@ -28,7 +32,9 @@ test_that("substituents are correctly parsed", {
 
 test_that("anomers are correctly parsed", {
   expect_anomer <- function(x, anomer) {
-    expect_equal(parse_iupac_short(x)$anomer, anomer)
+    structure <- parse_iupac_short(x)
+    graph <- glyrepr::get_structure_graphs(structure)
+    expect_equal(graph$anomer, anomer)
   }
   expect_anomer("Glc", "?1")
   expect_anomer("Neu5Ac", "?2")
@@ -42,7 +48,9 @@ test_that("anomers are correctly parsed", {
 
 test_that("linkages are correctly parsed", {
   expect_linkages <- function(x, linkages) {
-    expect_equal(igraph::E(parse_iupac_short(x))$linkage, linkages)
+    structure <- parse_iupac_short(x)
+    graph <- glyrepr::get_structure_graphs(structure)
+    expect_equal(igraph::E(graph)$linkage, linkages)
   }
   expect_linkages("Mana3Man", "a1-3")
   expect_linkages("GlcNAcb4GlcNAc", "b1-4")

@@ -3,19 +3,7 @@
     Code
       parse_iupac_short(x)
     Output
-      Glycan Graph
-      Fuc: 1, Gal: 2, GlcNAc: 4, Man: 3, Neu5Ac: 2
-      ------------------
-      GlcNAc (b1-)
-      ├─Fuc (a1-6)
-      └─GlcNAc (b1-4)
-        └─Man (b1-4)
-          ├─Man (a1-6)
-          │ └─GlcNAc (b1-2)
-          │   └─Gal (b1-4)
-          │     └─Neu5Ac (a2-3)
-          └─Man (a1-3)
-            └─GlcNAc (b1-2)
-              └─Gal (b1-4)
-                └─Neu5Ac (a2-3)
+      <glycan_structure[1]>
+      [1] Neu5Ac(a2-3)Gal(b1-4)GlcNAc(b1-2)Man(a1-3)[Neu5Ac(a2-3)Gal(b1-4)GlcNAc(b1-2)Man(a1-6)]Man(b1-4)GlcNAc(b1-4)[Fuc(a1-6)]GlcNAc(b1-
+      # Unique structures: 1
 

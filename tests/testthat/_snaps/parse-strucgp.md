@@ -3,40 +3,16 @@
     Code
       print(glycan, verbose = TRUE)
     Output
-      Glycan Graph
-      Hex: 6, HexNAc: 5, NeuAc: 1, dHex: 1
-      ------------------
-      HexNAc
-      └─HexNAc
-        └─Hex
-          ├─Hex
-          │ └─HexNAc
-          │   ├─Hex
-          │   │ └─NeuAc
-          │   └─dHex
-          └─Hex
-            ├─HexNAc
-            │ └─Hex
-            └─HexNAc
-              └─Hex
+      <glycan_structure[1]>
+      [1] NeuAc(??-?)Hex(??-?)[dHex(??-?)]HexNAc(??-?)Hex(??-?)[Hex(??-?)HexNAc(??-?)[Hex(??-?)HexNAc(??-?)]Hex(??-?)]Hex(??-?)HexNAc(??-?)HexNAc(??-
+      # Unique structures: 1
 
 # A2B2C1D1E1F1fedD1E1F1feE1F1fedcba
 
     Code
       print(glycan, verbose = TRUE)
     Output
-      Glycan Graph
-      Hex: 9, HexNAc: 2
-      ------------------
-      HexNAc
-      └─HexNAc
-        └─Hex
-          ├─Hex
-          │ └─Hex
-          │   └─Hex
-          └─Hex
-            ├─Hex
-            │ └─Hex
-            └─Hex
-              └─Hex
+      <glycan_structure[1]>
+      [1] Hex(??-?)Hex(??-?)Hex(??-?)[Hex(??-?)Hex(??-?)[Hex(??-?)Hex(??-?)]Hex(??-?)]Hex(??-?)HexNAc(??-?)HexNAc(??-
+      # Unique structures: 1
 

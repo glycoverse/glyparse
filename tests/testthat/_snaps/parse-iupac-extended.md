@@ -3,12 +3,7 @@
     Code
       parse_iupac_extended(iupac)
     Output
-      Glycan Graph
-      GlcNAc: 2, Man: 3
-      ------------------
-      GlcNAc (b1-)
-      └─GlcNAc (b1-4)
-        └─Man (b1-4)
-          ├─Man (a1-6)
-          └─Man (a1-3)
+      <glycan_structure[1]>
+      [1] Man(a1-3)[Man(a1-6)]Man(b1-4)GlcNAc(b1-4)GlcNAc(b1-
+      # Unique structures: 1
 

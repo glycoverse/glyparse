@@ -411,12 +411,17 @@ test_that("parse_residue knows unkown substituent linkages", {
 
 
 test_that("anomer is corrected", {
+  expect_anomer <- function(wurcs, anomer) {
+    structure <- parse_wurcs(wurcs)
+    graph <- glyrepr::get_structure_graphs(structure)
+    expect_equal(graph$anomer, anomer)
+  }
   wurcs_a <- "WURCS=2.0/2,2,1/[a2122h-1a_1-5_2*NCC/3=O][a2122h-1b_1-5_2*NCC/3=O]/1-2/a4-b1"
   wurcs_b <- "WURCS=2.0/2,2,1/[a2122h-1b_1-5_2*NCC/3=O][a2122h-1a_1-5_2*NCC/3=O]/1-2/a4-b1"
   wurcs_x <- "WURCS=2.0/2,2,1/[a2122h-1x_1-5_2*NCC/3=O][a2122h-1a_1-5_2*NCC/3=O]/1-2/a4-b1"
-  expect_equal(parse_wurcs(wurcs_a)$anomer, "a1")
-  expect_equal(parse_wurcs(wurcs_b)$anomer, "b1")
-  expect_equal(parse_wurcs(wurcs_x)$anomer, "?1")
+  expect_anomer(wurcs_a, "a1")
+  expect_anomer(wurcs_b, "b1")
+  expect_anomer(wurcs_x, "?1")
 })
 
 

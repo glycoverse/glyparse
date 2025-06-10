@@ -40,8 +40,18 @@ do_parse_pglyco_struc <- function(x) {
     }
   }
 
+  # Map pGlyco monosaccharide codes to standard names
+  mono_map <- c(
+    "H" = "Hex",
+    "N" = "HexNAc",
+    "F" = "dHex",
+    "A" = "NeuAc",
+    "G" = "NeuGc"
+  )
+  igraph::V(g)$mono <- dplyr::recode(igraph::V(g)$mono, !!!mono_map, .default = igraph::V(g)$mono)
+
   igraph::E(g)$linkage <- "??-?"
   g$anomer <- "??"
   g$alditol <- FALSE
-  glyrepr::as_glycan_graph(g)
+  g
 }
