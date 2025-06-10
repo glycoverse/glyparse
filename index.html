@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="index.html">glyparse</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9024</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,42 +70,27 @@
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Parse a StrucGP-style structure string</span></span>
 <span><span class="fu"><a href="reference/parse_strucgp_struc.html">parse_strucgp_struc</a></span><span class="op">(</span><span class="st">"A2B2C1D1E2F1fedD1E2edcbB5ba"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Glycan Graph</span></span>
-<span><span class="co">#&gt; dHex: 1, Hex: 4, HexNAc: 4</span></span>
-<span><span class="co">#&gt; ------------------</span></span>
-<span><span class="co">#&gt; HexNAc</span></span>
-<span><span class="co">#&gt; ├─HexNAc</span></span>
-<span><span class="co">#&gt; │ └─Hex</span></span>
-<span><span class="co">#&gt; │   ├─Hex</span></span>
-<span><span class="co">#&gt; │   │ └─HexNAc</span></span>
-<span><span class="co">#&gt; │   │   └─Hex</span></span>
-<span><span class="co">#&gt; │   └─Hex</span></span>
-<span><span class="co">#&gt; │     └─HexNAc</span></span>
-<span><span class="co">#&gt; └─dHex</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;glycan_structure[1]&gt;</span></span>
+<span><span class="co">#&gt; [1] Hex(??-?)HexNAc(??-?)Hex(??-?)[HexNAc(??-?)Hex(??-?)]Hex(??-?)HexNAc(??-?)[dHex(??-?)]HexNAc(??-</span></span>
+<span><span class="co">#&gt; # Unique structures: 1</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Parse a pGlyco-style structure string</span></span>
 <span><span class="fu"><a href="reference/parse_pglyco_struc.html">parse_pglyco_struc</a></span><span class="op">(</span><span class="st">"(N(F)(N(H(H(N))(H(N(H))))))"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Glycan Graph</span></span>
-<span><span class="co">#&gt; F: 1, H: 4, N: 4</span></span>
-<span><span class="co">#&gt; ------------------</span></span>
-<span><span class="co">#&gt; N</span></span>
-<span><span class="co">#&gt; ├─F</span></span>
-<span><span class="co">#&gt; └─N</span></span>
-<span><span class="co">#&gt;   └─H</span></span>
-<span><span class="co">#&gt;     ├─H</span></span>
-<span><span class="co">#&gt;     │ └─N</span></span>
-<span><span class="co">#&gt;     └─H</span></span>
-<span><span class="co">#&gt;       └─N</span></span>
-<span><span class="co">#&gt;         └─H</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;glycan_structure[1]&gt;</span></span>
+<span><span class="co">#&gt; [1] Hex(??-?)HexNAc(??-?)Hex(??-?)[HexNAc(??-?)Hex(??-?)]Hex(??-?)HexNAc(??-?)[dHex(??-?)]HexNAc(??-</span></span>
+<span><span class="co">#&gt; # Unique structures: 1</span></span></code></pre></div>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Parse a condensed IUPAC structure string</span></span>
 <span><span class="fu"><a href="reference/parse_iupac_condensed.html">parse_iupac_condensed</a></span><span class="op">(</span><span class="st">"Gal(b1-3)GlcNAc(b1-4)Glc"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Glycan Graph</span></span>
-<span><span class="co">#&gt; Gal: 1, Glc: 1, GlcNAc: 1</span></span>
-<span><span class="co">#&gt; ------------------</span></span>
-<span><span class="co">#&gt; Glc (?1-)</span></span>
-<span><span class="co">#&gt; └─GlcNAc (b1-4)</span></span>
-<span><span class="co">#&gt;   └─Gal (b1-3)</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;glycan_structure[1]&gt;</span></span>
+<span><span class="co">#&gt; [1] Gal(b1-3)GlcNAc(b1-4)Glc(?1-</span></span>
+<span><span class="co">#&gt; # Unique structures: 1</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Parse a WURCS structure string</span></span>
+<span><span class="fu"><a href="reference/parse_wurcs.html">parse_wurcs</a></span><span class="op">(</span><span class="st">"WURCS=2.0/3,5,4/[a2122h-1b_1-5_2*NCC/3=O][a1122h-1b_1-5][a1122h-1a_1-5]/1-1-2-3-3/a4-b1_b4-c1_c3-d1_c6-e1"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; &lt;glycan_structure[1]&gt;</span></span>
+<span><span class="co">#&gt; [1] Man(a1-3)[Man(a1-6)]Man(b1-4)GlcNAc(b1-4)GlcNAc(b1-</span></span>
+<span><span class="co">#&gt; # Unique structures: 1</span></span></code></pre></div>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="license">
