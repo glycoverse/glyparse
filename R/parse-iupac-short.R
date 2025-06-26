@@ -52,7 +52,7 @@ convert_short_to_condensed <- function(x) {
   # with glyrepr. The same applies to substituents.
   mono_pattern <- paste(glyrepr::available_monosaccharides("concrete"), collapse = "|")
   sub_pattern <- paste(glyrepr::available_substituents(), collapse = "|")
-  full_mono_pattern <- stringr::str_glue("(?:{mono_pattern})(?:(?:\\d+|\\?)(?:{sub_pattern}))?")
+  full_mono_pattern <- stringr::str_glue("(?:{mono_pattern})(?:(?:\\d+|\\?)(?:{sub_pattern}))*")
   residue_pattern <- stringr::str_glue("({full_mono_pattern})([ab\\?])-?(\\d+|\\?)")
   token_pattern <- paste(residue_pattern, "\\(", "\\)", sep = "|")
   tokens <- stringr::str_extract_all(x, token_pattern)[[1]]

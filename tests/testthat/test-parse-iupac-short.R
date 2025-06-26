@@ -27,6 +27,7 @@ test_that("substituents are correctly parsed", {
   expect_sub("GlcNAc4S", "4S")
   expect_sub("Neu5Ac9Ac", "9Ac")
   expect_sub("Glc?Me", "?Me")
+  expect_sub("Glc3Me6S", "3Me,6S")
 })
 
 
@@ -63,4 +64,11 @@ test_that("linkages are correctly parsed", {
 test_that("parse_iupac_short works for a complex example", {
   x <- "Neu5Aca3Galb4GlcNAcb2Mana3(Neu5Aca3Galb4GlcNAcb2Mana6)Manb4GlcNAcb4(Fuca6)GlcNAcb-"
   expect_snapshot(parse_iupac_short(x))
+})
+
+
+test_that("parse_iupac_short works for a complex example with multiple substituents", {
+  x <- "Glc3Me6Sa3Man"
+  structure <- parse_iupac_short(x)
+  expect_equal(as.character(structure), "Glc3Me6S(a1-3)Man(?1-")
 })

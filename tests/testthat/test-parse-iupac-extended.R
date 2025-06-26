@@ -28,6 +28,7 @@ test_that("substituents are parsed correctly", {
   expect_mono_and_sub("α-D-GlcpNAc9Ac-(1→", "GlcNAc", "9Ac")
   expect_mono_and_sub("α-D-GlcpA2N-(1→", "GlcA", "2N")
   expect_mono_and_sub("α-D-Glcp?Me-(1→", "Glc", "?Me")
+  expect_mono_and_sub("α-D-Glcp3Me6S-(1→", "Glc", "3Me,6S")
 })
 
 
