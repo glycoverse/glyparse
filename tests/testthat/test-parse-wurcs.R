@@ -346,6 +346,18 @@ test_that("parse_residue recognizes substituents on Glc", {
 })
 
 
+test_that("parse_residue recognizes multiple substituents", {
+  expect_equal(
+    parse_residue("a2122h-1a_1-5_3*OC_6*OSO/3=O/3=O"),
+    c(mono = "Glc", anomer = "a1", sub = "3Me,6S")
+  )
+  expect_equal(
+    parse_residue("Aad21122h-2a_2-6_4*OCC/3=O_5*NCC/3=O_9*OCC/3=O"),
+    c(mono = "Neu5Ac", anomer = "a2", sub = "4Ac,9Ac")
+  )
+})
+
+
 test_that("parse_residue recognizes substituents on complex monosaccharides", {
   expect_equal(
     parse_residue("a2122h-1a_1-5_2*NCC/3=O_3*N"),

@@ -105,15 +105,16 @@ WURCS_MONO_REGEX <- c(
   "Xyl" = "^a212h-1[abx]_1-5",
   "Rib" = "^a222h-1[abx]_1-5",
 
+  # Neu5Ac and Neu5Gc - match if contains _5*NCC/3=O or _5*NCCO/3=O anywhere in the string
+  # These must come before Kdn since they are more specific
+  "Neu5Ac" = "^Aad21122h-2[abx]_2-6.*_5\\*NCC/3=O",
+  "Neu5Gc" = "^Aad21122h-2[abx]_2-6.*_5\\*NCCO/3=O",
+
   # Kdn: exclude N, Ac, and Gc
   "Kdn" = "^Aad21122h-2[abx]_2-6(?!_5\\*N(CC(O)?/3=O)?)",
 
   # Neu: exclude Ac and Gc
   "Neu" = "^Aad21122h-2[abx]_2-6_5\\*N(?!CC(O)?/3=O)",
-
-  # Neu5Ac and Neu5Gc
-  "Neu5Ac" = "^Aad21122h-2[abx]_2-6_5\\*NCC/3=O",
-  "Neu5Gc" = "^Aad21122h-2[abx]_2-6_5\\*NCCO/3=O",
 
   # Rest of the monosaccharides are themselves.
   "Pse" = "^had22111m-2[abx]_2-6_5\\*N_7\\*N",
@@ -155,6 +156,7 @@ parse_residue <- function(residue) {
   # `mono`: the IUPAC monosaccharide name
   # `anomer`: the anomer, e.g. "a1", "b2", "?1"
   # `sub`: the substituent, e.g. "3Me", "2Ac", "4NAc", "6P", "?P"
+  #        for multiple substituents, they are separated by commas, e.g. "3Me,6S"
 
   # Get monosaacharide name
   mono_idx <- purrr::detect_index(WURCS_MONO_REGEX, ~ stringr::str_detect(residue, .x))
@@ -168,19 +170,51 @@ parse_residue <- function(residue) {
   anomer <- stringr::str_replace(anomer_code, "x", "?")
   anomer <- paste0(stringr::str_sub(anomer, 2), stringr::str_sub(anomer, 1, 1))
 
-  # Get substituent
-  sub_code <- stringr::str_remove(residue, WURCS_MONO_REGEX[[mono_idx]])
+  # Get substituent(s)
+  # For Neu5Ac and Neu5Gc, we need special handling since the 5-position NAc/NGc
+  # is part of the monosaccharide itself, not an additional substituent
+  if (mono %in% c("Neu5Ac", "Neu5Gc")) {
+    # For Neu5Ac/Neu5Gc, remove the base Kdn structure and the characteristic 5-position modification
+    base_kdn_pattern <- "^Aad21122h-2[abx]_2-6"
+    if (mono == "Neu5Ac") {
+      # Remove the base Kdn pattern and the 5*NCC/3=O
+      sub_code <- stringr::str_remove(residue, base_kdn_pattern)
+      sub_code <- stringr::str_remove(sub_code, "_5\\*NCC/3=O")
+    } else { # Neu5Gc
+      # Remove the base Kdn pattern and the 5*NCCO/3=O
+      sub_code <- stringr::str_remove(residue, base_kdn_pattern)
+      sub_code <- stringr::str_remove(sub_code, "_5\\*NCCO/3=O")
+    }
+  } else {
+    # For other monosaccharides, use the standard approach
+    sub_code <- stringr::str_remove(residue, WURCS_MONO_REGEX[[mono_idx]])
+  }
+  
   if (sub_code == "") {
     sub <- ""
   } else {
-    sub_patterns <- stringr::str_glue("^_(\\d+|\\?)\\*{WURCS_SUB_REGEX}$")
-    sub_idx <- purrr::detect_index(sub_patterns, ~ stringr::str_detect(sub_code, .x))
-    if (sub_idx == 0) {
-      cli::cli_abort("Unable to parse substituent: {.str {sub_code}}")
-    }
-    sub_name <- names(WURCS_SUB_REGEX)[[sub_idx]]
-    sub_pos <- stringr::str_extract(sub_code, "_(\\d+|\\?)", group = 1)
-    sub <- paste0(sub_pos, sub_name)
+    # Split multiple substituents by "_" and process each one
+    sub_parts <- stringr::str_split_1(sub_code, "_")
+    # Remove empty strings (from leading "_")
+    sub_parts <- sub_parts[sub_parts != ""]
+    
+    # Process each substituent part
+    substituents <- purrr::map_chr(sub_parts, function(sub_part) {
+      # Add back the leading "_" for pattern matching
+      sub_part_with_underscore <- paste0("_", sub_part)
+      
+      sub_patterns <- stringr::str_glue("^_(\\d+|\\?)\\*{WURCS_SUB_REGEX}$")
+      sub_idx <- purrr::detect_index(sub_patterns, ~ stringr::str_detect(sub_part_with_underscore, .x))
+      if (sub_idx == 0) {
+        cli::cli_abort("Unable to parse substituent: {.str {sub_part_with_underscore}}")
+      }
+      sub_name <- names(WURCS_SUB_REGEX)[[sub_idx]]
+      sub_pos <- stringr::str_extract(sub_part_with_underscore, "_(\\d+|\\?)", group = 1)
+      paste0(sub_pos, sub_name)
+    })
+    
+    # Join multiple substituents with commas
+    sub <- paste(substituents, collapse = ",")
   }
 
   c(mono = mono, anomer = anomer, sub = sub)
