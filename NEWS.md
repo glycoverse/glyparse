@@ -1,0 +1,7 @@
+# glyparse 0.1.2
+
+## Minor improvements
+
+* `parse_iupac_short()`, `parse_iupac_extended()`, `parse_iupac_condensed()`,
+  `parse_wurcs()` now support multiple substituents on the same monosaccharide,
+  to align with the updates in `glyrepr` v0.5.0.
