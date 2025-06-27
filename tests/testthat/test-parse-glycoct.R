@@ -89,3 +89,22 @@ test_that("GlycoCT: Fuc(a1-2)[Gal(a1-3)]Gal(b1-3)[GlcNAc6S(b1-6)]GalNAc(a1- (Sul
   expected <- "Fuc(a1-2)[Gal(a1-3)]Gal(b1-3)[GlcNAc6S(b1-6)]GalNAc(a1-"
   expect_equal(result, expected)
 })
+
+test_that("GlycoCT: GlcA3S(b1-3)Gal(b1-4)GlcNAc(b1- (GlcA)", {
+  glycoct <- paste0(
+    "RES\n",
+    "1b:b-dglc-HEX-1:5\n",
+    "2s:n-acetyl\n",
+    "3b:b-dgal-HEX-1:5\n",
+    "4b:b-dglc-HEX-1:5|6:a\n",
+    "5s:sulfate\n",
+    "LIN\n",
+    "1:1d(2+1)2n\n",
+    "2:1o(4+1)3d\n",
+    "3:3o(3+1)4d\n",
+    "4:4o(3+1)5n"
+  )
+  result <- as.character(parse_glycoct(glycoct))
+  expected <- "GlcA3S(b1-3)Gal(b1-4)GlcNAc(b1-"
+  expect_equal(result, expected)
+})

@@ -191,35 +191,51 @@ LIN
 
 
 GlcA
-CONVERSION_FAILED
+RES
+1b:b-dglc-HEX-1:5|6:a
+
 
 
 ManA
-CONVERSION_FAILED
+RES
+1b:a-dman-HEX-1:5|6:a
+
 
 
 GalA
-CONVERSION_FAILED
+RES
+1b:a-dgal-HEX-1:5|6:a
+
 
 
 GulA
-CONVERSION_FAILED
+RES
+1b:a-dgul-HEX-1:5|6:a
+
 
 
 AltA
-CONVERSION_FAILED
+RES
+1b:a-lalt-HEX-1:5|6:a
+
 
 
 AllA
-CONVERSION_FAILED
+RES
+1b:a-dall-HEX-1:5|6:a
+
 
 
 TalA
-CONVERSION_FAILED
+RES
+1b:a-dtal-HEX-1:5|6:a
+
 
 
 IdoA
-CONVERSION_FAILED
+RES
+1b:a-lido-HEX-1:5|6:a
+
 
 
 Fuc
