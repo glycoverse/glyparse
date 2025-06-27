@@ -1,3 +1,10 @@
+# glyparse 0.2.0
+
+## Major improvements
+
+* Add `parse_glycoct()` to parse glycans in GlycoCT format.
+
+
 # glyparse 0.1.2
 
 ## Minor improvements
