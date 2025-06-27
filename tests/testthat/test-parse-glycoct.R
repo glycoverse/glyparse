@@ -127,3 +127,32 @@ test_that("GlycoCT: GlcA3S(?1-?)Gal(?1-?)GlcNAc(?1-, (Unknown linkages and anome
   expected <- "GlcA3S(?1-?)Gal(?1-?)GlcNAc(?1-"
   expect_equal(result, expected)
 })
+
+test_that("all monosaccharides can be parsed", {
+  expect_mono_equal <- function(x, expected) {
+    graph <- glyrepr::get_structure_graphs(x, 1)
+    mono <- igraph::V(graph)$mono
+    expect_equal(mono, expected)
+  }
+  
+  # Helper function to create GlycoCT from mapping
+  create_glycoct_from_mapping <- function(mapping) {
+    res_section <- paste(mapping$res, collapse = "\n")
+    if (!is.null(mapping$lin) && length(mapping$lin) > 0) {
+      lin_section <- paste(mapping$lin, collapse = "\n")
+      paste0("RES\n", res_section, "\nLIN\n", lin_section)
+    } else {
+      paste0("RES\n", res_section)
+    }
+  }
+  
+  # Get all mappings
+  mappings <- load_mono_mappings()
+  
+  # Test each monosaccharide
+  for (mono_name in names(mappings)) {
+    mapping <- mappings[[mono_name]]
+    glycoct <- create_glycoct_from_mapping(mapping)
+    expect_mono_equal(parse_glycoct(glycoct), mono_name)
+  }
+})

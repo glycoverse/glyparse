@@ -183,6 +183,8 @@ build_glycoct_graph <- function(residues, linkages) {
   if (length(edges) == 0) {
     # Single monosaccharide
     g <- igraph::make_empty_graph(n = length(consolidated$vertices), directed = TRUE)
+    # Add empty linkage attribute for validation
+    g <- igraph::set_edge_attr(g, "linkage", value = character(0))
   } else {
     g <- igraph::make_graph(edges, n = length(consolidated$vertices), directed = TRUE)
     igraph::E(g)$linkage <- edge_attrs$linkage
@@ -802,9 +804,9 @@ matches_glycoct_pattern <- function(group, residues, linkages, mapping) {
      }
    }
   
-  # Compare structures
+  # Compare structures - exact match for monosaccharide content
   mono_match <- !is.null(group_mono) && !is.null(pattern_mono) && 
-               stringr::str_detect(group_mono, stringr::fixed(pattern_mono))
+               group_mono == pattern_mono
   
   subs_match <- length(group_subs) == length(pattern_subs) &&
                all(sort(group_subs) == sort(pattern_subs))
