@@ -14,8 +14,12 @@ status](https://www.r-pkg.org/badges/version/glyparse)](https://CRAN.R-project.o
 coverage](https://codecov.io/gh/glycoverse/glyparse/graph/badge.svg)](https://app.codecov.io/gh/glycoverse/glyparse)
 <!-- badges: end -->
 
-The goal of glyparse is to parse glycan structure text strings into a
-`glyrepr` glycan graph.
+Parse different glycan structure text nomenclature into
+`glyrepr::glycan_structure`.
+
+Currently, the following formats are supported: IUPAC-extended,
+IUPAC-condensed, IUPAC-short, WURCS, GlycoCT, StrucGP-style,
+pGlyco-style.
 
 ## Installation
 
@@ -26,6 +30,23 @@ You can install the development version of glyparse from
 # install.packages("pak")
 pak::pak("glycoverse/glyparse")
 ```
+
+## Documentation
+
+-   📚 Reference:
+    [Here](https://glycoverse.github.io/glyparse/reference/index.html)
+
+## Role in `glycoverse`
+
+While `glyrepr` natively supports parsing IUPAC-condensed format through
+`as_glycan_structure()`, the glycan community has developed numerous
+other nomenclature formats that remain widely adopted in different
+contexts. `glyparse` serves as a comprehensive extension to `glyrepr`,
+providing robust parsing capabilities for these diverse formats. The
+package can be utilized directly by researchers to parse glycan
+structure text strings, or integrated with other packages such as
+`glyread` to seamlessly handle structure parsing when processing results
+from glycan and glycopeptide analysis software.
 
 ## Example
 
