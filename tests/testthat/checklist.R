@@ -25,5 +25,6 @@
 #   not be an issue, because "Neup5Ac4Ac" is normally the correct way to
 #   arrange the substituents.
 #
-# - It is also advised to parse some complex glycans, and use `expect_snapshot()`
-#   to check if the parsed glycan is correct.
+# - It is also advised to parse some complex glycans.
+#
+# - Do not use `expect_snapshot()`, use IUPAC-condensed format directly.
