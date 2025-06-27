@@ -108,3 +108,22 @@ test_that("GlycoCT: GlcA3S(b1-3)Gal(b1-4)GlcNAc(b1- (GlcA)", {
   expected <- "GlcA3S(b1-3)Gal(b1-4)GlcNAc(b1-"
   expect_equal(result, expected)
 })
+
+test_that("GlycoCT: GlcA3S(?1-?)Gal(?1-?)GlcNAc(?1-, (Unknown linkages and anomers)", {
+  glycoct <- paste0(
+    "RES\n",
+    "1b:x-dglc-HEX-1:5\n",
+    "2s:n-acetyl\n",
+    "3b:x-dgal-HEX-1:5\n",
+    "4b:x-dglc-HEX-1:5|6:a\n",
+    "5s:sulfate\n",
+    "LIN\n",
+    "1:1d(2+1)2n\n",
+    "2:1o(-1+1)3d\n",
+    "3:3o(-1+1)4d\n",
+    "4:4o(3+1)5n"
+  )
+  result <- as.character(parse_glycoct(glycoct))
+  expected <- "GlcA3S(?1-?)Gal(?1-?)GlcNAc(?1-"
+  expect_equal(result, expected)
+})

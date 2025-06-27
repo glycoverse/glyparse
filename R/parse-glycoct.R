@@ -118,7 +118,8 @@ parse_lin_section <- function(lin_lines) {
     link_info <- parts[2]
     
     # Extract components: from_res, positions, to_res
-    pattern <- "(\\d+)([do]?)\\((\\d+)\\+(\\d+)\\)(\\d+)([dn]?)"
+    # Updated pattern to handle negative positions like -1
+    pattern <- "(\\d+)([do]?)\\((-?\\d+)\\+(-?\\d+)\\)(\\d+)([dn]?)"
     matches <- stringr::str_match(link_info, pattern)
     
     if (!is.na(matches[1])) {
@@ -167,7 +168,13 @@ build_glycoct_graph <- function(residues, linkages) {
       
       # Build linkage string: anomer + to_pos + "-" + from_pos
       to_vertex <- consolidated$vertices[[to_idx]]
-      linkage_str <- paste0(to_vertex$anomer, edge$to_pos, "-", edge$from_pos)
+      
+      # Handle unknown anomer and positions
+      anomer_char <- if (to_vertex$anomer == "x") "?" else to_vertex$anomer
+      to_pos_str <- if (edge$to_pos == -1) "?" else as.character(edge$to_pos)
+      from_pos_str <- if (edge$from_pos == -1) "?" else as.character(edge$from_pos)
+      
+      linkage_str <- paste0(anomer_char, to_pos_str, "-", from_pos_str)
       edge_attrs$linkage <- c(edge_attrs$linkage, linkage_str)
     }
   }
@@ -194,6 +201,8 @@ build_glycoct_graph <- function(residues, linkages) {
     # Combine anomer configuration with position
     anomer_config <- stringr::str_extract(reducing_end$anomer, "^[abx]")
     if (is.na(anomer_config)) anomer_config <- "?"
+    # Handle unknown anomer configuration
+    if (anomer_config == "x") anomer_config <- "?"
     g$anomer <- paste0(anomer_config, anomer_pos)
   } else {
     g$anomer <- "?1"
@@ -204,105 +213,303 @@ build_glycoct_graph <- function(residues, linkages) {
 }
 
 load_mono_mappings <- function() {
-  # Read the mono_glycoct.txt file from package root
-  file_path <- system.file("mono_glycoct.txt", package = "glyparse")
-  if (!file.exists(file_path)) {
-    # Fallback to current working directory or package source
-    file_path <- "mono_glycoct.txt"
-    if (!file.exists(file_path)) {
-      file_path <- file.path(system.file(package = "glyparse"), "..", "..", "mono_glycoct.txt")
-    }
-  }
-  
-  if (!file.exists(file_path)) {
-    cli::cli_abort("Cannot find mono_glycoct.txt file")
-  }
-  
-  lines <- readLines(file_path, warn = FALSE)
-  lines <- stringr::str_trim(lines)
-  lines <- lines[lines != ""]
-  
-  mappings <- list()
-  current_mono <- NULL
-  current_res <- NULL
-  current_lin <- NULL
-  
-  i <- 1
-  while (i <= length(lines)) {
-    line <- lines[i]
-    
-    if (!stringr::str_detect(line, "^(RES|LIN|CONVERSION_FAILED)")) {
-      # This is a monosaccharide name
-      # Store previous mapping before starting new one
-      if (!is.null(current_mono) && !is.null(current_res)) {
-        mappings[[current_mono]] <- list(
-          res = current_res,
-          lin = current_lin
-        )
-      }
-      
-      current_mono <- line
-      current_res <- NULL
-      current_lin <- NULL
-      i <- i + 1
-      next
-    }
-    
-    if (line == "RES") {
-      current_res <- list()
-      i <- i + 1
-      while (i <= length(lines) && lines[i] != "LIN" && 
-             !stringr::str_detect(lines[i], "^[A-Za-z]") &&
-             lines[i] != "CONVERSION_FAILED") {
-        if (lines[i] != "") {
-          current_res <- c(current_res, lines[i])
-        }
-        i <- i + 1
-      }
-      next
-    }
-    
-    if (line == "LIN") {
-      current_lin <- list()
-      i <- i + 1
-      while (i <= length(lines) && 
-             !stringr::str_detect(lines[i], "^[A-Za-z]") &&
-             lines[i] != "CONVERSION_FAILED") {
-        if (lines[i] != "") {
-          current_lin <- c(current_lin, lines[i])
-        }
-        i <- i + 1
-      }
-      
-      # Store the mapping
-      if (!is.null(current_mono) && !is.null(current_res)) {
-        mappings[[current_mono]] <- list(
-          res = current_res,
-          lin = current_lin
-        )
-      }
-      next
-    }
-    
-    if (line == "CONVERSION_FAILED") {
-      # Skip this monosaccharide
-      current_mono <- NULL
-      current_res <- NULL
-      current_lin <- NULL
-    }
-    
-    i <- i + 1
-  }
-  
-  # Store the final mapping if we ended without encountering LIN or CONVERSION_FAILED
-  if (!is.null(current_mono) && !is.null(current_res)) {
-    mappings[[current_mono]] <- list(
-      res = current_res,
-      lin = current_lin
+  # Hardcoded GLYCOCT_MAP to avoid external file dependency
+  GLYCOCT_MAP <- list(
+    "Glc" = list(
+      res = c("1b:a-dglc-HEX-1:5"),
+      lin = NULL
+    ),
+    "Man" = list(
+      res = c("1b:a-dman-HEX-1:5"),
+      lin = NULL
+    ),
+    "Gal" = list(
+      res = c("1b:a-dgal-HEX-1:5"),
+      lin = NULL
+    ),
+    "Gul" = list(
+      res = c("1b:a-dgul-HEX-1:5"),
+      lin = NULL
+    ),
+    "Alt" = list(
+      res = c("1b:a-lalt-HEX-1:5"),
+      lin = NULL
+    ),
+    "All" = list(
+      res = c("1b:a-dall-HEX-1:5"),
+      lin = NULL
+    ),
+    "Tal" = list(
+      res = c("1b:a-dtal-HEX-1:5"),
+      lin = NULL
+    ),
+    "Ido" = list(
+      res = c("1b:a-lido-HEX-1:5"),
+      lin = NULL
+    ),
+    "GlcNAc" = list(
+      res = c("1b:a-dglc-HEX-1:5", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "GalNAc" = list(
+      res = c("1b:a-dgal-HEX-1:5", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "ManNAc" = list(
+      res = c("1b:a-dman-HEX-1:5", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "GulNAc" = list(
+      res = c("1b:a-dgul-HEX-1:5", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "AltNAc" = list(
+      res = c("1b:a-lalt-HEX-1:5", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "AllNAc" = list(
+      res = c("1b:a-dall-HEX-1:5", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "TalNAc" = list(
+      res = c("1b:a-dtal-HEX-1:5", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "IdoNAc" = list(
+      res = c("1b:a-lido-HEX-1:5", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "GlcN" = list(
+      res = c("1b:a-dglc-HEX-1:5", "2s:amino"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "ManN" = list(
+      res = c("1b:a-dman-HEX-1:5", "2s:amino"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "GalN" = list(
+      res = c("1b:a-dgal-HEX-1:5", "2s:amino"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "GulN" = list(
+      res = c("1b:a-dgul-HEX-1:5", "2s:amino"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "AltN" = list(
+      res = c("1b:a-lalt-HEX-1:5", "2s:amino"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "AllN" = list(
+      res = c("1b:a-dall-HEX-1:5", "2s:amino"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "TalN" = list(
+      res = c("1b:a-dtal-HEX-1:5", "2s:amino"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "IdoN" = list(
+      res = c("1b:a-lido-HEX-1:5", "2s:amino"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "GlcA" = list(
+      res = c("1b:b-dglc-HEX-1:5|6:a"),
+      lin = NULL
+    ),
+    "ManA" = list(
+      res = c("1b:a-dman-HEX-1:5|6:a"),
+      lin = NULL
+    ),
+    "GalA" = list(
+      res = c("1b:a-dgal-HEX-1:5|6:a"),
+      lin = NULL
+    ),
+    "GulA" = list(
+      res = c("1b:a-dgul-HEX-1:5|6:a"),
+      lin = NULL
+    ),
+    "AltA" = list(
+      res = c("1b:a-lalt-HEX-1:5|6:a"),
+      lin = NULL
+    ),
+    "AllA" = list(
+      res = c("1b:a-dall-HEX-1:5|6:a"),
+      lin = NULL
+    ),
+    "TalA" = list(
+      res = c("1b:a-dtal-HEX-1:5|6:a"),
+      lin = NULL
+    ),
+    "IdoA" = list(
+      res = c("1b:a-lido-HEX-1:5|6:a"),
+      lin = NULL
+    ),
+    "Fuc" = list(
+      res = c("1b:a-lgal-HEX-1:5|6:d"),
+      lin = NULL
+    ),
+    "Qui" = list(
+      res = c("1b:a-dglc-HEX-1:5|6:d"),
+      lin = NULL
+    ),
+    "Rha" = list(
+      res = c("1b:a-lman-HEX-1:5|6:d"),
+      lin = NULL
+    ),
+    "6dGul" = list(
+      res = c("1b:a-dgul-HEX-1:5|6:d"),
+      lin = NULL
+    ),
+    "6dAlt" = list(
+      res = c("1b:a-lalt-HEX-1:5|6:d"),
+      lin = NULL
+    ),
+    "6dTal" = list(
+      res = c("1b:a-dtal-HEX-1:5|6:d"),
+      lin = NULL
+    ),
+    "FucNAc" = list(
+      res = c("1b:a-lgal-HEX-1:5|6:d", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "QuiNAc" = list(
+      res = c("1b:a-dglc-HEX-1:5|6:d", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "RhaNAc" = list(
+      res = c("1b:a-lman-HEX-1:5|6:d", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "6dAltNAc" = list(
+      res = c("1b:a-lalt-HEX-1:5|6:d", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "6dTalNAc" = list(
+      res = c("1b:a-dtal-HEX-1:5|6:d", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "Oli" = list(
+      res = c("1b:a-dara-HEX-1:5|2:d|6:d"),
+      lin = NULL
+    ),
+    "Tyv" = list(
+      res = c("1b:a-dara-HEX-1:5|3:d|6:d"),
+      lin = NULL
+    ),
+    "Abe" = list(
+      res = c("1b:a-dxyl-HEX-1:5|3:d|6:d"),
+      lin = NULL
+    ),
+    "Par" = list(
+      res = c("1b:a-drib-HEX-1:5|3:d|6:d"),
+      lin = NULL
+    ),
+    "Dig" = list(
+      res = c("1b:a-drib-HEX-1:5|2:d|6:d"),
+      lin = NULL
+    ),
+    "Col" = list(
+      res = c("1b:a-lxyl-HEX-1:5|3:d|6:d"),
+      lin = NULL
+    ),
+    "Ara" = list(
+      res = c("1b:a-lara-PEN-1:5"),
+      lin = NULL
+    ),
+    "Lyx" = list(
+      res = c("1b:a-llyx-PEN-1:5"),
+      lin = NULL
+    ),
+    "Xyl" = list(
+      res = c("1b:a-dxyl-PEN-1:5"),
+      lin = NULL
+    ),
+    "Rib" = list(
+      res = c("1b:a-drib-PEN-1:5"),
+      lin = NULL
+    ),
+    "Kdn" = list(
+      res = c("1b:a-dgro-dgal-NON-2:6|1:a|2:keto|3:d"),
+      lin = NULL
+    ),
+    "Neu" = list(
+      res = c("1b:a-dgro-dgal-NON-2:6|1:a|2:keto|3:d", "2s:amino"),
+      lin = c("1:1d(5+1)2n")
+    ),
+    "Neu5Ac" = list(
+      res = c("1b:a-dgro-dgal-NON-2:6|1:a|2:keto|3:d", "2s:n-acetyl"),
+      lin = c("1:1d(5+1)2n")
+    ),
+    "Neu5Gc" = list(
+      res = c("1b:a-dgro-dgal-NON-2:6|1:a|2:keto|3:d", "2s:n-glycolyl"),
+      lin = c("1:1d(5+1)2n")
+    ),
+    "Pse" = list(
+      res = c("1b:a-lgro-lman-NON-2:6|2:keto|3:d|9:d", "2s:amino", "3s:amino"),
+      lin = c("1:1d(5+1)2n", "2:1d(7+1)3n")
+    ),
+    "Leg" = list(
+      res = c("1b:a-dgro-dgal-NON-2:6|1:a|2:keto|3:d|9:d", "2s:amino", "3s:amino"),
+      lin = c("1:1d(5+1)2n", "2:1d(7+1)3n")
+    ),
+    "Aci" = list(
+      res = c("1b:a-lgro-lalt-NON-2:6|1:a|2:keto|3:d|9:d", "2s:amino", "3s:amino"),
+      lin = c("1:1d(5+1)2n", "2:1d(7+1)3n")
+    ),
+    "4eLeg" = list(
+      res = c("1b:a-dgro-dtal-NON-2:6|1:a|2:keto|3:d|9:d", "2s:amino", "3s:amino"),
+      lin = c("1:1d(5+1)2n", "2:1d(7+1)3n")
+    ),
+    "Bac" = list(
+      res = c("1b:a-dglc-HEX-1:5|6:d", "2s:amino", "3s:amino"),
+      lin = c("1:1d(2+1)2n", "2:1d(4+1)3n")
+    ),
+    "LDmanHep" = list(
+      res = c("1b:a-lgro-dman-HEP-1:5"),
+      lin = NULL
+    ),
+    "Kdo" = list(
+      res = c("1b:a-dman-OCT-2:6|1:a|2:keto|3:d"),
+      lin = NULL
+    ),
+    "Dha" = list(
+      res = c("1b:a-dlyx-HEP-2:6|1:a|2:keto|3:d|7:a"),
+      lin = NULL
+    ),
+    "DDmanHep" = list(
+      res = c("1b:a-dgro-dman-HEP-1:5"),
+      lin = NULL
+    ),
+    "MurNAc" = list(
+      res = c("1b:a-dglc-HEX-1:5", "2s:n-acetyl", "3s:(r)-carboxyethyl"),
+      lin = c("1:1d(2+1)2n", "2:1o(3+1)3n")
+    ),
+    "MurNGc" = list(
+      res = c("1b:a-dglc-HEX-1:5", "2s:n-glycolyl", "3s:(r)-carboxyethyl"),
+      lin = c("1:1d(2+1)2n", "2:1o(3+1)3n")
+    ),
+    "Mur" = list(
+      res = c("1b:a-dglc-HEX-1:5", "2s:(r)-carboxyethyl"),
+      lin = c("1:1o(3+1)2n")
+    ),
+    "Fru" = list(
+      res = c("1b:a-dara-HEX-2:6|2:keto"),
+      lin = NULL
+    ),
+    "Tag" = list(
+      res = c("1b:a-dlyx-HEX-2:6|2:keto"),
+      lin = NULL
+    ),
+    "Sor" = list(
+      res = c("1b:a-lxyl-HEX-2:6|2:keto"),
+      lin = NULL
+    ),
+    "Psi" = list(
+      res = c("1b:a-drib-HEX-2:6|2:keto"),
+      lin = NULL
     )
-  }
+  )
   
-  mappings
+  return(GLYCOCT_MAP)
 }
 
 consolidate_residues <- function(residues, linkages, mono_mappings) {
@@ -645,6 +852,9 @@ map_single_mono <- function(content) {
     if (stringr::str_detect(stereo_name, "gal")) return("Gal") 
     if (stringr::str_detect(stereo_name, "man")) return("Man")
     if (stringr::str_detect(stereo_name, "xyl")) return("Xyl")
+    
+    # Handle GlcA (glucuronic acid) pattern
+    if (stringr::str_detect(content, "dglc.*6:a")) return("GlcA")
     
     # Fallback to class name
     if (class_name == "HEX") return("Hex")
