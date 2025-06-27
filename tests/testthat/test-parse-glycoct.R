@@ -65,32 +65,7 @@ test_that("GlycoCT: Man6", {
   expect_equal(result, expected)
 })
 
-test_that("GlycoCT: Fuc(a1-2)[Gal(a1-3)]Gal(b1-3)[GlcNAc6S(b1-6)]GalNAc(a1- (Sulfate)", {
-  glycoct <- paste0(
-    "RES\n",
-    "1b:a-dgal-HEX-1:5\n",
-    "2s:n-acetyl\n",
-    "3b:b-dgal-HEX-1:5\n",
-    "4b:a-lgal-HEX-1:5|6:d\n",
-    "5b:a-dgal-HEX-1:5\n",
-    "6b:b-dglc-HEX-1:5\n",
-    "7s:n-acetyl\n",
-    "8s:sulfate\n",
-    "LIN\n",
-    "1:1d(2+1)2n\n",
-    "2:1o(3+1)3d\n",
-    "3:3o(2+1)4d\n",
-    "4:3o(3+1)5d\n",
-    "5:1o(6+1)6d\n",
-    "6:6d(2+1)7n\n",
-    "7:6o(6+1)8n"
-  )
-  result <- as.character(parse_glycoct(glycoct))
-  expected <- "Fuc(a1-2)[Gal(a1-3)]Gal(b1-3)[GlcNAc6S(b1-6)]GalNAc(a1-"
-  expect_equal(result, expected)
-})
-
-test_that("GlycoCT: GlcA3S(b1-3)Gal(b1-4)GlcNAc(b1- (GlcA)", {
+test_that("GlycoCT: GlcA3S(b1-3)Gal(b1-4)GlcNAc(b1- (GlcA and sulfate)", {
   glycoct <- paste0(
     "RES\n",
     "1b:b-dglc-HEX-1:5\n",
@@ -107,6 +82,64 @@ test_that("GlycoCT: GlcA3S(b1-3)Gal(b1-4)GlcNAc(b1- (GlcA)", {
   result <- as.character(parse_glycoct(glycoct))
   expected <- "GlcA3S(b1-3)Gal(b1-4)GlcNAc(b1-"
   expect_equal(result, expected)
+})
+
+test_that("GlycoCT: GlcA?S(b1-3)Gal(b1-4)GlcNAc(b1- (Unknown sulfate position)", {
+  glycoct <- paste0(
+    "RES\n",
+    "1b:b-dglc-HEX-1:5\n",
+    "2s:n-acetyl\n",
+    "3b:b-dgal-HEX-1:5\n",
+    "4b:b-dglc-HEX-1:5|6:a\n",
+    "5s:sulfate\n",
+    "LIN\n",
+    "1:1d(2+1)2n\n",
+    "2:1o(4+1)3d\n",
+    "3:3o(3+1)4d\n",
+    "4:4o(-1+1)5n"
+  )
+  result <- as.character(parse_glycoct(glycoct))
+  expected <- "GlcA?S(b1-3)Gal(b1-4)GlcNAc(b1-"
+  expect_equal(result, expected)
+})
+
+test_that("GlycoCT: Neu4Ac5Ac(a2-", {
+  glycoct <- paste0(
+    "RES\n",
+    "1b:a-dgro-dgal-NON-2:6|1:a|2:keto|3:d\n",
+    "2s:acetyl\n",
+    "3s:n-acetyl\n",
+    "LIN\n",
+    "1:1o(4+1)2n\n",
+    "2:1d(5+1)3n\n"
+  )
+  result <- as.character(parse_glycoct(glycoct))
+  expected <- "Neu5Ac4Ac(a2-"
+  expect_equal(result, expected)
+})
+
+test_that("GlycoCT substituents", {
+  expect_sub_equal <- function(glycoct_string, expected) {
+    result <- parse_glycoct(glycoct_string)
+    graph <- glyrepr::get_structure_graphs(result, 1)
+    sub <- igraph::V(graph)$sub
+    expect_equal(sub, expected)
+  }
+
+  sub_N <- "RES\n1b:a-dglc-HEX-1:5\n2s:amino\nLIN\n1:1d(3+1)2n\n"
+  expect_sub_equal(sub_N, "3N")
+  sub_Me <- "RES\n1b:a-dglc-HEX-1:5\n2s:acetyl\nLIN\n1:1o(3+1)2n\n"
+  expect_sub_equal(sub_Me, "3Ac")
+  sub_NAc <- "RES\n1b:a-dglc-HEX-1:5\n2s:n-acetyl\nLIN\n1:1d(3+1)2n\n"
+  expect_sub_equal(sub_NAc, "3Ac")
+  sub_P <- "RES\n1b:a-dglc-HEX-1:5\n2s:phosphate\nLIN\n1:1o(3+1)2n\n"
+  expect_sub_equal(sub_P, "3P")
+  sub_S <- "RES\n1b:a-dglc-HEX-1:5\n2s:sulfate\nLIN\n1:1o(3+1)2n\n"
+  expect_sub_equal(sub_S, "3S")
+  sub_PPEtn <- "RES\n1b:a-dglc-HEX-1:5\n2s:diphospho-ethanolamine\nLIN\n1:1o(3+1)2n\n"
+  expect_sub_equal(sub_PPEtn, "3PPEtn")
+  sub_PEtn <- "RES\n1b:a-dglc-HEX-1:5\n2s:phospho-ethanolamine\nLIN\n1:1o(3+1)2n\n"
+  expect_sub_equal(sub_PEtn, "3PEtn")
 })
 
 test_that("GlycoCT: GlcA3S(?1-?)Gal(?1-?)GlcNAc(?1-, (Unknown linkages and anomers)", {

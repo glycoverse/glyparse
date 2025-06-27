@@ -671,15 +671,24 @@ match_partial_composite_structure <- function(group, residues, linkages, mono_ma
         
         # Check if monosaccharide matches
         if (!is.null(group_mono) && group_mono$content == pattern_mono_content) {
-          # This is a valid partial match
-          extra_subs <- setdiff(group_subs, pattern_subs)
+          # Verify that the pattern substituents actually match with correct linkages
+          # by using the full pattern matching function
+          if (matches_glycoct_pattern(group, residues, linkages, mapping)) {
+            # Exact match - shouldn't be in partial matching function
+            next
+          }
           
-          if (is.null(best_match) || length(pattern_subs) > length(best_match$pattern_subs)) {
-            best_match <- list(
-              mono_name = mono_name,
-              pattern_subs = pattern_subs
-            )
-            best_extra_subs <- extra_subs
+          # For partial matching, only consider if there are extra substituents
+          if (length(pattern_subs) < length(group_subs)) {
+            extra_subs <- setdiff(group_subs, pattern_subs)
+            
+            if (is.null(best_match) || length(pattern_subs) > length(best_match$pattern_subs)) {
+              best_match <- list(
+                mono_name = mono_name,
+                pattern_subs = pattern_subs
+              )
+              best_extra_subs <- extra_subs
+            }
           }
         }
       }
@@ -727,16 +736,31 @@ format_extra_substituents <- function(extra_subs, group, residues, linkages) {
       }
     }
     
+    # Handle unknown position
+    if (position == "-1") {
+      position <- "?"
+    }
+    
     # Format the substituent with position
     if (sub_content == "sulfate") {
       formatted <- c(formatted, paste0(position, "S"))
     } else if (sub_content == "n-acetyl") {
       formatted <- c(formatted, paste0(position, "Ac"))
+    } else if (sub_content == "acetyl") {
+      formatted <- c(formatted, paste0(position, "Ac"))
     } else if (sub_content == "methyl") {
       formatted <- c(formatted, paste0(position, "Me"))
+    } else if (sub_content == "amino") {
+      formatted <- c(formatted, paste0(position, "N"))
+    } else if (sub_content == "phosphate") {
+      formatted <- c(formatted, paste0(position, "P"))
+    } else if (sub_content == "phospho-ethanolamine") {
+      formatted <- c(formatted, paste0(position, "PEtn"))
+    } else if (sub_content == "diphospho-ethanolamine") {
+      formatted <- c(formatted, paste0(position, "PPEtn"))
     } else {
-      # Generic format
-      formatted <- c(formatted, paste0(position, stringr::str_to_title(sub_content)))
+      # Generic format - for unknown substituents, use the raw name
+      formatted <- c(formatted, paste0(position, sub_content))
     }
   }
   
