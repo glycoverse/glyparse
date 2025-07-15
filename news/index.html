@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">glyparse</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,6 +31,31 @@
 
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="glyparse-030">glyparse 0.3.0<a class="anchor" aria-label="anchor" href="#glyparse-030"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-3-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-3-0"></a></h3>
+<ul><li>Add <code><a href="../reference/auto_parse.html">auto_parse()</a></code> to automatically detect and parse different glycan structure string formats.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="minor-improvements-and-fixes-0-3-0">Minor improvements and fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-fixes-0-3-0"></a></h3>
+<ul><li>
+<p>Better error messages. Before:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="sc">&gt;</span> <span class="fu">parse_iupac_condensed</span>(<span class="st">"bad_glycan"</span>)</span></code></pre></div>
+<pre><code>Error in `purrr::map()` at glyparse/R/struc-parser-wrapper.R:13:3:
+ℹ In index: 1.
+Caused by error in `value[[3L]]()`:
+! Could not parse IUPAC-condensed string: {.val {x}}
+ℹ Invalid characters or format in IUPAC-condensed string
+Run `rlang::last_trace()` to see where the error occurred.</code></pre>
+<p>Now:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="sc">&gt;</span> <span class="fu">parse_iupac_condensed</span>(<span class="st">"bad_glycan"</span>)</span></code></pre></div>
+<pre><code>Error in `parse_iupac_condensed()`:
+! Can't parse: "bad_glycan"
+Run `rlang::last_trace()` to see where the error occurred.</code></pre>
+</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.1" id="glyparse-021">glyparse 0.2.1<a class="anchor" aria-label="anchor" href="#glyparse-021"></a></h2>
 <div class="section level3">

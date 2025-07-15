@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">glyparse</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -171,6 +171,26 @@ object that you can analyze</li>
 </ul>
 </div>
 <div class="section level2">
+<h2 id="part-0-auto_parse">Part 0: <code>auto_parse()</code><a class="anchor" aria-label="anchor" href="#part-0-auto_parse"></a>
+</h2>
+<p>Don’t know what you’re dealing with? Give it to
+<code><a href="../reference/auto_parse.html">auto_parse()</a></code>! This function tries to identify the format
+automatically and use the appropriate parser. Even input with mixed
+formats is supported.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"Gal(b1-3)GalNAc(b1-"</span>,</span>
+<span>  <span class="st">"(N(F)(N(H(H(N))(H(N(H))))))"</span>,</span>
+<span>  <span class="st">"WURCS=2.0/3,3,2/[a2122h-1b_1-5][a1122h-1b_1-5][a1122h-1a_1-5]/1-2-3/a4-b1_b3-c1"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/auto_parse.html">auto_parse</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span><span class="co">#&gt; &lt;glycan_structure[3]&gt;</span></span>
+<span><span class="co">#&gt; [1] <span style="color: #FFD700;">Gal</span>(<span style="color: #B2B2B2;">b1-3</span>)<span style="color: #FFD700;">GalNAc</span>(<span style="color: #B2B2B2;">b1-</span></span></span>
+<span><span class="co">#&gt; [2] <span style="color: #000000;">Hex</span>(??-?)<span style="color: #000000;">HexNAc</span>(??-?)<span style="color: #000000;">Hex</span>(??-?)[<span style="color: #000000;">HexNAc</span>(??-?)<span style="color: #000000;">Hex</span>(??-?)]<span style="color: #000000;">Hex</span>(??-?)<span style="color: #000000;">HexNAc</span>(??-?)[<span style="color: #000000;">dHex</span>(??-?)]<span style="color: #000000;">HexNAc</span>(??-</span></span>
+<span><span class="co">#&gt; [3] <span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">a1-3</span>)<span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">b1-4</span>)<span style="color: #0087D7;">Glc</span>(<span style="color: #B2B2B2;">b1-</span></span></span>
+<span><span class="co">#&gt; # Unique structures: 3</span></span></code></pre></div>
+</div>
+<div class="section level2">
 <h2 id="part-1-iupac-family-the-popular-kids">Part 1: IUPAC Family — The Popular Kids 🌟<a class="anchor" aria-label="anchor" href="#part-1-iupac-family-the-popular-kids"></a>
 </h2>
 <p>Let’s start with the IUPAC formats.</p>
@@ -181,24 +201,21 @@ object that you can analyze</li>
 like UniCarbKB.</p>
 <p>Want to know more about IUPAC-condensed format? Check <a href="https://glycoverse.github.io/glyrepr/articles/iupac.html" class="external-link">this</a>
 out!</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Single structure</span></span>
 <span><span class="va">iupac_condensed</span> <span class="op">&lt;-</span> <span class="st">"Neu5Ac(a2-3)Gal(b1-4)[Fuc(a1-3)]GlcNAc(b1-3)Gal(b1-4)Glc"</span></span>
-<span><span class="va">structure</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/parse_iupac_condensed.html">parse_iupac_condensed</a></span><span class="op">(</span><span class="va">iupac_condensed</span><span class="op">)</span></span>
-<span><span class="va">structure</span></span>
+<span><span class="fu"><a href="../reference/parse_iupac_condensed.html">parse_iupac_condensed</a></span><span class="op">(</span><span class="va">iupac_condensed</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;glycan_structure[1]&gt;</span></span>
 <span><span class="co">#&gt; [1] <span style="color: #AF5FAF;">Neu5Ac</span>(<span style="color: #B2B2B2;">a2-3</span>)<span style="color: #FFD700;">Gal</span>(<span style="color: #B2B2B2;">b1-4</span>)[<span style="color: #FF0000;">Fuc</span>(<span style="color: #B2B2B2;">a1-3</span>)]<span style="color: #0087D7;">GlcNAc</span>(<span style="color: #B2B2B2;">b1-3</span>)<span style="color: #FFD700;">Gal</span>(<span style="color: #B2B2B2;">b1-4</span>)<span style="color: #0087D7;">Glc</span>(<span style="color: #B2B2B2;">?1-</span></span></span>
 <span><span class="co">#&gt; # Unique structures: 1</span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Multiple structures at once</span></span>
 <span><span class="va">glycans</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  <span class="st">"Man(a1-3)[Man(a1-6)]Man(b1-4)GlcNAc(b1-4)GlcNAc"</span>,  <span class="co"># N-glycan core</span></span>
 <span>  <span class="st">"Gal(b1-3)GalNAc"</span>,                                    <span class="co"># O-glycan core 1</span></span>
 <span>  <span class="st">"Neu5Ac(a2-3)Gal(b1-3)[GlcNAc(b1-6)]GalNAc"</span>         <span class="co"># O-glycan core 2</span></span>
 <span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">structures</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/parse_iupac_condensed.html">parse_iupac_condensed</a></span><span class="op">(</span><span class="va">glycans</span><span class="op">)</span></span>
-<span><span class="va">structures</span></span>
+<span><span class="fu"><a href="../reference/parse_iupac_condensed.html">parse_iupac_condensed</a></span><span class="op">(</span><span class="va">glycans</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;glycan_structure[3]&gt;</span></span>
 <span><span class="co">#&gt; [1] <span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">a1-3</span>)[<span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">a1-6</span>)]<span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">b1-4</span>)<span style="color: #0087D7;">GlcNAc</span>(<span style="color: #B2B2B2;">b1-4</span>)<span style="color: #0087D7;">GlcNAc</span>(<span style="color: #B2B2B2;">?1-</span></span></span>
 <span><span class="co">#&gt; [2] <span style="color: #FFD700;">Gal</span>(<span style="color: #B2B2B2;">b1-3</span>)<span style="color: #FFD700;">GalNAc</span>(<span style="color: #B2B2B2;">?1-</span></span></span>
@@ -210,16 +227,14 @@ out!</p>
 </h3>
 <p>This compact format is popular in research papers because it saves
 space:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># The same structures in short format</span></span>
 <span><span class="va">iupac_short</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>  <span class="st">"Mana3(Mana6)Manb4GlcNAcb4GlcNAc"</span>,</span>
 <span>  <span class="st">"Galb3GalNAc"</span>, </span>
 <span>  <span class="st">"Neu5Aca3Galb3(GlcNAcb6)GalNAc"</span></span>
 <span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">short_structures</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/parse_iupac_short.html">parse_iupac_short</a></span><span class="op">(</span><span class="va">iupac_short</span><span class="op">)</span></span>
-<span><span class="va">short_structures</span></span>
+<span><span class="fu"><a href="../reference/parse_iupac_short.html">parse_iupac_short</a></span><span class="op">(</span><span class="va">iupac_short</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;glycan_structure[3]&gt;</span></span>
 <span><span class="co">#&gt; [1] <span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">a1-3</span>)[<span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">a1-6</span>)]<span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">b1-4</span>)<span style="color: #0087D7;">GlcNAc</span>(<span style="color: #B2B2B2;">b1-4</span>)<span style="color: #0087D7;">GlcNAc</span>(<span style="color: #B2B2B2;">?1-</span></span></span>
 <span><span class="co">#&gt; [2] <span style="color: #FFD700;">Gal</span>(<span style="color: #B2B2B2;">b1-3</span>)<span style="color: #FFD700;">GalNAc</span>(<span style="color: #B2B2B2;">?1-</span></span></span>
@@ -233,13 +248,12 @@ infer common linkage positions (like Neu5Ac always being a2-linked).</p>
 </h3>
 <p>This verbose format includes full chemical names and
 stereochemistry:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">iupac_extended</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span>
 <span>  <span class="st">"α-D-Manp-(1→3)[α-D-Manp-(1→6)]-β-D-Manp-(1→4)"</span>,</span>
 <span>  <span class="st">"-β-D-GlcpNAc-(1→4)-β-D-GlcpNAc-(1→"</span></span>
 <span><span class="op">)</span></span>
-<span><span class="va">extended_structure</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/parse_iupac_extended.html">parse_iupac_extended</a></span><span class="op">(</span><span class="va">iupac_extended</span><span class="op">)</span></span>
-<span><span class="va">extended_structure</span></span>
+<span><span class="fu"><a href="../reference/parse_iupac_extended.html">parse_iupac_extended</a></span><span class="op">(</span><span class="va">iupac_extended</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;glycan_structure[1]&gt;</span></span>
 <span><span class="co">#&gt; [1] <span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">a1-3</span>)[<span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">a1-6</span>)]<span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">b1-4</span>)<span style="color: #0087D7;">GlcNAc</span>(<span style="color: #B2B2B2;">b1-4</span>)<span style="color: #0087D7;">GlcNAc</span>(<span style="color: #B2B2B2;">b1-</span></span></span>
 <span><span class="co">#&gt; # Unique structures: 1</span></span></code></pre></div>
@@ -253,7 +267,7 @@ stereochemistry:</p>
 </h3>
 <p>GlycoCT is used in literature for precise representation and in
 databases like GlycomeDB. It’s more complex but extremely precise:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">glycoct</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span>
 <span>  <span class="st">"RES\n"</span>,</span>
 <span>  <span class="st">"1b:b-dglc-HEX-1:5\n"</span>,</span>
@@ -263,9 +277,7 @@ databases like GlycomeDB. It’s more complex but extremely precise:</p>
 <span>  <span class="st">"1:1o(4+1)2d\n"</span>,</span>
 <span>  <span class="st">"2:2o(3+1)3d"</span></span>
 <span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">glycoct_structure</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/parse_glycoct.html">parse_glycoct</a></span><span class="op">(</span><span class="va">glycoct</span><span class="op">)</span></span>
-<span><span class="va">glycoct_structure</span></span>
+<span><span class="fu"><a href="../reference/parse_glycoct.html">parse_glycoct</a></span><span class="op">(</span><span class="va">glycoct</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;glycan_structure[1]&gt;</span></span>
 <span><span class="co">#&gt; [1] <span style="color: #FFD700;">Gal</span>(<span style="color: #B2B2B2;">a1-3</span>)<span style="color: #FFD700;">Gal</span>(<span style="color: #B2B2B2;">b1-4</span>)<span style="color: #0087D7;">Glc</span>(<span style="color: #B2B2B2;">b1-</span></span></span>
 <span><span class="co">#&gt; # Unique structures: 1</span></span></code></pre></div>
@@ -276,15 +288,13 @@ databases like GlycomeDB. It’s more complex but extremely precise:</p>
 <p>WURCS (Web3 Unique Representation of Carbohydrate Structures) is used
 in literature for complex structures and in databases like
 GlyTouCan:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wurcs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span></span>
 <span>  <span class="st">"WURCS=2.0/3,3,2/"</span>,</span>
 <span>  <span class="st">"[a2122h-1b_1-5][a1122h-1b_1-5][a1122h-1a_1-5]/"</span>,</span>
 <span>  <span class="st">"1-2-3/a4-b1_b3-c1"</span></span>
 <span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">wurcs_structure</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/parse_wurcs.html">parse_wurcs</a></span><span class="op">(</span><span class="va">wurcs</span><span class="op">)</span></span>
-<span><span class="va">wurcs_structure</span></span>
+<span><span class="fu"><a href="../reference/parse_wurcs.html">parse_wurcs</a></span><span class="op">(</span><span class="va">wurcs</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;glycan_structure[1]&gt;</span></span>
 <span><span class="co">#&gt; [1] <span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">a1-3</span>)<span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">b1-4</span>)<span style="color: #0087D7;">Glc</span>(<span style="color: #B2B2B2;">b1-</span></span></span>
 <span><span class="co">#&gt; # Unique structures: 1</span></span></code></pre></div>
@@ -298,10 +308,9 @@ GlyTouCan:</p>
 </h3>
 <p>If you work with glycoproteomics, you might encounter pGlyco’s
 parenthetical notation:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pglyco</span> <span class="op">&lt;-</span> <span class="st">"(N(F)(N(H(H(N))(H(N(H))))))"</span></span>
-<span><span class="va">pglyco_structure</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/parse_pglyco_struc.html">parse_pglyco_struc</a></span><span class="op">(</span><span class="va">pglyco</span><span class="op">)</span></span>
-<span><span class="va">pglyco_structure</span></span>
+<span><span class="fu"><a href="../reference/parse_pglyco_struc.html">parse_pglyco_struc</a></span><span class="op">(</span><span class="va">pglyco</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;glycan_structure[1]&gt;</span></span>
 <span><span class="co">#&gt; [1] <span style="color: #000000;">Hex</span>(??-?)<span style="color: #000000;">HexNAc</span>(??-?)<span style="color: #000000;">Hex</span>(??-?)[<span style="color: #000000;">HexNAc</span>(??-?)<span style="color: #000000;">Hex</span>(??-?)]<span style="color: #000000;">Hex</span>(??-?)<span style="color: #000000;">HexNAc</span>(??-?)[<span style="color: #000000;">dHex</span>(??-?)]<span style="color: #000000;">HexNAc</span>(??-</span></span>
 <span><span class="co">#&gt; # Unique structures: 1</span></span></code></pre></div>
@@ -317,10 +326,9 @@ parenthetical notation:</p>
 <h3 id="strucgp-format-alphabetical-system">StrucGP Format: Alphabetical System<a class="anchor" aria-label="anchor" href="#strucgp-format-alphabetical-system"></a>
 </h3>
 <p>StrucGP uses a letter-based encoding system:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">strucgp</span> <span class="op">&lt;-</span> <span class="st">"A2B2C1D1E2F1fedD1E2edcbB5ba"</span></span>
-<span><span class="va">strucgp_structure</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/parse_strucgp_struc.html">parse_strucgp_struc</a></span><span class="op">(</span><span class="va">strucgp</span><span class="op">)</span></span>
-<span><span class="va">strucgp_structure</span></span>
+<span><span class="fu"><a href="../reference/parse_strucgp_struc.html">parse_strucgp_struc</a></span><span class="op">(</span><span class="va">strucgp</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;glycan_structure[1]&gt;</span></span>
 <span><span class="co">#&gt; [1] <span style="color: #000000;">Hex</span>(??-?)<span style="color: #000000;">HexNAc</span>(??-?)<span style="color: #000000;">Hex</span>(??-?)[<span style="color: #000000;">HexNAc</span>(??-?)<span style="color: #000000;">Hex</span>(??-?)]<span style="color: #000000;">Hex</span>(??-?)<span style="color: #000000;">HexNAc</span>(??-?)[<span style="color: #000000;">dHex</span>(??-?)]<span style="color: #000000;">HexNAc</span>(??-</span></span>
 <span><span class="co">#&gt; # Unique structures: 1</span></span></code></pre></div>
@@ -330,9 +338,12 @@ parenthetical notation:</p>
 <h2 id="the-bottom-line">The Bottom Line 🎯<a class="anchor" aria-label="anchor" href="#the-bottom-line"></a>
 </h2>
 <p><code>glyparse</code> transforms the chaos of glycan text formats
-into order. No matter where your glycan data comes from—databases,
-literature, or software tools—you can now parse it into a unified format
-for analysis.</p>
+into order. No matter where your glycan data comes from, databases,
+literature, or software tools, you can now parse it into
+<code><a href="https://glycoverse.github.io/glyrepr/reference/glycan_structure.html" class="external-link">glyrepr::glycan_structure()</a></code> for further analysis. In fact,
+<code>glyread</code> package uses these parsing functions internally
+when reading output from common glycopeptide identification
+softwares.</p>
 <p><strong>Next steps:</strong></p>
 <ul>
 <li>Explore the <code>glyrepr</code> package for structure
