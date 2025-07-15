@@ -73,6 +73,22 @@ All parsers follow the same pattern:
 - **Input**: Character vector of structure strings
 - **Output**: A `glyrepr::glycan_structure` object that you can analyze
 
+## Part 0: `auto_parse()`
+
+Don't know what you're dealing with?
+Give it to `auto_parse()`!
+This function tries to identify the format automatically and use the appropriate parser.
+Even input with mixed formats is supported.
+
+```{r}
+x <- c(
+  "Gal(b1-3)GalNAc(b1-",
+  "(N(F)(N(H(H(N))(H(N(H))))))",
+  "WURCS=2.0/3,3,2/[a2122h-1b_1-5][a1122h-1b_1-5][a1122h-1a_1-5]/1-2-3/a4-b1_b3-c1"
+)
+auto_parse(x)
+```
+
 ## Part 1: IUPAC Family — The Popular Kids 🌟
 
 Let's start with the IUPAC formats.
@@ -87,8 +103,7 @@ Check [this](https://glycoverse.github.io/glyrepr/articles/iupac.html) out!
 ```{r}
 # Single structure
 iupac_condensed <- "Neu5Ac(a2-3)Gal(b1-4)[Fuc(a1-3)]GlcNAc(b1-3)Gal(b1-4)Glc"
-structure <- parse_iupac_condensed(iupac_condensed)
-structure
+parse_iupac_condensed(iupac_condensed)
 ```
 
 ```{r}
@@ -98,9 +113,7 @@ glycans <- c(
   "Gal(b1-3)GalNAc",                                    # O-glycan core 1
   "Neu5Ac(a2-3)Gal(b1-3)[GlcNAc(b1-6)]GalNAc"         # O-glycan core 2
 )
-
-structures <- parse_iupac_condensed(glycans)
-structures
+parse_iupac_condensed(glycans)
 ```
 
 ### IUPAC-Short: Literature's Favorite
@@ -114,9 +127,7 @@ iupac_short <- c(
   "Galb3GalNAc", 
   "Neu5Aca3Galb3(GlcNAcb6)GalNAc"
 )
-
-short_structures <- parse_iupac_short(iupac_short)
-short_structures
+parse_iupac_short(iupac_short)
 ```
 
 Notice how much more compact this is! 
@@ -131,8 +142,7 @@ iupac_extended <- paste0(
   "α-D-Manp-(1→3)[α-D-Manp-(1→6)]-β-D-Manp-(1→4)",
   "-β-D-GlcpNAc-(1→4)-β-D-GlcpNAc-(1→"
 )
-extended_structure <- parse_iupac_extended(iupac_extended)
-extended_structure
+parse_iupac_extended(iupac_extended)
 ```
 
 ## Part 2: Database Formats — The Heavy Hitters 💪
@@ -152,9 +162,7 @@ glycoct <- paste0(
   "1:1o(4+1)2d\n",
   "2:2o(3+1)3d"
 )
-
-glycoct_structure <- parse_glycoct(glycoct)
-glycoct_structure
+parse_glycoct(glycoct)
 ```
 
 ### WURCS: The Complex Structure Format
@@ -167,9 +175,7 @@ wurcs <- paste0(
   "[a2122h-1b_1-5][a1122h-1b_1-5][a1122h-1a_1-5]/",
   "1-2-3/a4-b1_b3-c1"
 )
-
-wurcs_structure <- parse_wurcs(wurcs)
-wurcs_structure
+parse_wurcs(wurcs)
 ```
 
 ## Part 3: Software-Specific Formats — The Specialists 🔬
@@ -181,8 +187,7 @@ you might encounter pGlyco's parenthetical notation:
 
 ```{r}
 pglyco <- "(N(F)(N(H(H(N))(H(N(H))))))"
-pglyco_structure <- parse_pglyco_struc(pglyco)
-pglyco_structure
+parse_pglyco_struc(pglyco)
 ```
 
 This cryptic notation actually represents a complex N-glycan:
@@ -197,16 +202,16 @@ StrucGP uses a letter-based encoding system:
 
 ```{r}
 strucgp <- "A2B2C1D1E2F1fedD1E2edcbB5ba"
-strucgp_structure <- parse_strucgp_struc(strucgp)
-strucgp_structure
+parse_strucgp_struc(strucgp)
 ```
 
 ## The Bottom Line 🎯
 
-`glyparse` transforms the chaos of glycan text formats into order. 
-No matter where your glycan data comes from—databases, 
-literature, 
-or software tools—you can now parse it into a unified format for analysis.
+`glyparse` transforms the chaos of glycan text formats into order.
+No matter where your glycan data comes from, databases, literature,
+or software tools, you can now parse it into `glyrepr::glycan_structure()` for further analysis.
+In fact, `glyread` package uses these parsing functions internally when reading output
+from common glycopeptide identification softwares.
 
 **Next steps:**
 
