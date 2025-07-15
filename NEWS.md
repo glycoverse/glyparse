@@ -1,3 +1,34 @@
+# glyparse 0.3.0
+
+## New features
+
+* Add `auto_parse()` to automatically detect and parse different glycan structure string formats.
+
+## Minor improvements and fixes
+
+* Better error messages.
+  Before:
+  ```r
+  > parse_iupac_condensed("bad_glycan")
+  ```
+  ```
+  Error in `purrr::map()` at glyparse/R/struc-parser-wrapper.R:13:3:
+  ℹ In index: 1.
+  Caused by error in `value[[3L]]()`:
+  ! Could not parse IUPAC-condensed string: {.val {x}}
+  ℹ Invalid characters or format in IUPAC-condensed string
+  Run `rlang::last_trace()` to see where the error occurred.
+  ```
+  Now:
+  ```r
+  > parse_iupac_condensed("bad_glycan")
+  ```
+  ```
+  Error in `parse_iupac_condensed()`:
+  ! Can't parse: "bad_glycan"
+  Run `rlang::last_trace()` to see where the error occurred.
+  ```
+
 # glyparse 0.2.1
 
 ## Minor improvements and fixes
@@ -10,7 +41,6 @@
 ## Major improvements
 
 * Add `parse_glycoct()` to parse glycans in GlycoCT format.
-
 
 # glyparse 0.1.2
 
