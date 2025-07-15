@@ -1,3 +1,10 @@
+# glyparse 0.2.1
+
+## Minor improvements and fixes
+
+* Update README.
+* A "Get Started" vignette is added.
+
 # glyparse 0.2.0
 
 ## Major improvements
