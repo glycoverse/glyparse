@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="index.html">glyparse</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,7 +32,9 @@
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
+<li class="nav-item"><a class="nav-link" href="articles/glyparse.html">Get started</a></li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -53,7 +55,8 @@
 </div>
 <!-- badges: start -->
 
-<p>The goal of glyparse is to parse glycan structure text strings into a <code>glyrepr</code> glycan graph.</p>
+<p>Parse different glycan structure text nomenclature into <code><a href="https://glycoverse.github.io/glyrepr/reference/glycan_structure.html" class="external-link">glyrepr::glycan_structure</a></code>.</p>
+<p>Currently, the following formats are supported: IUPAC-extended, IUPAC-condensed, IUPAC-short, WURCS, GlycoCT, StrucGP-style, pGlyco-style.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -61,6 +64,20 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("pak")</span></span>
 <span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pak.html" class="external-link">pak</a></span><span class="op">(</span><span class="st">"glycoverse/glyparse"</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
+</h2>
+<ul>
+<li>📚 Reference: <a href="https://glycoverse.github.io/glyparse/reference/index.html">Here</a>
+</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="role-in-glycoverse">Role in <code>glycoverse</code>
+<a class="anchor" aria-label="anchor" href="#role-in-glycoverse"></a>
+</h2>
+<p>While <code>glyrepr</code> natively supports parsing IUPAC-condensed format through <code>as_glycan_structure()</code>, the glycan community has developed numerous other nomenclature formats that remain widely adopted in different contexts. <code>glyparse</code> serves as a comprehensive extension to <code>glyrepr</code>, providing robust parsing capabilities for these diverse formats. The package can be utilized directly by researchers to parse glycan structure text strings, or integrated with other packages such as <code>glyread</code> to seamlessly handle structure parsing when processing results from glycan and glycopeptide analysis software.</p>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
