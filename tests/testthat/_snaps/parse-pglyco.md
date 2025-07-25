@@ -25,3 +25,12 @@
       [1] HexNAc(??-
       # Unique structures: 1
 
+# pH and aH monosaccharides
+
+    Code
+      print(glycan, verbose = TRUE)
+    Output
+      <glycan_structure[1]>
+      [1] HexN(??-?)Hex?P(??-
+      # Unique structures: 1
+

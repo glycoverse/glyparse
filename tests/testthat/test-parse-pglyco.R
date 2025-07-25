@@ -17,3 +17,10 @@ test_that("single monosaccharide", {
   glycan <- parse_pglyco_struc("(N)")
   expect_snapshot(print(glycan, verbose = TRUE))
 })
+
+
+test_that("pH and aH monosaccharides", {
+  skip_on_old_win()
+  glycan <- parse_pglyco_struc("(pH(aH))")
+  expect_snapshot(print(glycan, verbose = TRUE))
+})

@@ -20,7 +20,8 @@ parse_pglyco_struc <- function(x) {
 
 # Parsing logic of `parse_pglyco_struc()`
 do_parse_pglyco_struc <- function(x) {
-  monos <- stringr::str_split_1(stringr::str_replace_all(x, "[//(, \\)]", ""), "")
+  monos <- stringr::str_split_1(x, "[//(, \\)]")
+  monos <- monos[monos != ""]
   g <- igraph::make_empty_graph(n = length(monos), directed = TRUE)
   igraph::V(g)$name <- seq_along(monos)
   igraph::V(g)$mono <- monos
@@ -46,8 +47,11 @@ do_parse_pglyco_struc <- function(x) {
     "N" = "HexNAc",
     "F" = "dHex",
     "A" = "NeuAc",
-    "G" = "NeuGc"
+    "G" = "NeuGc",
+    "aH" = "HexN",
+    "pH" = "Hex"
   )
+  igraph::V(g)$sub <- dplyr::if_else(igraph::V(g)$mono == "pH", "?P", "")
   igraph::V(g)$mono <- dplyr::recode(igraph::V(g)$mono, !!!mono_map, .default = igraph::V(g)$mono)
 
   igraph::E(g)$linkage <- "??-?"
