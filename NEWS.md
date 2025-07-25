@@ -1,3 +1,9 @@
+# glyparse 0.3.1
+
+## Minor improvements and fixes
+
+* `parse_pglyco_struc()` now support "aH" and "pH" monosaccharides.
+
 # glyparse 0.3.0
 
 ## New features
