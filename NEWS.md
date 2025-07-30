@@ -1,8 +1,8 @@
-# glyparse (development version)
+# glyparse 0.4.0
 
 ## Breaking changes
 
-* `parse_iupac_short()` now requires the reducing-end monosaccharide to have anomer information. For example, "Neu5Aca-" is valid, but "Neu5Ac" is not.
+* `parse_iupac_condensed()` and `parse_iupac_short()` now require the reducing-end monosaccharide to have anomer information. For example, "Neu5Ac(a2-" and "Neu5Aca-" are valid, but "Neu5Ac" is not.
 
 # glyparse 0.3.1
 
