@@ -13,11 +13,6 @@
 #' Also, the parentheses around linkages are omitted, and parentheses are used
 #' to indicate branching, e.g. "Neu5Aca3Gala3(Fuca3)GlcNAcb-".
 #'
-#' Same as IUPAC-condensed notation, the reducing-end monosaccharide can be with
-#' or without anomer information. For example, the two strings below are all valid:
-#' - "Neu5Aca-"
-#' - "Neu5Ac"
-#'
 #' In the first case, the anomer is "a2". In the second case, the anomer is "?2".
 #'
 #' @param x A character vector of IUPAC-short strings.
@@ -58,8 +53,7 @@ convert_short_to_condensed <- function(x) {
   tokens <- stringr::str_extract_all(x, token_pattern)[[1]]
 
   # The last residue is special because it doesn't have pos 2, e.g. "Mana-"
-  # It may even only have the monosaccharide name, e.g. "Man".
-  last_residue_pattern <- stringr::str_glue("({full_mono_pattern})([ab\\?])?-?$")
+  last_residue_pattern <- stringr::str_glue("({full_mono_pattern})([ab\\?])-$")
   last_token <- stringr::str_extract(x, last_residue_pattern)
 
   # Validate if x has been thoroughly parsed into tokens.
@@ -97,11 +91,7 @@ convert_short_to_condensed <- function(x) {
     mono <- match[, 2]
     anomer <- match[, 3]
     pos1 <- decide_anomer_pos(mono)
-    if (is.na(anomer)) {
-      mono
-    } else {
-      paste0(mono, "(", anomer, pos1, "-")
-    }
+    paste0(mono, "(", anomer, pos1, "-")
   })
 
   paste0(c(processed_tokens, last_processed_token), collapse = "")
