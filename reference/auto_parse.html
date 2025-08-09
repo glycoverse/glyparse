@@ -31,7 +31,7 @@ StrucGP
 
     <a class="navbar-brand me-2" href="../index.html">glyparse</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -100,12 +100,12 @@ or a list of glycan graphs if <code>x</code> is a character vector.</p>
 <span class="r-in"><span><span class="co"># Mixed types</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="st">"Gal(b1-3)GlcNAc(b1-4)Glc(a1-"</span>,  <span class="co"># IUPAC-condensed</span></span></span>
-<span class="r-in"><span>  <span class="st">"Neu5Aca3Gala3(Fuca3)GlcNAcb-"</span>  <span class="co"># IUPAC-short</span></span></span>
+<span class="r-in"><span>  <span class="st">"Neu5Aca3Gala3(Fuca6)GlcNAcb-"</span>  <span class="co"># IUPAC-short</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">auto_parse</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;glycan_structure[2]&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] <span style="color: #FFD700;">Gal</span>(<span style="color: #B2B2B2;">b1-3</span>)<span style="color: #0087D7;">GlcNAc</span>(<span style="color: #B2B2B2;">b1-4</span>)<span style="color: #0087D7;">Glc</span>(<span style="color: #B2B2B2;">a1-</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2] <span style="color: #AF5FAF;">Neu5Ac</span>(<span style="color: #B2B2B2;">a2-3</span>)<span style="color: #FFD700;">Gal</span>(<span style="color: #B2B2B2;">a1-3</span>)[<span style="color: #FF0000;">Fuc</span>(<span style="color: #B2B2B2;">a1-3</span>)]<span style="color: #0087D7;">GlcNAc</span>(<span style="color: #B2B2B2;">b1-</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2] <span style="color: #AF5FAF;">Neu5Ac</span>(<span style="color: #B2B2B2;">a2-3</span>)<span style="color: #FFD700;">Gal</span>(<span style="color: #B2B2B2;">a1-3</span>)[<span style="color: #FF0000;">Fuc</span>(<span style="color: #B2B2B2;">a1-6</span>)]<span style="color: #0087D7;">GlcNAc</span>(<span style="color: #B2B2B2;">b1-</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Unique structures: 2</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

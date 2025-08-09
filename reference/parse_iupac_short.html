@@ -11,7 +11,7 @@ https://doi.org/10.1351/pac199668101919."><meta property="og:image" content="htt
 
     <a class="navbar-brand me-2" href="../index.html">glyparse</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -69,10 +69,7 @@ ignore the anomer positions, assuming they are known for common monosaccharides.
 For example, "Neu5Aca3Gala-" assumes the anomer of Neu5Ac is C2 (a2-3 linked).
 Also, the parentheses around linkages are omitted, and parentheses are used
 to indicate branching, e.g. "Neu5Aca3Gala3(Fuca3)GlcNAcb-".</p>
-<p>Same as IUPAC-condensed notation, the reducing-end monosaccharide can be with
-or without anomer information. For example, the two strings below are all valid:</p><ul><li><p>"Neu5Aca-"</p></li>
-<li><p>"Neu5Ac"</p></li>
-</ul><p>In the first case, the anomer is "a2". In the second case, the anomer is "?2".</p>
+<p>In the first case, the anomer is "a2". In the second case, the anomer is "?2".</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -81,10 +78,10 @@ or without anomer information. For example, the two strings below are all valid:
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">iupac</span> <span class="op">&lt;-</span> <span class="st">"Neu5Aca3Gala3(Fuca3)GlcNAcb-"</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">iupac</span> <span class="op">&lt;-</span> <span class="st">"Neu5Aca3Gala3(Fuca6)GlcNAcb-"</span></span></span>
 <span class="r-in"><span><span class="fu">parse_iupac_short</span><span class="op">(</span><span class="va">iupac</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;glycan_structure[1]&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] <span style="color: #AF5FAF;">Neu5Ac</span>(<span style="color: #B2B2B2;">a2-3</span>)<span style="color: #FFD700;">Gal</span>(<span style="color: #B2B2B2;">a1-3</span>)[<span style="color: #FF0000;">Fuc</span>(<span style="color: #B2B2B2;">a1-3</span>)]<span style="color: #0087D7;">GlcNAc</span>(<span style="color: #B2B2B2;">b1-</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] <span style="color: #AF5FAF;">Neu5Ac</span>(<span style="color: #B2B2B2;">a2-3</span>)<span style="color: #FFD700;">Gal</span>(<span style="color: #B2B2B2;">a1-3</span>)[<span style="color: #FF0000;">Fuc</span>(<span style="color: #B2B2B2;">a1-6</span>)]<span style="color: #0087D7;">GlcNAc</span>(<span style="color: #B2B2B2;">b1-</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Unique structures: 1</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
