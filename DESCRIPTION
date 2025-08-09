@@ -22,7 +22,7 @@ Imports:
     checkmate,
     cli,
     dplyr,
-    glyrepr (>= 0.5.2.9000),
+    glyrepr (>= 0.6.0),
     igraph,
     purrr,
     rlang,
