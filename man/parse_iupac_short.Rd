@@ -30,7 +30,7 @@ to indicate branching, e.g. "Neu5Aca3Gala3(Fuca3)GlcNAcb-".
 In the first case, the anomer is "a2". In the second case, the anomer is "?2".
 }
 \examples{
-iupac <- "Neu5Aca3Gala3(Fuca3)GlcNAcb-"
+iupac <- "Neu5Aca3Gala3(Fuca6)GlcNAcb-"
 parse_iupac_short(iupac)
 
 }

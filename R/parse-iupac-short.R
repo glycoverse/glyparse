@@ -21,7 +21,7 @@
 #' or a list of glycan graphs if `x` is a character vector.
 #'
 #' @examples
-#' iupac <- "Neu5Aca3Gala3(Fuca3)GlcNAcb-"
+#' iupac <- "Neu5Aca3Gala3(Fuca6)GlcNAcb-"
 #' parse_iupac_short(iupac)
 #'
 #' @seealso [parse_iupac_condensed()], [parse_iupac_extended()]

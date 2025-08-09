@@ -27,7 +27,7 @@
 #' # Mixed types
 #' x <- c(
 #'   "Gal(b1-3)GlcNAc(b1-4)Glc(a1-",  # IUPAC-condensed
-#'   "Neu5Aca3Gala3(Fuca3)GlcNAcb-"  # IUPAC-short
+#'   "Neu5Aca3Gala3(Fuca6)GlcNAcb-"  # IUPAC-short
 #' )
 #' auto_parse(x)
 #'
