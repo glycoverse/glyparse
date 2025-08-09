@@ -27,13 +27,6 @@ For example, "Neu5Aca3Gala-" assumes the anomer of Neu5Ac is C2 (a2-3 linked).
 Also, the parentheses around linkages are omitted, and parentheses are used
 to indicate branching, e.g. "Neu5Aca3Gala3(Fuca3)GlcNAcb-".
 
-Same as IUPAC-condensed notation, the reducing-end monosaccharide can be with
-or without anomer information. For example, the two strings below are all valid:
-\itemize{
-\item "Neu5Aca-"
-\item "Neu5Ac"
-}
-
 In the first case, the anomer is "a2". In the second case, the anomer is "?2".
 }
 \examples{
