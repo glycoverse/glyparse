@@ -1,3 +1,10 @@
+# glyparse 0.4.1
+
+## Minor improvements and fixes
+
+* Fix some incorrect structure strings in tests and documentations.
+* Remove some legacy documentations.
+
 # glyparse 0.4.0
 
 ## Breaking changes
