@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">glyparse</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -203,22 +203,24 @@ like UniCarbKB.</p>
 out!</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Single structure</span></span>
-<span><span class="va">iupac_condensed</span> <span class="op">&lt;-</span> <span class="st">"Neu5Ac(a2-3)Gal(b1-4)[Fuc(a1-3)]GlcNAc(b1-3)Gal(b1-4)Glc"</span></span>
+<span><span class="va">iupac_condensed</span> <span class="op">&lt;-</span> <span class="st">"Neu5Ac(a2-3)Gal(b1-4)[Fuc(a1-3)]GlcNAc(b1-4)Gal(b1-4)Glc(a1-"</span></span>
 <span><span class="fu"><a href="../reference/parse_iupac_condensed.html">parse_iupac_condensed</a></span><span class="op">(</span><span class="va">iupac_condensed</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `parse_iupac_condensed()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Can't parse:</span></span>
-<span><span class="co">#&gt;   <span style="color: #0000BB;">"Neu5Ac(a2-3)Gal(b1-4)[Fuc(a1-3)]GlcNAc(b1-3)Gal(b1-4)Glc"</span></span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;glycan_structure[1]&gt;</span></span>
+<span><span class="co">#&gt; [1] <span style="color: #AF5FAF;">Neu5Ac</span>(<span style="color: #B2B2B2;">a2-3</span>)<span style="color: #FFD700;">Gal</span>(<span style="color: #B2B2B2;">b1-4</span>)[<span style="color: #FF0000;">Fuc</span>(<span style="color: #B2B2B2;">a1-3</span>)]<span style="color: #0087D7;">GlcNAc</span>(<span style="color: #B2B2B2;">b1-4</span>)<span style="color: #FFD700;">Gal</span>(<span style="color: #B2B2B2;">b1-4</span>)<span style="color: #0087D7;">Glc</span>(<span style="color: #B2B2B2;">a1-</span></span></span>
+<span><span class="co">#&gt; # Unique structures: 1</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Multiple structures at once</span></span>
 <span><span class="va">glycans</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  <span class="st">"Man(a1-3)[Man(a1-6)]Man(b1-4)GlcNAc(b1-4)GlcNAc"</span>,  <span class="co"># N-glycan core</span></span>
-<span>  <span class="st">"Gal(b1-3)GalNAc"</span>,                                    <span class="co"># O-glycan core 1</span></span>
-<span>  <span class="st">"Neu5Ac(a2-3)Gal(b1-3)[GlcNAc(b1-6)]GalNAc"</span>         <span class="co"># O-glycan core 2</span></span>
+<span>  <span class="st">"Man(a1-3)[Man(a1-6)]Man(b1-4)GlcNAc(b1-4)GlcNAc(b1-"</span>,  <span class="co"># N-glycan core</span></span>
+<span>  <span class="st">"Gal(b1-3)GalNAc(b1-"</span>,                                  <span class="co"># O-glycan core 1</span></span>
+<span>  <span class="st">"Neu5Ac(a2-3)Gal(b1-3)[GlcNAc(b1-6)]GalNAc(b1-"</span>         <span class="co"># O-glycan core 2</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/parse_iupac_condensed.html">parse_iupac_condensed</a></span><span class="op">(</span><span class="va">glycans</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `parse_iupac_condensed()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Can't parse: <span style="color: #0000BB;">"Man(a1-3)[Man(a1-6)]Man(b1-4)GlcNAc(b1-4)GlcNAc"</span>,</span></span>
-<span><span class="co">#&gt;   <span style="color: #0000BB;">"Gal(b1-3)GalNAc"</span>, and <span style="color: #0000BB;">"Neu5Ac(a2-3)Gal(b1-3)[GlcNAc(b1-6)]GalNAc"</span></span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;glycan_structure[3]&gt;</span></span>
+<span><span class="co">#&gt; [1] <span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">a1-3</span>)[<span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">a1-6</span>)]<span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">b1-4</span>)<span style="color: #0087D7;">GlcNAc</span>(<span style="color: #B2B2B2;">b1-4</span>)<span style="color: #0087D7;">GlcNAc</span>(<span style="color: #B2B2B2;">b1-</span></span></span>
+<span><span class="co">#&gt; [2] <span style="color: #FFD700;">Gal</span>(<span style="color: #B2B2B2;">b1-3</span>)<span style="color: #FFD700;">GalNAc</span>(<span style="color: #B2B2B2;">b1-</span></span></span>
+<span><span class="co">#&gt; [3] <span style="color: #AF5FAF;">Neu5Ac</span>(<span style="color: #B2B2B2;">a2-3</span>)<span style="color: #FFD700;">Gal</span>(<span style="color: #B2B2B2;">b1-3</span>)[<span style="color: #0087D7;">GlcNAc</span>(<span style="color: #B2B2B2;">b1-6</span>)]<span style="color: #FFD700;">GalNAc</span>(<span style="color: #B2B2B2;">b1-</span></span></span>
+<span><span class="co">#&gt; # Unique structures: 3</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="iupac-short-literatures-favorite">IUPAC-Short: Literature’s Favorite<a class="anchor" aria-label="anchor" href="#iupac-short-literatures-favorite"></a>
@@ -228,14 +230,16 @@ space:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># The same structures in short format</span></span>
 <span><span class="va">iupac_short</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  <span class="st">"Mana3(Mana6)Manb4GlcNAcb4GlcNAc"</span>,</span>
-<span>  <span class="st">"Galb3GalNAc"</span>, </span>
-<span>  <span class="st">"Neu5Aca3Galb3(GlcNAcb6)GalNAc"</span></span>
+<span>  <span class="st">"Mana3(Mana6)Manb4GlcNAcb4GlcNAcb-"</span>,</span>
+<span>  <span class="st">"Galb3GalNAcb-"</span>, </span>
+<span>  <span class="st">"Neu5Aca3Galb3(GlcNAcb6)GalNAcb-"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/parse_iupac_short.html">parse_iupac_short</a></span><span class="op">(</span><span class="va">iupac_short</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `parse_iupac_short()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Can't parse: <span style="color: #0000BB;">"Mana3(Mana6)Manb4GlcNAcb4GlcNAc"</span>, <span style="color: #0000BB;">"Galb3GalNAc"</span>, and</span></span>
-<span><span class="co">#&gt;   <span style="color: #0000BB;">"Neu5Aca3Galb3(GlcNAcb6)GalNAc"</span></span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;glycan_structure[3]&gt;</span></span>
+<span><span class="co">#&gt; [1] <span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">a1-3</span>)[<span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">a1-6</span>)]<span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">b1-4</span>)<span style="color: #0087D7;">GlcNAc</span>(<span style="color: #B2B2B2;">b1-4</span>)<span style="color: #0087D7;">GlcNAc</span>(<span style="color: #B2B2B2;">b1-</span></span></span>
+<span><span class="co">#&gt; [2] <span style="color: #FFD700;">Gal</span>(<span style="color: #B2B2B2;">b1-3</span>)<span style="color: #FFD700;">GalNAc</span>(<span style="color: #B2B2B2;">b1-</span></span></span>
+<span><span class="co">#&gt; [3] <span style="color: #AF5FAF;">Neu5Ac</span>(<span style="color: #B2B2B2;">a2-3</span>)<span style="color: #FFD700;">Gal</span>(<span style="color: #B2B2B2;">b1-3</span>)[<span style="color: #0087D7;">GlcNAc</span>(<span style="color: #B2B2B2;">b1-6</span>)]<span style="color: #FFD700;">GalNAc</span>(<span style="color: #B2B2B2;">b1-</span></span></span>
+<span><span class="co">#&gt; # Unique structures: 3</span></span></code></pre></div>
 <p>Notice how much more compact this is! The parser is smart enough to
 infer common linkage positions (like Neu5Ac always being a2-linked).</p>
 </div>
