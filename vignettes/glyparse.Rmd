@@ -102,16 +102,16 @@ Check [this](https://glycoverse.github.io/glyrepr/articles/iupac.html) out!
 
 ```{r}
 # Single structure
-iupac_condensed <- "Neu5Ac(a2-3)Gal(b1-4)[Fuc(a1-3)]GlcNAc(b1-3)Gal(b1-4)Glc"
+iupac_condensed <- "Neu5Ac(a2-3)Gal(b1-4)[Fuc(a1-3)]GlcNAc(b1-4)Gal(b1-4)Glc(a1-"
 parse_iupac_condensed(iupac_condensed)
 ```
 
 ```{r}
 # Multiple structures at once
 glycans <- c(
-  "Man(a1-3)[Man(a1-6)]Man(b1-4)GlcNAc(b1-4)GlcNAc",  # N-glycan core
-  "Gal(b1-3)GalNAc",                                    # O-glycan core 1
-  "Neu5Ac(a2-3)Gal(b1-3)[GlcNAc(b1-6)]GalNAc"         # O-glycan core 2
+  "Man(a1-3)[Man(a1-6)]Man(b1-4)GlcNAc(b1-4)GlcNAc(b1-",  # N-glycan core
+  "Gal(b1-3)GalNAc(b1-",                                  # O-glycan core 1
+  "Neu5Ac(a2-3)Gal(b1-3)[GlcNAc(b1-6)]GalNAc(b1-"         # O-glycan core 2
 )
 parse_iupac_condensed(glycans)
 ```
@@ -123,9 +123,9 @@ This compact format is popular in research papers because it saves space:
 ```{r}
 # The same structures in short format
 iupac_short <- c(
-  "Mana3(Mana6)Manb4GlcNAcb4GlcNAc",
-  "Galb3GalNAc", 
-  "Neu5Aca3Galb3(GlcNAcb6)GalNAc"
+  "Mana3(Mana6)Manb4GlcNAcb4GlcNAcb-",
+  "Galb3GalNAcb-", 
+  "Neu5Aca3Galb3(GlcNAcb6)GalNAcb-"
 )
 parse_iupac_short(iupac_short)
 ```
