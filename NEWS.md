@@ -1,3 +1,9 @@
+# glyparse 0.4.2
+
+## Minor improvements and fixes
+
+* Fix some incorrect structure strings in vignettes.
+
 # glyparse 0.4.1
 
 ## Minor improvements and fixes
