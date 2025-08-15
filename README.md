@@ -23,11 +23,17 @@ pGlyco-style.
 
 ## Installation
 
-You can install the development version of glyparse from
+You can install the latest release of glyparse from
 [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("pak")
+pak::pak("glycoverse/glyparse@*release")
+```
+
+Or install the development version:
+
+``` r
 pak::pak("glycoverse/glyparse")
 ```
 
@@ -72,9 +78,9 @@ parse_pglyco_struc("(N(F)(N(H(H(N))(H(N(H))))))")
 
 ``` r
 # Parse a condensed IUPAC structure string
-parse_iupac_condensed("Gal(b1-3)GlcNAc(b1-4)Glc")
+parse_iupac_condensed("Gal(b1-3)GlcNAc(b1-4)Glc(a1-")
 #> <glycan_structure[1]>
-#> [1] Gal(b1-3)GlcNAc(b1-4)Glc(?1-
+#> [1] Gal(b1-3)GlcNAc(b1-4)Glc(a1-
 #> # Unique structures: 1
 ```
 
