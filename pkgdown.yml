@@ -3,7 +3,7 @@ pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
   glyparse: glyparse.html
-last_built: 2025-08-19T01:52Z
+last_built: 2025-08-19T01:57Z
 urls:
   reference: https://glycoverse.github.io/glyparse/reference
   article: https://glycoverse.github.io/glyparse/articles
