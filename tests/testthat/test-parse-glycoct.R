@@ -121,7 +121,7 @@ test_that("GlycoCT: Neu4Ac5Ac(a2-", {
 test_that("GlycoCT substituents", {
   expect_sub_equal <- function(glycoct_string, expected) {
     result <- parse_glycoct(glycoct_string)
-    graph <- glyrepr::get_structure_graphs(result, 1)
+    graph <- glyrepr::get_structure_graphs(result, return_list = FALSE)
     sub <- igraph::V(graph)$sub
     expect_equal(sub, expected)
   }
@@ -163,7 +163,7 @@ test_that("GlycoCT: GlcA3S(?1-?)Gal(?1-?)GlcNAc(?1-, (Unknown linkages and anome
 
 test_that("all monosaccharides can be parsed", {
   expect_mono_equal <- function(x, expected) {
-    graph <- glyrepr::get_structure_graphs(x, 1)
+    graph <- glyrepr::get_structure_graphs(x, return_list = FALSE)
     mono <- igraph::V(graph)$mono
     expect_equal(mono, expected)
   }
