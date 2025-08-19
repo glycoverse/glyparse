@@ -1,3 +1,9 @@
+# glyparse 0.4.3
+
+## Minor improvements and fixes
+
+* Fix bugs introduced by the breaking changes in `glyrepr` v0.7.0.
+
 # glyparse 0.4.2
 
 ## Minor improvements and fixes
