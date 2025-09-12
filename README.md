@@ -27,14 +27,14 @@ You can install the latest release of glyparse from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("glycoverse/glyparse@*release")
+# install.packages("remotes")
+remotes::install_github("glycoverse/glyparse@*release")
 ```
 
 Or install the development version:
 
 ``` r
-devtools::install_github("glycoverse/glyparse")
+remotes::install_github("glycoverse/glyparse")
 ```
 
 ## Documentation
