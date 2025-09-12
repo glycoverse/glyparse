@@ -1,3 +1,9 @@
+# glyparse 0.4.4
+
+## Minor improvements and bug fixes
+
+* Update dependencies to depend on release versions of glycoverse packages.
+
 # glyparse 0.4.3
 
 ## Minor improvements and fixes
