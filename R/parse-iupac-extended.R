@@ -53,14 +53,14 @@ IUPAC_EXT_TO_CON <- local({
 # - "-?([\\u03b1\\u03b2\\\\?])": anomer (α, β, or ?), with optional leading "-". Group 1.
 # - "-[DL]-": configuration (D or L), with leading and trailing "-".
 # - "([:alnum:]+?)": monosaccharide name, with non-greedy matching. Group 2.
-# - "-\\((\\d+|\\?)\\u2192(?:(\\d+|\\?)\\))?": position information, e.g. -(1→2). \\u2192 is →.
+# - "-\\((\\d+(?:/\\d+)*|\\?)\\u2192(?:(\\d+(?:/\\d+)*|\\?)\\))?": position information, e.g. -(1→2). \\u2192 is →.
 #   Leading "-". Group 3 is the first position, and group 4 is the second position.
-RESIDUE_PATTERN <- "-?([\\u03b1\\u03b2\\?])-[DL]-([[:alnum:]\\?]+?)-\\((\\d+|\\?)\\u2192(?:(\\d+|\\?)\\))?"
+RESIDUE_PATTERN <- "-?([\\u03b1\\u03b2\\?])-[DL]-([[:alnum:]\\?]+?)-\\((\\d+(?:/\\d+)*|\\?)\\u2192(?:(\\d+(?:/\\d+)*|\\?)\\))?"
 
 # Regex pattern of a IUPAC-extended DDmanHep or LDmanHep residue:
 # "D-gro-α-D-manHepp-(1→" for "DDmanHep(a1-"
 # "L-gro-α-D-manHepp-(1→" for "LDmanHep(a1-"
-DMANHEP_PATTERN <- "-?[DL]-gro-[\\u03b1\\u03b2\\?]-D-manHepp(?:[[:alnum:]\\?]+?)?-\\((\\d+|\\?)\\u2192(?:(\\d+|\\?)\\))?"
+DMANHEP_PATTERN <- "-?[DL]-gro-[\\u03b1\\u03b2\\?]-D-manHepp(?:[[:alnum:]\\?]+?)?-\\((\\d+(?:/\\d+)*|\\?)\\u2192(?:(\\d+(?:/\\d+)*|\\?)\\))?"
 
 
 convert_ext_to_con <- function(x) {

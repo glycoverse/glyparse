@@ -54,6 +54,7 @@ test_that("linkages are parsed correctly", {
   expect_linkage("β-D-Galp-(1→4)-β-D-Galp-(1→", "b1-4")
   expect_linkage("?-D-Galp-(1→4)-β-D-Galp-(1→", "?1-4")
   expect_linkage("α-D-Galp-(1→?)-β-D-Galp-(1→", "a1-?")
+  expect_linkage("α-D-Galp-(1→3/4)-β-D-Galp-(1→", "a1-3/4")
 })
 
 
