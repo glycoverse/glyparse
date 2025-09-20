@@ -56,6 +56,7 @@ test_that("linkages are correctly parsed", {
   expect_linkages("Neu5Aca3Galb-", "a2-3")
   expect_linkages("Glc?3Glc?-", "?1-3")
   expect_linkages("Neu5Aca?Gal?-", "a2-?")
+  expect_linkages("Gala3/4GalNAca-", "a1-3/4")
 })
 
 
