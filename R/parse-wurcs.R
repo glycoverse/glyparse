@@ -251,8 +251,34 @@ parse_one_linkage <- function(x) {
   # Input: a string of one WURCS linkage, e.g. "a4-b1"
   # Output: a named list of `from`, `to`, and `linkage`
   spl <- stringr::str_split_1(x, "-")
-  from_part <- spl[[1]]
-  to_part <- spl[[2]]
+
+  handle_parallel_pos <- function(part) {
+    if (stringr::str_detect(part, "|")) {
+      parts <- stringr::str_split_1(part, stringr::fixed("|"))
+      pos <- stringr::str_sub(parts, 2, -1)
+      idx_part <- stringr::str_sub(part, 1, 1)
+      pos_part <- stringr::str_c(pos, collapse = "/")
+      stringr::str_c(idx_part, pos_part)
+    } else {
+      part
+    }
+  }
+
+  from_part <- handle_parallel_pos(spl[[1]])
+  to_part <- handle_parallel_pos(spl[[2]])
+  if (stringr::str_detect(to_part, stringr::fixed("/"))) {
+    # WURCS has a strange linkage rule:
+    # In the normal case, the linkage positions are opposite to the orders of IUPAC.
+    # For example, "a4-b1" means "1-4" in IUPAC.
+    # However, when second position is a parallel position, e.g. "b2|b2",
+    # the linkage positions are the same as the orders of IUPAC.
+    # For example, "f2-g3|g6" means "2-3/6" in IUPAC.
+    # In this case, we need to swap from_part and to_part.
+    temp <- from_part
+    from_part <- to_part
+    to_part <- temp
+  }
+
   from_idx <- letter_to_int(stringr::str_sub(from_part, 1, 1))
   to_idx <- letter_to_int(stringr::str_sub(to_part, 1, 1))
   linkage <- paste0(
@@ -262,7 +288,6 @@ parse_one_linkage <- function(x) {
   )
   list(from = from_idx, to = to_idx, linkage = linkage)
 }
-
 
 letter_to_int <- function(letter) {
   utf8ToInt(letter) - utf8ToInt("a") + 1

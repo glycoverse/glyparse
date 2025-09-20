@@ -422,6 +422,22 @@ test_that("parse_residue knows unkown substituent linkages", {
 })
 
 
+test_that("parse_wurcs correctly handles unknown linkages", {
+  expect_equal(
+    as.character(parse_wurcs("WURCS=2.0/2,2,1/[a2112h-1a_1-5_2*NCC/3=O][a2112h-1a_1-5]/1-2/b1-a3|a4")),
+    "Gal(a1-3/4)GalNAc(a1-"
+  )
+  expect_equal(
+    as.character(parse_wurcs("WURCS=2.0/2,2,1/[a2112h-1a_1-5_2*NCC/3=O][a2112h-1a_1-5]/1-2/a?-b1")),
+    "Gal(a1-?)GalNAc(a1-"
+  )
+  expect_equal(
+    as.character(parse_wurcs("WURCS=2.0/2,2,1/[a2112h-1a_1-5_2*NCC/3=O][a2112h-1a_1-5]/1-2/a3-b?")),
+    "Gal(a?-3)GalNAc(a1-"
+  )
+})
+
+
 test_that("anomer is corrected", {
   expect_anomer <- function(wurcs, anomer) {
     structure <- parse_wurcs(wurcs)
