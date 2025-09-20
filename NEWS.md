@@ -1,3 +1,12 @@
+# glyparse 0.4.5
+
+## Minor improvements and fixes
+
+* Fix the bug that linkages like "1→3/4" cannot be parsed by `parse_iupac_extended()`.
+* Fix the bug that linkages like "b1-a3|a4" cannot be parsed by `parse_wurcs()`.
+* Fix the bug that linkages like "a3/4" cannot be parsed by `parse_iupac_short()`.
+* Fix the bug that linkages like "3:3o(3|6+1)4d" cannot be parsed by `parse_glycoct()`.
+
 # glyparse 0.4.4
 
 ## Minor improvements and bug fixes
