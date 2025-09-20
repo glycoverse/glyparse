@@ -153,11 +153,11 @@ test_that("GlycoCT: GlcA3S(?1-?)Gal(?1-?)GlcNAc(?1-, (Unknown linkages and anome
     "LIN\n",
     "1:1d(2+1)2n\n",
     "2:1o(-1+1)3d\n",
-    "3:3o(-1+1)4d\n",
+    "3:3o(3|6+1)4d\n",
     "4:4o(3+1)5n"
   )
   result <- as.character(parse_glycoct(glycoct))
-  expected <- "GlcA3S(?1-?)Gal(?1-?)GlcNAc(?1-"
+  expected <- "GlcA3S(?1-3/6)Gal(?1-?)GlcNAc(?1-"
   expect_equal(result, expected)
 })
 
@@ -188,4 +188,43 @@ test_that("all monosaccharides can be parsed", {
     glycoct <- create_glycoct_from_mapping(mapping)
     expect_mono_equal(parse_glycoct(glycoct), mono_name)
   }
+})
+
+test_that("GlycoCT: a complex N-glycan example", {
+  glycoct <- paste0(
+    "RES\n",
+    "1b:b-dglc-HEX-1:5\n",
+    "2s:n-acetyl\n",
+    "3b:b-dglc-HEX-1:5\n",
+    "4s:n-acetyl\n",
+    "5b:b-dman-HEX-1:5\n",
+    "6b:a-dman-HEX-1:5\n",
+    "7b:b-dglc-HEX-1:5\n",
+    "8s:n-acetyl\n",
+    "9b:b-dgal-HEX-1:5\n",
+    "10b:a-dgro-dgal-NON-2:6|1:a|2:keto|3:d\n",
+    "11s:n-acetyl\n",
+    "12b:a-dman-HEX-1:5\n",
+    "13b:b-dglc-HEX-1:5\n",
+    "14s:n-acetyl\n",
+    "15b:b-dgal-HEX-1:5\n",
+    "LIN\n",
+    "1:1d(2+1)2n\n",
+    "2:1o(4+1)3d\n",
+    "3:3d(2+1)4n\n",
+    "4:3o(4+1)5d\n",
+    "5:5o(3+1)6d\n",
+    "6:6o(2+1)7d\n",
+    "7:7d(2+1)8n\n",
+    "8:7o(4+1)9d\n",
+    "9:9o(3|6+2)10d\n",
+    "10:10d(5+1)11n\n",
+    "11:5o(6+1)12d\n",
+    "12:12o(2+1)13d\n",
+    "13:13d(2+1)14n\n",
+    "14:13o(4+1)15d"
+  )
+  result <- as.character(parse_glycoct(glycoct))
+  expected <- "Neu5Ac(a2-3/6)Gal(b1-4)GlcNAc(b1-2)Man(a1-3)[Gal(b1-4)GlcNAc(b1-2)Man(a1-6)]Man(b1-4)GlcNAc(b1-4)GlcNAc(b1-"
+  expect_equal(result, expected)
 })

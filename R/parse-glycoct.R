@@ -119,14 +119,14 @@ parse_lin_section <- function(lin_lines) {
     
     # Extract components: from_res, positions, to_res
     # Updated pattern to handle negative positions like -1
-    pattern <- "(\\d+)([do]?)\\((-?\\d+)\\+(-?\\d+)\\)(\\d+)([dn]?)"
+    pattern <- "(\\d+)([do]?)\\((-?\\d+(?:\\|\\d+)*)\\+(-?\\d+(?:\\|\\d+)*)\\)(\\d+)([dn]?)"
     matches <- stringr::str_match(link_info, pattern)
-    
+
     if (!is.na(matches[1])) {
       from_res <- as.integer(matches[2])
-      from_pos <- as.integer(matches[4])
+      from_pos <- matches[4]
       to_res <- as.integer(matches[6])
-      to_pos <- as.integer(matches[5])
+      to_pos <- matches[5]
       
       linkages[[link_id]] <- list(
         from_res = from_res,
@@ -171,8 +171,11 @@ build_glycoct_graph <- function(residues, linkages) {
       
       # Handle unknown anomer and positions
       anomer_char <- if (to_vertex$anomer == "x") "?" else to_vertex$anomer
-      to_pos_str <- if (edge$to_pos == -1) "?" else as.character(edge$to_pos)
-      from_pos_str <- if (edge$from_pos == -1) "?" else as.character(edge$from_pos)
+      to_pos_str <- if (edge$to_pos == "-1") "?" else as.character(edge$to_pos)
+      from_pos_str <- if (edge$from_pos == "-1") "?" else as.character(edge$from_pos)
+      if (stringr::str_detect(from_pos_str, stringr::fixed("|"))) {
+        from_pos_str <- stringr::str_replace_all(from_pos_str, stringr::fixed("|"), stringr::fixed("/"))
+      }
       
       linkage_str <- paste0(anomer_char, to_pos_str, "-", from_pos_str)
       edge_attrs$linkage <- c(edge_attrs$linkage, linkage_str)
