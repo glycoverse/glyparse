@@ -10,11 +10,10 @@ parse_strucgp_struc(x)
 \item{x}{A character vector of StrucGP-style structure strings.}
 }
 \value{
-A glycan graph if \code{x} is a single character,
-or a list of glycan graphs if \code{x} is a character vector.
+A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.
 }
 \description{
-Parse StrucGP-style structure characters into glycan graphs.
+Parse StrucGP-style structure characters into a \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}}.
 See example below for the structure format.
 }
 \examples{

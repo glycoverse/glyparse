@@ -10,11 +10,10 @@ parse_pglyco_struc(x)
 \item{x}{A character vector of pGlyco-style structure strings.}
 }
 \value{
-A glycan graph if \code{x} is a single character,
-or a list of glycan graphs if \code{x} is a character vector.
+A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.
 }
 \description{
-Parse pGlyco-style structure characters into glycan graphs.
+Parse pGlyco-style structure characters into a \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}}.
 See example below for the structure format.
 }
 \examples{

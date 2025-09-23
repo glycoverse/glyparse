@@ -1,6 +1,6 @@
 #' Parse IUPAC-short Structures
 #'
-#' Parse IUPAC-short-style structure characters into glycan graphs.
+#' Parse IUPAC-short-style structure characters into a [glyrepr::glycan_structure()].
 #' For more information about IUPAC-short format, see
 #' [https://doi.org/10.1351/pac199668101919](https://doi.org/10.1351/pac199668101919).
 #'
@@ -17,8 +17,7 @@
 #'
 #' @param x A character vector of IUPAC-short strings.
 #'
-#' @return A glycan graph if `x` is a single character,
-#' or a list of glycan graphs if `x` is a character vector.
+#' @return A [glyrepr::glycan_structure()] object.
 #'
 #' @examples
 #' iupac <- "Neu5Aca3Gala3(Fuca6)GlcNAcb-"

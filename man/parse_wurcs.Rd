@@ -10,11 +10,10 @@ parse_wurcs(x)
 \item{x}{A character vector of WURCS strings.}
 }
 \value{
-A glycan graph if \code{x} is a single character,
-or a list of glycan graphs if \code{x} is a character vector.
+A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.
 }
 \description{
-This function parses WURCS strings into a glycan graph.
+This function parses WURCS strings into a \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}}.
 Currently, only WURCS 2.0 is supported.
 For more information about WURCS, see \href{https://github.com/glycoinfo/WURCS/wiki}{WURCS}.
 }

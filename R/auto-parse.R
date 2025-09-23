@@ -16,8 +16,7 @@
 #'
 #' @param x A character vector of structure strings.
 #'
-#' @return A glycan graph if `x` is a single character,
-#' or a list of glycan graphs if `x` is a character vector.
+#' @return A [glyrepr::glycan_structure()] object.
 #'
 #' @examples
 #' # Single structure

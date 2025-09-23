@@ -10,11 +10,10 @@ parse_iupac_short(x)
 \item{x}{A character vector of IUPAC-short strings.}
 }
 \value{
-A glycan graph if \code{x} is a single character,
-or a list of glycan graphs if \code{x} is a character vector.
+A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.
 }
 \description{
-Parse IUPAC-short-style structure characters into glycan graphs.
+Parse IUPAC-short-style structure characters into a \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}}.
 For more information about IUPAC-short format, see
 \url{https://doi.org/10.1351/pac199668101919}.
 }

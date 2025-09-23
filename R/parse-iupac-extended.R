@@ -1,13 +1,12 @@
 #' Parse IUPAC-extended Structures
 #'
-#' Parse IUPAC-extended-style structure characters into glycan graphs.
+#' Parse IUPAC-extended-style structure characters into a [glyrepr::glycan_structure()].
 #' For more information about IUPAC-extended format, see
 #' [https://doi.org/10.1351/pac199668101919](https://doi.org/10.1351/pac199668101919).
 #'
 #' @param x A character vector of IUPAC-extended strings.
 #'
-#' @return A glycan graph if `x` is a single character,
-#' or a list of glycan graphs if `x` is a character vector.
+#' @return A [glyrepr::glycan_structure()] object.
 #'
 #' @examples
 #' iupac <- "β-D-Galp-(1→3)[β-D-Galp-(1→4)-β-D-GlcpNAc-(1→6)]-α-D-GalpNAc-(1→"

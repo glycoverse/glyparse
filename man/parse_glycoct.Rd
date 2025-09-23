@@ -10,11 +10,10 @@ parse_glycoct(x)
 \item{x}{A character vector of GlycoCT strings.}
 }
 \value{
-A glycan_structure object if \code{x} is a single character,
-or a glycan_structure vector if \code{x} is a character vector.
+A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.
 }
 \description{
-This function parses GlycoCT strings into glycan graphs.
+This function parses GlycoCT strings into a \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}}.
 GlycoCT is a format used by databases like GlyTouCan and GlyGen.
 }
 \details{

@@ -1,6 +1,6 @@
 #' Parse IUPAC-condensed Structures
 #'
-#' This function parses IUPAC-condensed strings into a glycan graph.
+#' This function parses IUPAC-condensed strings into a [glyrepr::glycan_structure()].
 #' For more information about IUPAC-condensed notation, see
 #' [https://doi.org/10.1351/pac199668101919](https://doi.org/10.1351/pac199668101919).
 #'
@@ -24,8 +24,7 @@
 #'
 #' @param x A character vector of IUPAC-condensed strings.
 #'
-#' @return A glycan graph if `x` is a single character,
-#' or a list of glycan graphs if `x` is a character vector.
+#' @return A [glyrepr::glycan_structure()] object.
 #'
 #' @examples
 #' iupac <- "Gal(b1-3)GlcNAc(b1-4)Glc(a1-"

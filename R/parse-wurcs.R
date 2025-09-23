@@ -1,13 +1,12 @@
 #' Parse WURCS Structures
 #'
-#' This function parses WURCS strings into a glycan graph.
+#' This function parses WURCS strings into a [glyrepr::glycan_structure()].
 #' Currently, only WURCS 2.0 is supported.
 #' For more information about WURCS, see [WURCS](https://github.com/glycoinfo/WURCS/wiki).
 #'
 #' @param x A character vector of WURCS strings.
 #'
-#' @return A glycan graph if `x` is a single character,
-#' or a list of glycan graphs if `x` is a character vector.
+#' @return A [glyrepr::glycan_structure()] object.
 #'
 #' @examples
 #' wurcs <- paste0(

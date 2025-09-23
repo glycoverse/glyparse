@@ -1,12 +1,11 @@
 #' Parse StrucGP Structures
 #'
-#' Parse StrucGP-style structure characters into glycan graphs.
+#' Parse StrucGP-style structure characters into a [glyrepr::glycan_structure()].
 #' See example below for the structure format.
 #'
 #' @param x A character vector of StrucGP-style structure strings.
 #'
-#' @return A glycan graph if `x` is a single character,
-#' or a list of glycan graphs if `x` is a character vector.
+#' @return A [glyrepr::glycan_structure()] object.
 #'
 #' @examples
 #' glycan <- parse_strucgp_struc("A2B2C1D1E2F1fedD1E2edcbB5ba")

@@ -10,11 +10,10 @@ parse_iupac_condensed(x)
 \item{x}{A character vector of IUPAC-condensed strings.}
 }
 \value{
-A glycan graph if \code{x} is a single character,
-or a list of glycan graphs if \code{x} is a character vector.
+A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.
 }
 \description{
-This function parses IUPAC-condensed strings into a glycan graph.
+This function parses IUPAC-condensed strings into a \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}}.
 For more information about IUPAC-condensed notation, see
 \url{https://doi.org/10.1351/pac199668101919}.
 }

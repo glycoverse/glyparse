@@ -1,6 +1,6 @@
 #' Parse GlycoCT Structures
 #'
-#' This function parses GlycoCT strings into glycan graphs.
+#' This function parses GlycoCT strings into a [glyrepr::glycan_structure()].
 #' GlycoCT is a format used by databases like GlyTouCan and GlyGen.
 #'
 #' @details
@@ -12,8 +12,7 @@
 #'
 #' @param x A character vector of GlycoCT strings.
 #'
-#' @return A glycan_structure object if `x` is a single character,
-#' or a glycan_structure vector if `x` is a character vector.
+#' @return A [glyrepr::glycan_structure()] object.
 #'
 #' @examples
 #' glycoct <- paste0(
