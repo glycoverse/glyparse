@@ -119,11 +119,16 @@ N-glycan core structure written in different formats:</p>
 <td>Literature, GlyTouCan</td>
 </tr>
 <tr class="even">
+<td><strong>Linear Code</strong></td>
+<td><code>Ma3(Ma6)Mb4GNb4GNb</code></td>
+<td>Literature</td>
+</tr>
+<tr class="odd">
 <td><strong>pGlyco</strong></td>
 <td><code>(N(N(H(H(H)))))</code></td>
 <td>pGlyco software results</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><strong>StrucGP</strong></td>
 <td><code>A2B2C1D1E2fedcba</code></td>
 <td>StrucGP software results</td>
@@ -153,6 +158,9 @@ format</li>
 format</li>
 <li>
 <strong><code><a href="../reference/parse_wurcs.html">parse_wurcs()</a></code></strong>: Modern standardized
+format</li>
+<li>
+<strong><code><a href="../reference/parse_linear_code.html">parse_linear_code()</a></code></strong>: Linear Code
 format</li>
 <li>
 <strong><code><a href="../reference/parse_pglyco_struc.html">parse_pglyco_struc()</a></code></strong>: pGlyco software
@@ -299,6 +307,18 @@ GlyTouCan:</p>
 <span><span class="co">#&gt; [1] <span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">a1-3</span>)<span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">b1-4</span>)<span style="color: #0087D7;">Glc</span>(<span style="color: #B2B2B2;">b1-</span></span></span>
 <span><span class="co">#&gt; # Unique structures: 1</span></span></code></pre></div>
 </div>
+<div class="section level3">
+<h3 id="linear-code-the-simplified-format">Linear Code: The Simplified Format<a class="anchor" aria-label="anchor" href="#linear-code-the-simplified-format"></a>
+</h3>
+<p>Linear Code is a simplified format used in literature for complex
+structures:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">linear_code</span> <span class="op">&lt;-</span> <span class="st">"Ma3(Ma6)Mb4GNb4GNb"</span></span>
+<span><span class="fu"><a href="../reference/parse_linear_code.html">parse_linear_code</a></span><span class="op">(</span><span class="va">linear_code</span><span class="op">)</span></span>
+<span><span class="co">#&gt; &lt;glycan_structure[1]&gt;</span></span>
+<span><span class="co">#&gt; [1] <span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">a1-3</span>)[<span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">a1-6</span>)]<span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">b1-4</span>)<span style="color: #0087D7;">GlcNAc</span>(<span style="color: #B2B2B2;">b1-4</span>)<span style="color: #0087D7;">GlcNAc</span>(<span style="color: #B2B2B2;">b1-</span></span></span>
+<span><span class="co">#&gt; # Unique structures: 1</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
 <h2 id="part-3-software-specific-formats-the-specialists">Part 3: Software-Specific Formats — The Specialists 🔬<a class="anchor" aria-label="anchor" href="#part-3-software-specific-formats-the-specialists"></a>
@@ -308,7 +328,7 @@ GlyTouCan:</p>
 </h3>
 <p>If you work with glycoproteomics, you might encounter pGlyco’s
 parenthetical notation:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pglyco</span> <span class="op">&lt;-</span> <span class="st">"(N(F)(N(H(H(N))(H(N(H))))))"</span></span>
 <span><span class="fu"><a href="../reference/parse_pglyco_struc.html">parse_pglyco_struc</a></span><span class="op">(</span><span class="va">pglyco</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;glycan_structure[1]&gt;</span></span>
@@ -326,7 +346,7 @@ parenthetical notation:</p>
 <h3 id="strucgp-format-alphabetical-system">StrucGP Format: Alphabetical System<a class="anchor" aria-label="anchor" href="#strucgp-format-alphabetical-system"></a>
 </h3>
 <p>StrucGP uses a letter-based encoding system:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">strucgp</span> <span class="op">&lt;-</span> <span class="st">"A2B2C1D1E2F1fedD1E2edcbB5ba"</span></span>
 <span><span class="fu"><a href="../reference/parse_strucgp_struc.html">parse_strucgp_struc</a></span><span class="op">(</span><span class="va">strucgp</span><span class="op">)</span></span>
 <span><span class="co">#&gt; &lt;glycan_structure[1]&gt;</span></span>
