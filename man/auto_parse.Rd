@@ -24,6 +24,7 @@ Supported types:
 \item IUPAC-extended
 \item IUPAC-short
 \item WURCS
+\item Linear Code
 \item pGlyco
 \item StrucGP
 }

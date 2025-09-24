@@ -11,8 +11,9 @@
 #' 3. IUPAC-extended
 #' 4. IUPAC-short
 #' 5. WURCS
-#' 6. pGlyco
-#' 7. StrucGP
+#' 6. Linear Code
+#' 7. pGlyco
+#' 8. StrucGP
 #'
 #' @param x A character vector of structure strings.
 #'
@@ -53,7 +54,9 @@ choose_parser <- function(x) {
     return(do_parse_iupac_extended)
   } else if (stringr::str_detect(x, "\\w+\\([ab\\?][\\d\\?]-")) {
     return(do_parse_iupac_condensed)
-  } else {  # Assume IUPAC-short
+  } else if (stringr::str_ends(x, "-")) {
     return(do_parse_iupac_short)
+  } else {  # Assume Linear Code
+    return(do_parse_linear_code)
   }
 }
