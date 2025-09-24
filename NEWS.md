@@ -1,3 +1,14 @@
+# glyparse 0.5.0
+
+## New features
+
+* Add `parse_linear_code()` to parse Linear Code strings.
+* `auto_parse()` now supports Linear Code strings.
+
+## Minor improvements and fixes
+
+* Revise the documentations of all parsers to be more accurate about return value type.
+
 # glyparse 0.4.5
 
 ## Minor improvements and fixes
