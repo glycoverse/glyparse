@@ -7,6 +7,8 @@
 #   and "DDmanHep". Also make sure some monosaccharides are not parsed
 #   as substituents, e.g. "GlcNAc" should not be parsed as "Glc" and "2NAc".
 #
+# - Check if generic monosaccharide names are parsed correctly, e.g. "Hex".
+#
 # - Check if substituents are parsed correctly. This includes substituent
 #   names and positions. Positions can be integers or "?".
 #

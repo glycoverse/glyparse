@@ -26,7 +26,7 @@ do_parse_iupac_extended <- function(x) {
 
 
 IUPAC_EXT_TO_CON <- local({
-  monos <- glyrepr::available_monosaccharides(mono_type = "concrete")
+  monos <- glyrepr::available_monosaccharides(mono_type = "all")
   monos <- setdiff(monos, "Sia")
   # Deal with general rules
   ext_monos <- dplyr::case_when(
@@ -50,11 +50,11 @@ IUPAC_EXT_TO_CON <- local({
 
 # Regex pattern of a IUPAC-extended residue:
 # - "-?([\\u03b1\\u03b2\\\\?])": anomer (α, β, or ?), with optional leading "-". Group 1.
-# - "-[DL]-": configuration (D or L), with leading and trailing "-".
+# - "-[DL\\?]-": configuration (D or L, or ?), with leading and trailing "-".
 # - "([:alnum:]+?)": monosaccharide name, with non-greedy matching. Group 2.
 # - "-\\((\\d+(?:/\\d+)*|\\?)\\u2192(?:(\\d+(?:/\\d+)*|\\?)\\))?": position information, e.g. -(1→2). \\u2192 is →.
 #   Leading "-". Group 3 is the first position, and group 4 is the second position.
-RESIDUE_PATTERN <- "-?([\\u03b1\\u03b2\\?])-[DL]-([[:alnum:]\\?]+?)-\\((\\d+(?:/\\d+)*|\\?)\\u2192(?:(\\d+(?:/\\d+)*|\\?)\\))?"
+RESIDUE_PATTERN <- "-?([\\u03b1\\u03b2\\?])-[DL\\?]-([[:alnum:]\\?]+?)-\\((\\d+(?:/\\d+)*|\\?)\\u2192(?:(\\d+(?:/\\d+)*|\\?)\\))?"
 
 # Regex pattern of a IUPAC-extended DDmanHep or LDmanHep residue:
 # "D-gro-α-D-manHepp-(1→" for "DDmanHep(a1-"
