@@ -1,4 +1,8 @@
-# glyparse (development version)
+# glyparse 0.5.1
+
+## Minor improvements and fixes
+
+* `parse_iupac_extended()` and `parse_iupac_short()` now support generic monosaccharides, e.g. "Hex", "HexNAc", "HexN".
 
 # glyparse 0.5.0
 
