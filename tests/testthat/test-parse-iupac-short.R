@@ -12,6 +12,17 @@ test_that("Monosaccharides are correctly parsed", {
 })
 
 
+test_that("generic monosaccharides are parsed correctly", {
+  expect_mono <- function(x, mono) {
+    structure <- parse_iupac_short(x)
+    graph <- glyrepr::get_structure_graphs(structure)
+    expect_equal(igraph::V(graph)$mono, mono)
+  }
+  expect_mono("Hexa-", "Hex")
+  expect_mono("HexNAca-", "HexNAc")
+})
+
+
 test_that("substituents are correctly parsed", {
   expect_sub <- function(x, sub) {
     structure <- parse_iupac_short(x)

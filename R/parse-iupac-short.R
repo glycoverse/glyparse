@@ -44,7 +44,7 @@ convert_short_to_condensed <- function(x) {
   # Hardcoded pattern prevents potential errors. This is acceptable because
   # the monosaacharide list is actually not fixed, and can be updated along
   # with glyrepr. The same applies to substituents.
-  mono_pattern <- paste(glyrepr::available_monosaccharides("concrete"), collapse = "|")
+  mono_pattern <- paste(glyrepr::available_monosaccharides("all"), collapse = "|")
   sub_pattern <- paste(glyrepr::available_substituents(), collapse = "|")
   full_mono_pattern <- stringr::str_glue("(?:{mono_pattern})(?:(?:\\d+(?:/\\d+)*|\\?)(?:{sub_pattern}))*")
   residue_pattern <- stringr::str_glue("({full_mono_pattern})([ab\\?])-?(\\d+(?:/\\d+)*|\\?)")
