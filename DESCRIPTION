@@ -30,6 +30,4 @@ Imports:
     rlang,
     rstackdeque,
     stringr
-Remotes: 
-    glycoverse/glyrepr@*release
 VignetteBuilder: knitr
