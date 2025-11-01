@@ -1,4 +1,8 @@
-# glyparse (development version)
+# glyparse 0.5.3
+
+## Minor improvements and fixes
+
+* Prepare for release on CRAN.
 
 # glyparse 0.5.2
 
