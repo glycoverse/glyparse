@@ -1,4 +1,8 @@
-# glyparse (development version)
+# glyparse 0.5.2
+
+## Minor improvements and fixes
+
+* glyaprse now depends on the CRAN version of glyrepr.
 
 # glyparse 0.5.1
 
