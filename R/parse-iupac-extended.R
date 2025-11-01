@@ -8,7 +8,7 @@
 #' @return A [glyrepr::glycan_structure()] object.
 #'
 #' @examples
-#' iupac <- "β-D-Galp-(1→3)[β-D-Galp-(1→4)-β-D-GlcpNAc-(1→6)]-α-D-GalpNAc-(1→"
+#' iupac <- "\u03b2-D-Galp-(1\u21923)-\u03b1-D-GalpNAc-(1\u2192"
 #' parse_iupac_extended(iupac)
 #'
 #' @seealso [parse_iupac_condensed()], [parse_iupac_short()]

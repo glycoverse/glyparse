@@ -17,7 +17,7 @@ Parse IUPAC-extended-style structure characters into a \code{\link[glyrepr:glyca
 For more information about IUPAC-extended format, see \doi{10.1351/pac199668101919}.
 }
 \examples{
-iupac <- "β-D-Galp-(1→3)[β-D-Galp-(1→4)-β-D-GlcpNAc-(1→6)]-α-D-GalpNAc-(1→"
+iupac <- "\u03b2-D-Galp-(1\u21923)-\u03b1-D-GalpNAc-(1\u2192"
 parse_iupac_extended(iupac)
 
 }
