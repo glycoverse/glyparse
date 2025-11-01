@@ -14,8 +14,7 @@ A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.
 }
 \description{
 Parse IUPAC-extended-style structure characters into a \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}}.
-For more information about IUPAC-extended format, see
-\url{https://doi.org/10.1351/pac199668101919}.
+For more information about IUPAC-extended format, see \doi{10.1351/pac199668101919}.
 }
 \examples{
 iupac <- "β-D-Galp-(1→3)[β-D-Galp-(1→4)-β-D-GlcpNAc-(1→6)]-α-D-GalpNAc-(1→"

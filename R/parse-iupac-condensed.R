@@ -1,8 +1,7 @@
 #' Parse IUPAC-condensed Structures
 #'
 #' This function parses IUPAC-condensed strings into a [glyrepr::glycan_structure()].
-#' For more information about IUPAC-condensed notation, see
-#' [https://doi.org/10.1351/pac199668101919](https://doi.org/10.1351/pac199668101919).
+#' For more information about IUPAC-condensed notation, see \doi{10.1351/pac199668101919}.
 #'
 #' @details
 #' The IUPAC-condensed notation is a compact form of IUPAC-extended notation.

@@ -14,8 +14,7 @@ A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.
 }
 \description{
 This function parses IUPAC-condensed strings into a \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}}.
-For more information about IUPAC-condensed notation, see
-\url{https://doi.org/10.1351/pac199668101919}.
+For more information about IUPAC-condensed notation, see \doi{10.1351/pac199668101919}.
 }
 \details{
 The IUPAC-condensed notation is a compact form of IUPAC-extended notation.

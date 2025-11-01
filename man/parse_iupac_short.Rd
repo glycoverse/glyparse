@@ -14,8 +14,7 @@ A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.
 }
 \description{
 Parse IUPAC-short-style structure characters into a \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}}.
-For more information about IUPAC-short format, see
-\url{https://doi.org/10.1351/pac199668101919}.
+For more information about IUPAC-short format, see \doi{10.1351/pac199668101919}.
 }
 \details{
 The IUPAC-short notation is a compact form of IUPAC-condensed notation.

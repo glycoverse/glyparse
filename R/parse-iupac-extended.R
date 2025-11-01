@@ -1,8 +1,7 @@
 #' Parse IUPAC-extended Structures
 #'
 #' Parse IUPAC-extended-style structure characters into a [glyrepr::glycan_structure()].
-#' For more information about IUPAC-extended format, see
-#' [https://doi.org/10.1351/pac199668101919](https://doi.org/10.1351/pac199668101919).
+#' For more information about IUPAC-extended format, see \doi{10.1351/pac199668101919}.
 #'
 #' @param x A character vector of IUPAC-extended strings.
 #'
