@@ -1,3 +1,5 @@
+# glyparse (development version)
+
 # glyparse 0.5.2
 
 ## Minor improvements and fixes
