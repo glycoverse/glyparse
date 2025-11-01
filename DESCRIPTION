@@ -1,12 +1,12 @@
 Package: glyparse
-Title: Parsing glycan structure text representations
+Title: Parsing Glycan Structure Text Representations
 Version: 0.5.2.9000
 Authors@R: 
-    person("Bin", "Fu", , "23110220018@m.fudan.edu.cn", role = c("aut", "cre"),
+    person("Bin", "Fu", , "23110220018@m.fudan.edu.cn", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0001-8567-2997"))
 Description: 
-    This package provides functions to parse glycan structure text representations
-    into a graph representation. Currently, it supports StrucGP-style,
+    Provides functions to parse glycan structure text representations
+    into 'glyrepr' glycan structures. Currently, it supports StrucGP-style,
     pGlyco-style, IUPAC-condensed, IUPAC-extended, IUPAC-short, WURCS,
     Linear Code, and GlycoCT format. It also provides an automatic parser
     to detect the format and parse the structure string.
@@ -30,4 +30,6 @@ Imports:
     rlang,
     rstackdeque,
     stringr
+Depends: 
+    R (>= 4.1)
 VignetteBuilder: knitr
