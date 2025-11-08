@@ -1,5 +1,7 @@
 # Changelog
 
+## glyparse (development version)
+
 ## glyparse 0.5.3
 
 CRAN release: 2025-11-04
