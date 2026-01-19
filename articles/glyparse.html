@@ -193,11 +193,10 @@ formats is supported.</p>
 <span>  <span class="st">"WURCS=2.0/3,3,2/[a2122h-1b_1-5][a1122h-1b_1-5][a1122h-1a_1-5]/1-2-3/a4-b1_b3-c1"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/auto_parse.html">auto_parse</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
-<span><span class="co">#&gt; &lt;glycan_structure[3]&gt;</span></span>
-<span><span class="co">#&gt; [1] <span style="color: #FFD700;">Gal</span>(<span style="color: #B2B2B2;">b1-3</span>)<span style="color: #FFD700;">GalNAc</span>(<span style="color: #B2B2B2;">b1-</span></span></span>
-<span><span class="co">#&gt; [2] <span style="color: #000000;">Hex</span>(??-?)<span style="color: #000000;">HexNAc</span>(??-?)<span style="color: #000000;">Hex</span>(??-?)[<span style="color: #000000;">HexNAc</span>(??-?)<span style="color: #000000;">Hex</span>(??-?)]<span style="color: #000000;">Hex</span>(??-?)<span style="color: #000000;">HexNAc</span>(??-?)[<span style="color: #000000;">dHex</span>(??-?)]<span style="color: #000000;">HexNAc</span>(??-</span></span>
-<span><span class="co">#&gt; [3] <span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">a1-3</span>)<span style="color: #00AF5F;">Man</span>(<span style="color: #B2B2B2;">b1-4</span>)<span style="color: #0087D7;">Glc</span>(<span style="color: #B2B2B2;">b1-</span></span></span>
-<span><span class="co">#&gt; # Unique structures: 3</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `validate_glycan_structure_vector()`:</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> All structures must have the same monosaccharide type.</span></span>
+<span><span class="co">#&gt; <span style="color: #BB0000;">✖</span> Found <span style="color: #0000BB;">2</span> concrete and <span style="color: #0000BB;">1</span> generic structure(s) in the same vector.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use `convert_to_generic()` to convert concrete structures to generic type.</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="part-1-iupac-family-the-popular-kids">Part 1: IUPAC Family — The Popular Kids 🌟<a class="anchor" aria-label="anchor" href="#part-1-iupac-family-the-popular-kids"></a>

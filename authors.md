@@ -10,13 +10,13 @@
 Source:
 [`DESCRIPTION`](https://github.com/glycoverse/glyparse/blob/main/DESCRIPTION)
 
-Fu B (2025). *glyparse: Parsing Glycan Structure Text Representations*.
+Fu B (2026). *glyparse: Parsing Glycan Structure Text Representations*.
 R package version 0.5.3.9000, <https://glycoverse.github.io/glyparse/>.
 
     @Manual{,
       title = {glyparse: Parsing Glycan Structure Text Representations},
       author = {Bin Fu},
-      year = {2025},
+      year = {2026},
       note = {R package version 0.5.3.9000},
       url = {https://glycoverse.github.io/glyparse/},
     }
