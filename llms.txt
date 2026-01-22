@@ -9,13 +9,26 @@ pGlyco-style.
 
 ## Installation
 
-You can install the latest release of glyparse from CRAN with:
+You can install the latest release of glyparse from
+[CRAN](https://CRAN.R-project.org/package=glyparse):
 
 ``` r
 install.packages("glyparse")
 ```
 
-Or install the development version from GitHub:
+Or from [r-universe](https://glycoverse.r-universe.dev/glyparse):
+
+``` r
+install.packages('glyparse', repos = c('https://glycoverse.r-universe.dev', 'https://cloud.r-project.org'))
+```
+
+Or from [GitHub](https://github.com/glycoverse/glyparse):
+
+``` r
+remotes::install_github("glycoverse/glyparse@*release")
+```
+
+Or install the development version:
 
 ``` r
 remotes::install_github("glycoverse/glyparse")
