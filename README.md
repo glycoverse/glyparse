@@ -12,6 +12,8 @@ status](https://www.r-pkg.org/badges/version/glyparse)](https://CRAN.R-project.o
 [![R-CMD-check](https://github.com/glycoverse/glyparse/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/glycoverse/glyparse/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/glycoverse/glyparse/graph/badge.svg)](https://app.codecov.io/gh/glycoverse/glyparse)
+[![R-universe
+version](https://glycoverse.r-universe.dev/glyparse/badges/version)](https://glycoverse.r-universe.dev/glyparse)
 <!-- badges: end -->
 
 Parse different glycan structure text nomenclature into
