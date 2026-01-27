@@ -2,6 +2,10 @@
 
 ## glyparse (development version)
 
+### Minor improvements and fixes
+
+- Adapt to glyrepr 0.10.0.
+
 ## glyparse 0.5.3
 
 CRAN release: 2025-11-04
