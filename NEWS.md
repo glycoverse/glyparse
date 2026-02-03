@@ -1,5 +1,9 @@
 # glyparse (development version)
 
+## New features
+
+* All parser functions now preserve names of input character vectors.
+
 # glyparse 0.5.4
 
 ## Minor improvements and fixes
