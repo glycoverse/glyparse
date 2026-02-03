@@ -7,7 +7,7 @@
 parse_pglyco_struc(x)
 }
 \arguments{
-\item{x}{A character vector of pGlyco-style structure strings.}
+\item{x}{A character vector of pGlyco-style structure strings. NA values are allowed and will be returned as NA structures.}
 }
 \value{
 A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.

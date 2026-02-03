@@ -4,7 +4,7 @@
 #' Currently, only WURCS 2.0 is supported.
 #' For more information about WURCS, see [WURCS](https://github.com/glycoinfo/WURCS/wiki).
 #'
-#' @param x A character vector of WURCS strings.
+#' @param x A character vector of WURCS strings. NA values are allowed and will be returned as NA structures.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'

@@ -3,7 +3,7 @@
 #' Parse Linear Code structures into a [glyrepr::glycan_structure()].
 #' To know more about Linear Code, see [this article](https://www.jstage.jst.go.jp/article/tigg1989/14/77/14_77_127/_article).
 #'
-#' @param x A character vector of Linear Code strings.
+#' @param x A character vector of Linear Code strings. NA values are allowed and will be returned as NA structures.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
