@@ -21,7 +21,7 @@
 #' In the first case, the anomer is "a2".
 #' In the second case, the anomer is "?2".
 #'
-#' @param x A character vector of IUPAC-condensed strings.
+#' @param x A character vector of IUPAC-condensed strings. NA values are allowed and will be returned as NA structures.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'

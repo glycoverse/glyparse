@@ -7,7 +7,7 @@
 parse_iupac_condensed(x)
 }
 \arguments{
-\item{x}{A character vector of IUPAC-condensed strings.}
+\item{x}{A character vector of IUPAC-condensed strings. NA values are allowed and will be returned as NA structures.}
 }
 \value{
 A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.

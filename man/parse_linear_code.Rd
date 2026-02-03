@@ -7,7 +7,7 @@
 parse_linear_code(x)
 }
 \arguments{
-\item{x}{A character vector of Linear Code strings.}
+\item{x}{A character vector of Linear Code strings. NA values are allowed and will be returned as NA structures.}
 }
 \value{
 A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.

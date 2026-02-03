@@ -7,7 +7,7 @@
 parse_wurcs(x)
 }
 \arguments{
-\item{x}{A character vector of WURCS strings.}
+\item{x}{A character vector of WURCS strings. NA values are allowed and will be returned as NA structures.}
 }
 \value{
 A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.

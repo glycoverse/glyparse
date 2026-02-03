@@ -3,7 +3,7 @@
 #' Parse pGlyco-style structure characters into a [glyrepr::glycan_structure()].
 #' See example below for the structure format.
 #'
-#' @param x A character vector of pGlyco-style structure strings.
+#' @param x A character vector of pGlyco-style structure strings. NA values are allowed and will be returned as NA structures.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'

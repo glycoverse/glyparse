@@ -3,7 +3,7 @@
 #' Parse StrucGP-style structure characters into a [glyrepr::glycan_structure()].
 #' See example below for the structure format.
 #'
-#' @param x A character vector of StrucGP-style structure strings.
+#' @param x A character vector of StrucGP-style structure strings. NA values are allowed and will be returned as NA structures.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'

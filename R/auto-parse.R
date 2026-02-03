@@ -15,7 +15,7 @@
 #' 7. pGlyco
 #' 8. StrucGP
 #'
-#' @param x A character vector of structure strings.
+#' @param x A character vector of structure strings. NA values are allowed and will be returned as NA structures.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'

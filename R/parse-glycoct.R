@@ -10,7 +10,7 @@
 #'
 #' For more information about GlycoCT format, see the glycoct.md documentation.
 #'
-#' @param x A character vector of GlycoCT strings.
+#' @param x A character vector of GlycoCT strings. NA values are allowed and will be returned as NA structures.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
