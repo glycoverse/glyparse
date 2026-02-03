@@ -28,3 +28,75 @@ test_that("parse_strucgp_struc preserves names with NA", {
   result <- parse_strucgp_struc(input)
   expect_equal(names(result), c("struct1", "missing"))
 })
+
+test_that("parse_pglyco_struc handles NA", {
+  skip_if_not_installed("glyrepr", minimum_version = "0.10.0")
+  input <- c("(N(F)(N(H)))", NA)
+  result <- parse_pglyco_struc(input)
+  expect_equal(length(result), 2)
+  expect_false(is.na(result[1]))
+  expect_true(is.na(result[2]))
+})
+
+test_that("parse_iupac_condensed handles NA", {
+  skip_if_not_installed("glyrepr", minimum_version = "0.10.0")
+  input <- c("Gal(b1-3)GlcNAc(b1-4)Glc(a1-", NA)
+  result <- parse_iupac_condensed(input)
+  expect_equal(length(result), 2)
+  expect_false(is.na(result[1]))
+  expect_true(is.na(result[2]))
+})
+
+test_that("parse_iupac_extended handles NA", {
+  skip_if_not_installed("glyrepr", minimum_version = "0.10.0")
+  input <- c("α-D-Galp-(1→", NA)
+  result <- parse_iupac_extended(input)
+  expect_equal(length(result), 2)
+  expect_false(is.na(result[1]))
+  expect_true(is.na(result[2]))
+})
+
+test_that("parse_iupac_short handles NA", {
+  skip_if_not_installed("glyrepr", minimum_version = "0.10.0")
+  input <- c("GlcNAcb-", NA)
+  result <- parse_iupac_short(input)
+  expect_equal(length(result), 2)
+  expect_false(is.na(result[1]))
+  expect_true(is.na(result[2]))
+})
+
+test_that("parse_wurcs handles NA", {
+  skip_if_not_installed("glyrepr", minimum_version = "0.10.0")
+  input <- c("WURCS=2.0/3,3,2/[a2122h-1b_1-5_2*NCC/3=O][a1122h-1b_1-5][a1122h-1a_1-5]/1-2-3/a3-b1_b4-c1", NA)
+  result <- parse_wurcs(input)
+  expect_equal(length(result), 2)
+  expect_false(is.na(result[1]))
+  expect_true(is.na(result[2]))
+})
+
+test_that("parse_linear_code handles NA", {
+  skip_if_not_installed("glyrepr", minimum_version = "0.10.0")
+  input <- c("Ma3(Ma6)Mb4GNb4GNb", NA)
+  result <- parse_linear_code(input)
+  expect_equal(length(result), 2)
+  expect_false(is.na(result[1]))
+  expect_true(is.na(result[2]))
+})
+
+test_that("parse_glycoct handles NA", {
+  skip_if_not_installed("glyrepr", minimum_version = "0.10.0")
+  input <- c("RES\n1b:b-dglc-HEX-1:5\nLIN\n1:1d(2+1)2n", NA)
+  result <- parse_glycoct(input)
+  expect_equal(length(result), 2)
+  expect_false(is.na(result[1]))
+  expect_true(is.na(result[2]))
+})
+
+test_that("auto_parse handles NA", {
+  skip_if_not_installed("glyrepr", minimum_version = "0.10.0")
+  input <- c("Gal(b1-3)GlcNAc(b1-4)Glc(a1-", NA)
+  result <- auto_parse(input)
+  expect_equal(length(result), 2)
+  expect_false(is.na(result[1]))
+  expect_true(is.na(result[2]))
+})
