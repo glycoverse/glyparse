@@ -2,6 +2,10 @@
 
 ## glyparse (development version)
 
+### New features
+
+- All parser functions now preserve names of input character vectors.
+
 ## glyparse 0.5.4
 
 CRAN release: 2026-01-27
