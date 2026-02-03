@@ -14,7 +14,8 @@ parse_glycoct(x)
 
 - x:
 
-  A character vector of GlycoCT strings.
+  A character vector of GlycoCT strings. NA values are allowed and will
+  be returned as NA structures.
 
 ## Value
 

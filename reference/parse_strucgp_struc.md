@@ -14,7 +14,8 @@ parse_strucgp_struc(x)
 
 - x:
 
-  A character vector of StrucGP-style structure strings.
+  A character vector of StrucGP-style structure strings. NA values are
+  allowed and will be returned as NA structures.
 
 ## Value
 

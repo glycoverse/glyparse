@@ -15,7 +15,8 @@ parse_linear_code(x)
 
 - x:
 
-  A character vector of Linear Code strings.
+  A character vector of Linear Code strings. NA values are allowed and
+  will be returned as NA structures.
 
 ## Value
 

@@ -15,7 +15,8 @@ parse_iupac_short(x)
 
 - x:
 
-  A character vector of IUPAC-short strings.
+  A character vector of IUPAC-short strings. NA values are allowed and
+  will be returned as NA structures.
 
 ## Value
 

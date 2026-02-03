@@ -31,7 +31,8 @@ auto_parse(x)
 
 - x:
 
-  A character vector of structure strings.
+  A character vector of structure strings. NA values are allowed and
+  will be returned as NA structures.
 
 ## Value
 

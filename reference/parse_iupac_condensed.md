@@ -15,7 +15,8 @@ parse_iupac_condensed(x)
 
 - x:
 
-  A character vector of IUPAC-condensed strings.
+  A character vector of IUPAC-condensed strings. NA values are allowed
+  and will be returned as NA structures.
 
 ## Value
 

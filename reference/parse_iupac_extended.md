@@ -15,7 +15,8 @@ parse_iupac_extended(x)
 
 - x:
 
-  A character vector of IUPAC-extended strings.
+  A character vector of IUPAC-extended strings. NA values are allowed
+  and will be returned as NA structures.
 
 ## Value
 
