@@ -60,7 +60,7 @@ struc_parser_wrapper <- function(x, parser, call = rlang::caller_env()) {
   }
   
   # Combine all structures
-  result <- purrr::reduce(struct_list, vctrs::vec_c)
+  result <- purrr::reduce(struct_list, c)
 
   # Restore names (only if input had names)
   if (!is.null(original_names)) {
