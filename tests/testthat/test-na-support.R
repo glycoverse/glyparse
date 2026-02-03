@@ -100,3 +100,17 @@ test_that("auto_parse handles NA", {
   expect_false(is.na(result[1]))
   expect_true(is.na(result[2]))
 })
+
+test_that("invalid structures still error, not treated as NA", {
+  skip_if_not_installed("glyrepr", minimum_version = "0.10.0")
+  expect_error(
+    parse_strucgp_struc(c("valid_structure", "invalid"))
+  )
+})
+
+test_that("mixed valid and invalid structures error", {
+  skip_if_not_installed("glyrepr", minimum_version = "0.10.0")
+  expect_error(
+    parse_strucgp_struc(c("A2B2C1D1E2F1fedD1E2edcbB5ba", "not_valid"))
+  )
+})
