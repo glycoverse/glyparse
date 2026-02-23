@@ -40,27 +40,17 @@ struc_parser_wrapper <- function(x, parser, call = rlang::caller_env()) {
   # Create structure from parsed unique graphs
   unique_structure <- glyrepr::as_glycan_structure(unique_graphs)
 
-  # Build result by combining structures
-  # For each position, use either the parsed structure or NA
+  # Build result by directly constructing the IUPAC vector
+  # This avoids the expensive purrr::reduce() operation with c()
   non_na_match_indices <- match(non_na_x, unique_x)
-  
-  # Create a list of structures to combine
-  na_structure <- glyrepr::glycan_structure(NA)
-  struct_list <- vector("list", length(x))
-  
-  # Fill non-NA positions with parsed structures
-  non_na_counter <- 1
-  for (i in seq_along(x)) {
-    if (na_mask[i]) {
-      struct_list[[i]] <- na_structure
-    } else {
-      struct_list[[i]] <- unique_structure[non_na_match_indices[non_na_counter]]
-      non_na_counter <- non_na_counter + 1
-    }
-  }
-  
-  # Combine all structures
-  result <- purrr::reduce(struct_list, c)
+  unique_iupacs <- vctrs::vec_data(unique_structure)
+  unique_graphs_list <- attr(unique_structure, "graphs")
+
+  result_iupacs <- character(length(x))
+  result_iupacs[na_mask] <- NA_character_
+  result_iupacs[!na_mask] <- unique_iupacs[non_na_match_indices]
+
+  result <- glyrepr:::new_glycan_structure(result_iupacs, unique_graphs_list)
 
   # Restore names (only if input had names)
   if (!is.null(original_names)) {
