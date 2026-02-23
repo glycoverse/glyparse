@@ -43,10 +43,17 @@ convert_short_to_condensed <- function(x) {
   # Hardcoded pattern prevents potential errors. This is acceptable because
   # the monosaacharide list is actually not fixed, and can be updated along
   # with glyrepr. The same applies to substituents.
-  mono_pattern <- paste(glyrepr::available_monosaccharides("all"), collapse = "|")
+  mono_pattern <- paste(
+    glyrepr::available_monosaccharides("all"),
+    collapse = "|"
+  )
   sub_pattern <- paste(glyrepr::available_substituents(), collapse = "|")
-  full_mono_pattern <- stringr::str_glue("(?:{mono_pattern})(?:(?:\\d+(?:/\\d+)*|\\?)(?:{sub_pattern}))*")
-  residue_pattern <- stringr::str_glue("({full_mono_pattern})([ab\\?])-?(\\d+(?:/\\d+)*|\\?)")
+  full_mono_pattern <- stringr::str_glue(
+    "(?:{mono_pattern})(?:(?:\\d+(?:/\\d+)*|\\?)(?:{sub_pattern}))*"
+  )
+  residue_pattern <- stringr::str_glue(
+    "({full_mono_pattern})([ab\\?])-?(\\d+(?:/\\d+)*|\\?)"
+  )
   token_pattern <- paste(residue_pattern, "\\(", "\\)", sep = "|")
   tokens <- stringr::str_extract_all(x, token_pattern)[[1]]
 
@@ -63,11 +70,11 @@ convert_short_to_condensed <- function(x) {
   # For residues, convert them to the condensed format.
   # This does not handle the last residue yet.
   process_token <- function(token) {
-    dplyr::case_match(
+    dplyr::recode_values(
       token,
       "(" ~ "[",
       ")" ~ "]",
-      .default = local({
+      default = local({
         match <- stringr::str_match(token, residue_pattern)
         mono <- match[, 2]
         anomer <- match[, 3]

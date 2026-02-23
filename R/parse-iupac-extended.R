@@ -29,7 +29,11 @@ IUPAC_EXT_TO_CON <- local({
   monos <- setdiff(monos, "Sia")
   # Deal with general rules
   ext_monos <- dplyr::case_when(
-    stringr::str_detect(monos, "NAc$") ~ stringr::str_replace(monos, "NAc$", "pNAc"),
+    stringr::str_detect(monos, "NAc$") ~ stringr::str_replace(
+      monos,
+      "NAc$",
+      "pNAc"
+    ),
     stringr::str_detect(monos, "N$") ~ stringr::str_replace(monos, "N$", "pN"),
     stringr::str_detect(monos, "A$") ~ stringr::str_replace(monos, "A$", "pA"),
     .default = paste0(monos, "p")
@@ -63,7 +67,13 @@ DMANHEP_PATTERN <- "-?[DL]-gro-[\\u03b1\\u03b2\\?]-D-manHepp(?:[[:alnum:]\\?]+?)
 
 convert_ext_to_con <- function(x) {
   # Convert IUPAC-extended format to IUPAC-condensed format
-  token_pattern <- paste(RESIDUE_PATTERN, DMANHEP_PATTERN, "\\[", "\\]", sep = "|")
+  token_pattern <- paste(
+    RESIDUE_PATTERN,
+    DMANHEP_PATTERN,
+    "\\[",
+    "\\]",
+    sep = "|"
+  )
   tokens <- stringr::str_extract_all(x, token_pattern)[[1]]
   new_tokens <- purrr::map_chr(tokens, convert_token)
   paste(new_tokens, collapse = "")
@@ -82,12 +92,21 @@ convert_token <- function(token) {
   if (stringr::str_detect(token, DMANHEP_PATTERN)) {
     maphep_dl <- stringr::str_extract(token, "([DL])-gro", group = 1)
     token <- stringr::str_replace(token, "([DL])-gro", "")
-    token <- stringr::str_replace(token, "manHepp", paste0(maphep_dl, "DmanHep"))
+    token <- stringr::str_replace(
+      token,
+      "manHepp",
+      paste0(maphep_dl, "DmanHep")
+    )
   }
 
   # General case
   anomer <- stringr::str_extract(token, RESIDUE_PATTERN, group = 1)
-  new_anomer <- dplyr::case_match(anomer, "?" ~ "?", "\u03b1" ~ "a", "\u03b2" ~ "b")
+  new_anomer <- dplyr::recode_values(
+    anomer,
+    "?" ~ "?",
+    "\u03b1" ~ "a",
+    "\u03b2" ~ "b"
+  )
   mono <- stringr::str_extract(token, RESIDUE_PATTERN, group = 2)
   new_mono <- convert_mono(mono)
   pos1 <- stringr::str_extract(token, RESIDUE_PATTERN, group = 3)
@@ -110,7 +129,11 @@ convert_mono <- function(mono) {
     stringr::str_detect(mono, stringr::fixed(names(IUPAC_EXT_TO_CON)))
   ]
   matched <- candidates[which.max(nchar(candidates))]
-  new_mono <- stringr::str_replace(mono, stringr::fixed(names(matched)), matched)
+  new_mono <- stringr::str_replace(
+    mono,
+    stringr::fixed(names(matched)),
+    matched
+  )
   if (is.na(new_mono)) {
     cli::cli_abort(paste0("Unknown monosaccharide: ", mono))
   }
