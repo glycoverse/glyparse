@@ -1,6 +1,8 @@
 # Changelog
 
-## glyparse (development version)
+## glyparse 0.5.6
+
+CRAN release: 2026-02-24
 
 ### Minor improvements and bug fixes
 
