@@ -2,7 +2,19 @@
 
 ## glyparse (development version)
 
+### Minor improvements and bug fixes
+
+- Parser functions are now significantly faster (10-30x) for large
+  inputs.
+- Replaced deprecated
+  [`dplyr::case_match()`](https://dplyr.tidyverse.org/reference/case_match.html)
+  with
+  [`dplyr::recode_values()`](https://dplyr.tidyverse.org/reference/recode-and-replace-values.html)
+  in parsers to prevent warnings.
+
 ## glyparse 0.5.5
+
+CRAN release: 2026-02-04
 
 ### Minor improvements and bug fixes
 

@@ -34,9 +34,14 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="glyparse-development-version">glyparse (development version)<a class="anchor" aria-label="anchor" href="#glyparse-development-version"></a></h2>
+<div class="section level3">
+<h3 id="minor-improvements-and-bug-fixes-development-version">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-development-version"></a></h3>
+<ul><li>Parser functions are now significantly faster (10-30x) for large inputs.</li>
+<li>Replaced deprecated <code><a href="https://dplyr.tidyverse.org/reference/case_match.html" class="external-link">dplyr::case_match()</a></code> with <code><a href="https://dplyr.tidyverse.org/reference/recode-and-replace-values.html" class="external-link">dplyr::recode_values()</a></code> in parsers to prevent warnings.</li>
+</ul></div>
 </div>
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.5.5" id="glyparse-055">glyparse 0.5.5<a class="anchor" aria-label="anchor" href="#glyparse-055"></a></h2>
+<h2 class="pkg-version" data-toc-text="0.5.5" id="glyparse-055">glyparse 0.5.5<a class="anchor" aria-label="anchor" href="#glyparse-055"></a></h2><p class="text-muted">CRAN release: 2026-02-04</p>
 <div class="section level3">
 <h3 id="minor-improvements-and-bug-fixes-0-5-5">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-0-5-5"></a></h3>
 <ul><li>All parser functions now preserve names of input character vectors.</li>
