@@ -1,5 +1,10 @@
 # glyparse (development version)
 
+## Minor improvements and bug fixes
+
+* Parser functions are now significantly faster (10-30x) for large inputs.
+* Replaced deprecated `dplyr::case_match()` with `dplyr::recode_values()` in parsers to prevent warnings.
+
 # glyparse 0.5.5
 
 ## Minor improvements and bug fixes
