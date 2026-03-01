@@ -1,0 +1,23 @@
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://glycoverse.github.io/glyparse/dev/CODE_OF_CONDUCT.html</loc></url>
+<url><loc>https://glycoverse.github.io/glyparse/dev/CONTRIBUTING.html</loc></url>
+<url><loc>https://glycoverse.github.io/glyparse/dev/LICENSE-text.html</loc></url>
+<url><loc>https://glycoverse.github.io/glyparse/dev/LICENSE.html</loc></url>
+<url><loc>https://glycoverse.github.io/glyparse/dev/SUPPORT.html</loc></url>
+<url><loc>https://glycoverse.github.io/glyparse/dev/articles/glyparse.html</loc></url>
+<url><loc>https://glycoverse.github.io/glyparse/dev/articles/index.html</loc></url>
+<url><loc>https://glycoverse.github.io/glyparse/dev/authors.html</loc></url>
+<url><loc>https://glycoverse.github.io/glyparse/dev/index.html</loc></url>
+<url><loc>https://glycoverse.github.io/glyparse/dev/news/index.html</loc></url>
+<url><loc>https://glycoverse.github.io/glyparse/dev/reference/auto_parse.html</loc></url>
+<url><loc>https://glycoverse.github.io/glyparse/dev/reference/index.html</loc></url>
+<url><loc>https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.html</loc></url>
+<url><loc>https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_condensed.html</loc></url>
+<url><loc>https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_extended.html</loc></url>
+<url><loc>https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_short.html</loc></url>
+<url><loc>https://glycoverse.github.io/glyparse/dev/reference/parse_linear_code.html</loc></url>
+<url><loc>https://glycoverse.github.io/glyparse/dev/reference/parse_pglyco_struc.html</loc></url>
+<url><loc>https://glycoverse.github.io/glyparse/dev/reference/parse_strucgp_struc.html</loc></url>
+<url><loc>https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.html</loc></url>
+</urlset>
+
