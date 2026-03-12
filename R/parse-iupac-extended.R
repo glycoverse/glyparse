@@ -20,7 +20,8 @@ parse_iupac_extended <- function(x) {
 
 
 do_parse_iupac_extended <- function(x) {
-  do_parse_iupac_condensed(convert_ext_to_con(x))
+  x_normalized <- normalize_iupac_extended(x)
+  do_parse_iupac_condensed(convert_ext_to_con(x_normalized))
 }
 
 
@@ -138,4 +139,14 @@ convert_mono <- function(mono) {
     cli::cli_abort(paste0("Unknown monosaccharide: ", mono))
   }
   new_mono
+}
+
+
+normalize_iupac_extended <- function(x) {
+  # Normalize plain text IUPAC-extended format to Unicode format
+  # Converts: alpha -> α, beta -> β, -> -> →
+  x %>%
+    stringr::str_replace_all("alpha", "\u03b1") %>%
+    stringr::str_replace_all("beta", "\u03b2") %>%
+    stringr::str_replace_all("->", "\u2192")
 }
