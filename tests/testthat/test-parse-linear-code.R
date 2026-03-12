@@ -5,7 +5,9 @@ test_that("Linear Code: Ma3(Ma6)Mb4GNb4GNb", {
 })
 
 test_that("Linear Code: GNb2Ma3(Ab4GNb2Ma6)Mb4GNb4(Fa6)GNa", {
-  result <- as.character(parse_linear_code("GNb2Ma3(Ab4GNb2Ma6)Mb4GNb4(Fa6)GNa"))
+  result <- as.character(parse_linear_code(
+    "GNb2Ma3(Ab4GNb2Ma6)Mb4GNb4(Fa6)GNa"
+  ))
   # The main branch is switched here to Gal-GlcNAc-Man (the longest)
   expected <- "Gal(b1-4)GlcNAc(b1-2)Man(a1-6)[GlcNAc(b1-2)Man(a1-3)]Man(b1-4)GlcNAc(b1-4)[Fuc(a1-6)]GlcNAc(a1-"
   expect_equal(result, expected)

@@ -17,6 +17,38 @@ test_that("monosaccharides are parsed correctly", {
 })
 
 
+test_that("plain text format is parsed correctly", {
+  expect_mono <- function(iupac_ext, mono) {
+    structure <- parse_iupac_extended(iupac_ext)
+    graph <- glyrepr::get_structure_graphs(structure)
+    expect_equal(igraph::V(graph)$mono, mono)
+  }
+  expect_anomer <- function(iupac_ext, anomer) {
+    structure <- parse_iupac_extended(iupac_ext)
+    graph <- glyrepr::get_structure_graphs(structure)
+    expect_equal(graph$anomer, anomer)
+  }
+  expect_linkage <- function(iupac_ext, linkage) {
+    structure <- parse_iupac_extended(iupac_ext)
+    graph <- glyrepr::get_structure_graphs(structure)
+    expect_equal(igraph::E(graph)$linkage, linkage)
+  }
+
+  # Monosaccharides
+  expect_mono("alpha-D-Glcp-(1->", "Glc")
+  expect_mono("beta-D-Glcp-(1->", "Glc")
+  expect_mono("alpha-D-GlcpNAc-(1->", "GlcNAc")
+
+  # Anomers
+  expect_anomer("alpha-D-Glcp-(1->", "a1")
+  expect_anomer("beta-D-Glcp-(1->", "b1")
+
+  # Linkages
+  expect_linkage("alpha-D-Galp-(1->4)-beta-D-Galp-(1->", "a1-4")
+  expect_linkage("beta-D-Galp-(1->4)-beta-D-Galp-(1->", "b1-4")
+})
+
+
 test_that("generic monosaccharides are parsed correctly", {
   expect_mono <- function(iupac_ext, mono) {
     structure <- parse_iupac_extended(iupac_ext)

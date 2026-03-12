@@ -26,16 +26,23 @@ do_parse_pglyco_struc <- function(x) {
   igraph::V(g)$mono <- monos
   igraph::V(g)$sub <- ""
 
-  parentheses <- stringr::str_split_1(stringr::str_replace_all(x, "[^()]", ""), "")
+  parentheses <- stringr::str_split_1(
+    stringr::str_replace_all(x, "[^()]", ""),
+    ""
+  )
   current_node <- 1
   node_stack <- rstackdeque::rstack()
   node_stack <- rstackdeque::insert_top(node_stack, 1)
   for (i in 2:length(parentheses)) {
     if (parentheses[[i]] == "(") {
       current_node <- current_node + 1
-      g <- igraph::add_edges(g, c(rstackdeque::peek_top(node_stack), current_node))
+      g <- igraph::add_edges(
+        g,
+        c(rstackdeque::peek_top(node_stack), current_node)
+      )
       node_stack <- rstackdeque::insert_top(node_stack, current_node)
-    } else {  # must be ")"
+    } else {
+      # must be ")"
       node_stack <- rstackdeque::without_top(node_stack)
     }
   }
@@ -51,7 +58,11 @@ do_parse_pglyco_struc <- function(x) {
     "pH" = "Hex"
   )
   igraph::V(g)$sub <- dplyr::if_else(igraph::V(g)$mono == "pH", "?P", "")
-  igraph::V(g)$mono <- dplyr::recode(igraph::V(g)$mono, !!!mono_map, .default = igraph::V(g)$mono)
+  igraph::V(g)$mono <- dplyr::recode(
+    igraph::V(g)$mono,
+    !!!mono_map,
+    .default = igraph::V(g)$mono
+  )
 
   igraph::E(g)$linkage <- "??-?"
   g$anomer <- "??"

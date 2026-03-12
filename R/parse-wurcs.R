@@ -158,7 +158,10 @@ parse_residue <- function(residue) {
   #        for multiple substituents, they are separated by commas, e.g. "3Me,6S"
 
   # Get monosaacharide name
-  mono_idx <- purrr::detect_index(WURCS_MONO_REGEX, ~ stringr::str_detect(residue, .x))
+  mono_idx <- purrr::detect_index(
+    WURCS_MONO_REGEX,
+    ~ stringr::str_detect(residue, .x)
+  )
   if (mono_idx == 0) {
     cli::cli_abort("Unable to parse residue: {.str {residue}}")
   }
@@ -179,7 +182,8 @@ parse_residue <- function(residue) {
       # Remove the base Kdn pattern and the 5*NCC/3=O
       sub_code <- stringr::str_remove(residue, base_kdn_pattern)
       sub_code <- stringr::str_remove(sub_code, "_5\\*NCC/3=O")
-    } else { # Neu5Gc
+    } else {
+      # Neu5Gc
       # Remove the base Kdn pattern and the 5*NCCO/3=O
       sub_code <- stringr::str_remove(residue, base_kdn_pattern)
       sub_code <- stringr::str_remove(sub_code, "_5\\*NCCO/3=O")
@@ -188,7 +192,7 @@ parse_residue <- function(residue) {
     # For other monosaccharides, use the standard approach
     sub_code <- stringr::str_remove(residue, WURCS_MONO_REGEX[[mono_idx]])
   }
-  
+
   if (sub_code == "") {
     sub <- ""
   } else {
@@ -196,22 +200,31 @@ parse_residue <- function(residue) {
     sub_parts <- stringr::str_split_1(sub_code, "_")
     # Remove empty strings (from leading "_")
     sub_parts <- sub_parts[sub_parts != ""]
-    
+
     # Process each substituent part
     substituents <- purrr::map_chr(sub_parts, function(sub_part) {
       # Add back the leading "_" for pattern matching
       sub_part_with_underscore <- paste0("_", sub_part)
-      
+
       sub_patterns <- stringr::str_glue("^_(\\d+|\\?)\\*{WURCS_SUB_REGEX}$")
-      sub_idx <- purrr::detect_index(sub_patterns, ~ stringr::str_detect(sub_part_with_underscore, .x))
+      sub_idx <- purrr::detect_index(
+        sub_patterns,
+        ~ stringr::str_detect(sub_part_with_underscore, .x)
+      )
       if (sub_idx == 0) {
-        cli::cli_abort("Unable to parse substituent: {.str {sub_part_with_underscore}}")
+        cli::cli_abort(
+          "Unable to parse substituent: {.str {sub_part_with_underscore}}"
+        )
       }
       sub_name <- names(WURCS_SUB_REGEX)[[sub_idx]]
-      sub_pos <- stringr::str_extract(sub_part_with_underscore, "_(\\d+|\\?)", group = 1)
+      sub_pos <- stringr::str_extract(
+        sub_part_with_underscore,
+        "_(\\d+|\\?)",
+        group = 1
+      )
       paste0(sub_pos, sub_name)
     })
-    
+
     # Join multiple substituents with commas
     sub <- paste(substituents, collapse = ",")
   }
@@ -298,9 +311,16 @@ prepare_graph_dfs <- function(residues, linkages) {
   # `edgelist_df`: "from", "to", "linkage".
   # `vertex_df`: "name", "mono", "anomer", "sub".
   # Note that the "anomer" column is not need in a `glycan_graph` object.
-  vertex_df <- purrr::list_rbind(purrr::map(residues, ~ data.frame(as.list(.x))))
+  vertex_df <- purrr::list_rbind(purrr::map(
+    residues,
+    ~ data.frame(as.list(.x))
+  ))
   if (is.null(linkages)) {
-    edgelist_df <- data.frame(from = integer(), to = integer(), linkage = character())
+    edgelist_df <- data.frame(
+      from = integer(),
+      to = integer(),
+      linkage = character()
+    )
   } else {
     edgelist_df <- purrr::list_rbind(purrr::map(linkages, data.frame))
     # Add anomer to "linkage" column in `edgelist_df`.
@@ -323,19 +343,22 @@ build_glycan_graph <- function(edgelist_df, vertex_df) {
   core_node <- igraph::V(graph)[igraph::degree(graph, mode = "in") == 0]
   core_anomer <- vertex_df$anomer[as.numeric(core_node)]
   graph$anomer <- core_anomer
-  graph$alditol <- FALSE  # Not implemented yet
+  graph$alditol <- FALSE # Not implemented yet
   graph
 }
 
 
 do_parse_wurcs <- function(x) {
-  wurcs_regex <- stringr::regex("
+  wurcs_regex <- stringr::regex(
+    "
     ^WURCS=2\\.0         # WURCS version
     /\\d+,\\d+,\\d+      # unique residue count, residue count, linkage count
     /((?:\\[.*?\\])+)    # unique residues
     /((?:\\d+-)*\\d+)    # residue sequence
     (?:/(.*))?           # linkages, omitted for one residue sequence
-    ", comments = TRUE)
+    ",
+    comments = TRUE
+  )
   # Here we assume all characters after "residue sequence" are valid linkages.
 
   if (!stringr::str_detect(x, wurcs_regex)) {

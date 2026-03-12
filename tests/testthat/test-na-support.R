@@ -67,7 +67,10 @@ test_that("parse_iupac_short handles NA", {
 
 test_that("parse_wurcs handles NA", {
   skip_if_not_installed("glyrepr", minimum_version = "0.10.0")
-  input <- c("WURCS=2.0/3,3,2/[a2122h-1b_1-5_2*NCC/3=O][a1122h-1b_1-5][a1122h-1a_1-5]/1-2-3/a3-b1_b4-c1", NA)
+  input <- c(
+    "WURCS=2.0/3,3,2/[a2122h-1b_1-5_2*NCC/3=O][a1122h-1b_1-5][a1122h-1a_1-5]/1-2-3/a3-b1_b4-c1",
+    NA
+  )
   result <- parse_wurcs(input)
   expect_equal(length(result), 2)
   expect_false(is.na(result[1]))

@@ -5,11 +5,19 @@
 #'
 #' @param x A character vector of IUPAC-extended strings. NA values are allowed and will be returned as NA structures.
 #'
+#' @details
+#' The function accepts both a Unicode format (using the Greek letters α/β and the
+#' arrow symbol →) and a plain-text format (using the strings "alpha", "beta",
+#' and "->"). For example,
+#' both `"β-D-Galp-(1→3)-α-D-GalpNAc-(1→"` and
+#' `"beta-D-Galp-(1->3)-alpha-D-GalpNAc-(1->"` are valid inputs.
+#'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
 #' @examples
 #' iupac <- "\u03b2-D-Galp-(1\u21923)-\u03b1-D-GalpNAc-(1\u2192"
 #' parse_iupac_extended(iupac)
+#' parse_iupac_extended("beta-D-Galp-(1->3)-alpha-D-GalpNAc-(1->")
 #'
 #' @seealso [parse_iupac_condensed()], [parse_iupac_short()]
 #'
@@ -20,7 +28,8 @@ parse_iupac_extended <- function(x) {
 
 
 do_parse_iupac_extended <- function(x) {
-  do_parse_iupac_condensed(convert_ext_to_con(x))
+  x_normalized <- normalize_iupac_extended(x)
+  do_parse_iupac_condensed(convert_ext_to_con(x_normalized))
 }
 
 
@@ -138,4 +147,14 @@ convert_mono <- function(mono) {
     cli::cli_abort(paste0("Unknown monosaccharide: ", mono))
   }
   new_mono
+}
+
+
+normalize_iupac_extended <- function(x) {
+  # Normalize plain text IUPAC-extended format to Unicode format
+  # Converts: alpha -> α, beta -> β, -> -> →
+  x |>
+    stringr::str_replace_all("alpha", "\u03b1") |>
+    stringr::str_replace_all("beta", "\u03b2") |>
+    stringr::str_replace_all("->", "\u2192")
 }

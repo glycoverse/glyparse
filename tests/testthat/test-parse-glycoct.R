@@ -167,7 +167,7 @@ test_that("all monosaccharides can be parsed", {
     mono <- igraph::V(graph)$mono
     expect_equal(mono, expected)
   }
-  
+
   # Helper function to create GlycoCT from mapping
   create_glycoct_from_mapping <- function(mapping) {
     res_section <- paste(mapping$res, collapse = "\n")
@@ -178,10 +178,10 @@ test_that("all monosaccharides can be parsed", {
       paste0("RES\n", res_section)
     }
   }
-  
+
   # Get all mappings
   mappings <- load_mono_mappings()
-  
+
   # Test each monosaccharide
   for (mono_name in names(mappings)) {
     mapping <- mappings[[mono_name]]

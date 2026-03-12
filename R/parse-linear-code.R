@@ -65,7 +65,11 @@ convert_linear_to_iupac <- function(x) {
   x <- stringr::str_replace_all(x, stringr::fixed(")"), "]")
   # Finally convert "a3" to "(a1-3)"
   # Here we assume the anomer position is always 1
-  x <- stringr::str_replace_all(x, "([ab\\?])(\\d+(?:/\\d+)*|\\?)", "(\\11-\\2)")
+  x <- stringr::str_replace_all(
+    x,
+    "([ab\\?])(\\d+(?:/\\d+)*|\\?)",
+    "(\\11-\\2)"
+  )
   red_anomer <- stringr::str_sub(x, -1, -1)
   x <- paste0(stringr::str_sub(x, 1, -2), "(", red_anomer, "1-")
 
@@ -82,7 +86,9 @@ convert_linear_to_iupac <- function(x) {
   # When converting linkages, we assume the anomer positions are always 1.
   # Here we replace some of them with 2.
   anomer_pos <- decide_anomer_pos(names(mono_map))
-  anomer_patterns <- stringr::str_glue("(?<![:alnum:])({names(mono_map)})(_.*?_)?\\(([ab\\?])1-")
+  anomer_patterns <- stringr::str_glue(
+    "(?<![:alnum:])({names(mono_map)})(_.*?_)?\\(([ab\\?])1-"
+  )
   anomer_replaces <- stringr::str_glue("\\1\\2\\(\\3{anomer_pos}-")
   for (i in seq_along(anomer_patterns)) {
     x <- stringr::str_replace_all(x, anomer_patterns[i], anomer_replaces[i])
