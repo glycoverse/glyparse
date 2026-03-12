@@ -24,6 +24,14 @@ A
 [`glyrepr::glycan_structure()`](https://glycoverse.github.io/glyrepr/reference/glycan_structure.html)
 object.
 
+## Details
+
+The function accepts both a Unicode format (using the Greek letters α/β
+and the arrow symbol →) and a plain-text format (using the strings
+"alpha", "beta", and "-\>"). For example, both
+`"β-D-Galp-(1→3)-α-D-GalpNAc-(1→"` and
+`"beta-D-Galp-(1->3)-alpha-D-GalpNAc-(1->"` are valid inputs.
+
 ## See also
 
 [`parse_iupac_condensed()`](https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_condensed.md),
@@ -34,6 +42,10 @@ object.
 ``` r
 iupac <- "\u03b2-D-Galp-(1\u21923)-\u03b1-D-GalpNAc-(1\u2192"
 parse_iupac_extended(iupac)
+#> <glycan_structure[1]>
+#> [1] Gal(b1-3)GalNAc(a1-
+#> # Unique structures: 1
+parse_iupac_extended("beta-D-Galp-(1->3)-alpha-D-GalpNAc-(1->")
 #> <glycan_structure[1]>
 #> [1] Gal(b1-3)GalNAc(a1-
 #> # Unique structures: 1
