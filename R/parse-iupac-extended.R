@@ -6,15 +6,16 @@
 #' @param x A character vector of IUPAC-extended strings. NA values are allowed and will be returned as NA structures.
 #'
 #' @details
-#' The function accepts both Unicode format (with alpha, beta, and arrow symbols)
-#' and plain text format (with "alpha", "beta", and "->"). For example,
+#' The function accepts both a Unicode format (using the Greek letters α/β and the
+#' arrow symbol →) and a plain-text format (using the strings "alpha", "beta",
+#' and "->"). For example,
 #' both `"β-D-Galp-(1→3)-α-D-GalpNAc-(1→"` and
 #' `"beta-D-Galp-(1->3)-alpha-D-GalpNAc-(1->"` are valid inputs.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
 #' @examples
-#' iupac <- "\u03b2-D-Galp-(1->3)-\u03b1-D-GalpNAc-(1->"
+#' iupac <- "\u03b2-D-Galp-(1\u21923)-\u03b1-D-GalpNAc-(1\u2192"
 #' parse_iupac_extended(iupac)
 #' parse_iupac_extended("beta-D-Galp-(1->3)-alpha-D-GalpNAc-(1->")
 #'

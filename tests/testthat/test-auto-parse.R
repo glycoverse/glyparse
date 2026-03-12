@@ -19,6 +19,13 @@ test_that("auto_parse correctly identifies and parses IUPAC-extended format", {
   expect_equal(as.character(result), as.character(expected))
 })
 
+test_that("auto_parse correctly identifies and parses plain text IUPAC-extended format", {
+  input <- "beta-D-Galp-(1->3)-alpha-D-GalpNAc-(1->"
+  result <- auto_parse(input)
+  expected <- parse_iupac_extended(input)
+  expect_equal(as.character(result), as.character(expected))
+})
+
 test_that("auto_parse correctly identifies and parses pGlyco format", {
   input <- "(N(F)(N(H(H(N))(H(N(H))))))"
   result <- auto_parse(input)

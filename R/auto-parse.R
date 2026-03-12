@@ -50,8 +50,11 @@ choose_parser <- function(x) {
     return(do_parse_pglyco_struc)
   } else if (stringr::str_starts(x, "A") && stringr::str_ends(x, "a")) {
     return(do_parse_strucgp_struc)
-  } else if (stringr::str_detect(x, "\\u2192")) {
-    # \\u2192 is →
+  } else if (
+    stringr::str_detect(x, "\\u2192") || # Unicode arrow →
+      stringr::str_detect(x, "->") || # Plain text arrow ->
+      stringr::str_detect(x, "alpha|beta") # Plain text anomers
+  ) {
     return(do_parse_iupac_extended)
   } else if (stringr::str_detect(x, "\\w+\\([ab\\?][\\d\\?]-")) {
     return(do_parse_iupac_condensed)
