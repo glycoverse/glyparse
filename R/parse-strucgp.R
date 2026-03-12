@@ -21,7 +21,13 @@ parse_strucgp_struc <- function(x) {
 do_parse_strucgp_struc <- function(x) {
   graph_env <- list(graph = igraph::make_empty_graph())
   graph <- recur_parse_strucgp(x, graph_env, 0)$graph
-  mono_map <- c("1" = "Hex", "2" = "HexNAc", "3" = "NeuAc", "4" = "NeuGc", "5" = "dHex")
+  mono_map <- c(
+    "1" = "Hex",
+    "2" = "HexNAc",
+    "3" = "NeuAc",
+    "4" = "NeuGc",
+    "5" = "dHex"
+  )
   igraph::V(graph)$mono <- mono_map[igraph::V(graph)$mono]
   igraph::V(graph)$sub <- ""
   igraph::E(graph)$linkage <- "??-?"
@@ -55,10 +61,8 @@ recur_parse_strucgp <- function(x, graph_env, last_node) {
       graph_env <- recur_parse_strucgp(sub_x, graph_env, last_node)
     }
     return(graph_env)
-  }
-
-  # For layer with no branch, add a node.
-  else {
+  } else {
+    # For layer with no branch, add a node.
     # Build new graph
     mono <- stringr::str_sub(x, 2, 2)
     name = as.character(igraph::vcount(graph_env$graph) + 1)

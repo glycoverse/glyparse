@@ -50,13 +50,15 @@ choose_parser <- function(x) {
     return(do_parse_pglyco_struc)
   } else if (stringr::str_starts(x, "A") && stringr::str_ends(x, "a")) {
     return(do_parse_strucgp_struc)
-  } else if (stringr::str_detect(x, "\\u2192")) {  # \\u2192 is →
+  } else if (stringr::str_detect(x, "\\u2192")) {
+    # \\u2192 is →
     return(do_parse_iupac_extended)
   } else if (stringr::str_detect(x, "\\w+\\([ab\\?][\\d\\?]-")) {
     return(do_parse_iupac_condensed)
   } else if (stringr::str_ends(x, "-")) {
     return(do_parse_iupac_short)
-  } else {  # Assume Linear Code
+  } else {
+    # Assume Linear Code
     return(do_parse_linear_code)
   }
 }

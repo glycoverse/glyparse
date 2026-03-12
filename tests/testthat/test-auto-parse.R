@@ -42,8 +42,8 @@ test_that("auto_parse correctly identifies and parses Linear Code format", {
 
 test_that("auto_parse works with mixed format vector", {
   mixed_input <- c(
-    "Gal(b1-3)GlcNAc(b1-4)Glc(a1-",   # IUPAC-condensed
-    "Neu5Aca3Gala3(Fuca6)GlcNAcb-"    # IUPAC-short
+    "Gal(b1-3)GlcNAc(b1-4)Glc(a1-", # IUPAC-condensed
+    "Neu5Aca3Gala3(Fuca6)GlcNAcb-" # IUPAC-short
   )
   result <- auto_parse(mixed_input)
   expected <- c(

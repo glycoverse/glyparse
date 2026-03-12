@@ -36,57 +36,59 @@ do_parse_glycoct <- function(x) {
   lines <- stringr::str_split(x, "\n")[[1]]
   lines <- stringr::str_trim(lines)
   lines <- lines[lines != ""]
-  
+
   # Find RES and LIN sections
   res_start <- which(lines == "RES")
   lin_start <- which(lines == "LIN")
-  
+
   if (length(res_start) == 0) {
     cli::cli_abort("No RES section found in GlycoCT string")
   }
-  
+
   # Parse RES section
   if (length(lin_start) == 0) {
     res_lines <- lines[(res_start + 1):length(lines)]
   } else {
     res_lines <- lines[(res_start + 1):(lin_start - 1)]
   }
-  
+
   # Parse LIN section (if exists)
   if (length(lin_start) > 0) {
     lin_lines <- lines[(lin_start + 1):length(lines)]
   } else {
     lin_lines <- character(0)
   }
-  
+
   # Parse residues (monosaccharides and substituents)
   residues <- parse_res_section(res_lines)
-  
+
   # Parse linkages
   linkages <- parse_lin_section(lin_lines)
-  
+
   # Build the graph
   build_glycoct_graph(residues, linkages)
 }
 
 parse_res_section <- function(res_lines) {
   residues <- list()
-  
+
   for (line in res_lines) {
     # Parse line format: "1b:a-dgal-HEX-1:5"
     parts <- stringr::str_split(line, ":")[[1]]
-    if (length(parts) < 2) next
-    
+    if (length(parts) < 2) {
+      next
+    }
+
     id <- as.integer(stringr::str_extract(parts[1], "\\d+"))
     type <- stringr::str_extract(parts[1], "[bs]$")
     # Rejoin content in case there are multiple colons
     content <- paste(parts[2:length(parts)], collapse = ":")
-    
+
     if (type == "b") {
       # Monosaccharide
       anomer <- stringr::str_extract(content, "^[abx]")
       mono_info <- stringr::str_remove(content, "^[abx]-")
-      
+
       residues[[as.character(id)]] <- list(
         type = "mono",
         anomer = anomer,
@@ -101,21 +103,23 @@ parse_res_section <- function(res_lines) {
       )
     }
   }
-  
+
   residues
 }
 
 parse_lin_section <- function(lin_lines) {
   linkages <- list()
-  
+
   for (line in lin_lines) {
     # Parse line format: "1:1d(2+1)2n"
     parts <- stringr::str_split(line, ":")[[1]]
-    if (length(parts) < 2) next
-    
+    if (length(parts) < 2) {
+      next
+    }
+
     link_id <- as.integer(parts[1])
     link_info <- parts[2]
-    
+
     # Extract components: from_res, positions, to_res
     # Updated pattern to handle negative positions like -1
     pattern <- "(\\d+)([do]?)\\((-?\\d+(?:\\|\\d+)*)\\+(-?\\d+(?:\\|\\d+)*)\\)(\\d+)([dn]?)"
@@ -126,7 +130,7 @@ parse_lin_section <- function(lin_lines) {
       from_pos <- matches[4]
       to_res <- as.integer(matches[6])
       to_pos <- matches[5]
-      
+
       linkages[[link_id]] <- list(
         from_res = from_res,
         from_pos = from_pos,
@@ -135,68 +139,87 @@ parse_lin_section <- function(lin_lines) {
       )
     }
   }
-  
+
   linkages
 }
 
 build_glycoct_graph <- function(residues, linkages) {
   # Load monosaccharide mappings
   mono_mappings <- load_mono_mappings()
-  
+
   # Consolidate monosaccharides with their substituents
   consolidated <- consolidate_residues(residues, linkages, mono_mappings)
-  
+
   # Build igraph
   if (length(consolidated$vertices) == 0) {
     cli::cli_abort("No monosaccharides found in GlycoCT string")
   }
-  
+
   # Create vertex names
   vertex_names <- seq_along(consolidated$vertices)
-  
+
   # Create edges
   edges <- c()
   edge_attrs <- list(linkage = character(0))
-  
+
   for (edge in consolidated$edges) {
-    from_idx <- which(sapply(consolidated$vertices, function(v) v$original_id == edge$from_res))
-    to_idx <- which(sapply(consolidated$vertices, function(v) v$original_id == edge$to_res))
-    
+    from_idx <- which(sapply(consolidated$vertices, function(v) {
+      v$original_id == edge$from_res
+    }))
+    to_idx <- which(sapply(consolidated$vertices, function(v) {
+      v$original_id == edge$to_res
+    }))
+
     if (length(from_idx) == 1 && length(to_idx) == 1) {
       edges <- c(edges, from_idx, to_idx)
-      
+
       # Build linkage string: anomer + to_pos + "-" + from_pos
       to_vertex <- consolidated$vertices[[to_idx]]
-      
+
       # Handle unknown anomer and positions
       anomer_char <- if (to_vertex$anomer == "x") "?" else to_vertex$anomer
       to_pos_str <- if (edge$to_pos == "-1") "?" else as.character(edge$to_pos)
-      from_pos_str <- if (edge$from_pos == "-1") "?" else as.character(edge$from_pos)
-      if (stringr::str_detect(from_pos_str, stringr::fixed("|"))) {
-        from_pos_str <- stringr::str_replace_all(from_pos_str, stringr::fixed("|"), stringr::fixed("/"))
+      from_pos_str <- if (edge$from_pos == "-1") {
+        "?"
+      } else {
+        as.character(edge$from_pos)
       }
-      
+      if (stringr::str_detect(from_pos_str, stringr::fixed("|"))) {
+        from_pos_str <- stringr::str_replace_all(
+          from_pos_str,
+          stringr::fixed("|"),
+          stringr::fixed("/")
+        )
+      }
+
       linkage_str <- paste0(anomer_char, to_pos_str, "-", from_pos_str)
       edge_attrs$linkage <- c(edge_attrs$linkage, linkage_str)
     }
   }
-  
+
   # Create igraph
   if (length(edges) == 0) {
     # Single monosaccharide
-    g <- igraph::make_empty_graph(n = length(consolidated$vertices), directed = TRUE)
+    g <- igraph::make_empty_graph(
+      n = length(consolidated$vertices),
+      directed = TRUE
+    )
     # Add empty linkage attribute for validation
     g <- igraph::set_edge_attr(g, "linkage", value = character(0))
   } else {
-    g <- igraph::make_graph(edges, n = length(consolidated$vertices), directed = TRUE)
+    g <- igraph::make_graph(
+      edges,
+      n = length(consolidated$vertices),
+      directed = TRUE
+    )
     igraph::E(g)$linkage <- edge_attrs$linkage
   }
-  
+
   # Set vertex attributes
   igraph::V(g)$name <- as.character(vertex_names)
   igraph::V(g)$mono <- sapply(consolidated$vertices, function(v) v$mono)
   igraph::V(g)$sub <- sapply(consolidated$vertices, function(v) v$sub)
-  
+
   # Set graph attributes (reducing end properties)
   reducing_end <- find_reducing_end(consolidated$vertices, consolidated$edges)
   if (!is.null(reducing_end)) {
@@ -204,15 +227,19 @@ build_glycoct_graph <- function(residues, linkages) {
     anomer_pos <- decide_anomer_pos(reducing_end$mono)
     # Combine anomer configuration with position
     anomer_config <- stringr::str_extract(reducing_end$anomer, "^[abx]")
-    if (is.na(anomer_config)) anomer_config <- "?"
+    if (is.na(anomer_config)) {
+      anomer_config <- "?"
+    }
     # Handle unknown anomer configuration
-    if (anomer_config == "x") anomer_config <- "?"
+    if (anomer_config == "x") {
+      anomer_config <- "?"
+    }
     g$anomer <- paste0(anomer_config, anomer_pos)
   } else {
     g$anomer <- "?1"
   }
   g$alditol <- FALSE
-  
+
   g
 }
 
@@ -452,15 +479,27 @@ load_mono_mappings <- function() {
       lin = c("1:1d(5+1)2n", "2:1d(7+1)3n")
     ),
     "Leg" = list(
-      res = c("1b:a-dgro-dgal-NON-2:6|1:a|2:keto|3:d|9:d", "2s:amino", "3s:amino"),
+      res = c(
+        "1b:a-dgro-dgal-NON-2:6|1:a|2:keto|3:d|9:d",
+        "2s:amino",
+        "3s:amino"
+      ),
       lin = c("1:1d(5+1)2n", "2:1d(7+1)3n")
     ),
     "Aci" = list(
-      res = c("1b:a-lgro-lalt-NON-2:6|1:a|2:keto|3:d|9:d", "2s:amino", "3s:amino"),
+      res = c(
+        "1b:a-lgro-lalt-NON-2:6|1:a|2:keto|3:d|9:d",
+        "2s:amino",
+        "3s:amino"
+      ),
       lin = c("1:1d(5+1)2n", "2:1d(7+1)3n")
     ),
     "4eLeg" = list(
-      res = c("1b:a-dgro-dtal-NON-2:6|1:a|2:keto|3:d|9:d", "2s:amino", "3s:amino"),
+      res = c(
+        "1b:a-dgro-dtal-NON-2:6|1:a|2:keto|3:d|9:d",
+        "2s:amino",
+        "3s:amino"
+      ),
       lin = c("1:1d(5+1)2n", "2:1d(7+1)3n")
     ),
     "Bac" = list(
@@ -512,34 +551,42 @@ load_mono_mappings <- function() {
       lin = NULL
     )
   )
-  
+
   return(GLYCOCT_MAP)
 }
 
 consolidate_residues <- function(residues, linkages, mono_mappings) {
   # Group residues by their linkage relationships to identify composite structures
   composite_groups <- find_composite_groups(residues, linkages)
-  
+
   vertices <- list()
   edges <- list()
-  
+
   for (group in composite_groups) {
     if (length(group) == 1) {
       # Single monosaccharide
       res <- residues[[as.character(group[1])]]
       if (!is.null(res) && res$type == "mono") {
         mono_name <- map_single_mono(res$content)
-        vertices <- append(vertices, list(list(
-          original_id = group[1],
-          mono = mono_name,
-          sub = "",
-          anomer = res$anomer
-        )))
+        vertices <- append(
+          vertices,
+          list(list(
+            original_id = group[1],
+            mono = mono_name,
+            sub = "",
+            anomer = res$anomer
+          ))
+        )
       }
     } else {
       # Composite structure - try to match with known patterns
-      matched <- match_composite_structure(group, residues, linkages, mono_mappings)
-      
+      matched <- match_composite_structure(
+        group,
+        residues,
+        linkages,
+        mono_mappings
+      )
+
       # Find the main monosaccharide (the one with type "mono")
       main_mono_id <- NULL
       main_mono <- NULL
@@ -551,61 +598,76 @@ consolidate_residues <- function(residues, linkages, mono_mappings) {
           break
         }
       }
-      
+
       if (!is.null(main_mono)) {
         if (!is.null(matched)) {
           # Exact match found
-          vertices <- append(vertices, list(list(
-            original_id = main_mono_id,
-            mono = matched,
-            sub = "",
-            anomer = main_mono$anomer
-          )))
+          vertices <- append(
+            vertices,
+            list(list(
+              original_id = main_mono_id,
+              mono = matched,
+              sub = "",
+              anomer = main_mono$anomer
+            ))
+          )
         } else {
           # No exact match - try partial matching with extra substituents
-          partial_result <- match_partial_composite_structure(group, residues, linkages, mono_mappings)
-          vertices <- append(vertices, list(list(
-            original_id = main_mono_id,
-            mono = partial_result$mono,
-            sub = partial_result$sub,
-            anomer = main_mono$anomer
-          )))
+          partial_result <- match_partial_composite_structure(
+            group,
+            residues,
+            linkages,
+            mono_mappings
+          )
+          vertices <- append(
+            vertices,
+            list(list(
+              original_id = main_mono_id,
+              mono = partial_result$mono,
+              sub = partial_result$sub,
+              anomer = main_mono$anomer
+            ))
+          )
         }
       }
     }
   }
-  
+
   # Build edges for inter-group connections
   for (linkage in linkages) {
     from_group <- find_group_containing(composite_groups, linkage$from_res)
     to_group <- find_group_containing(composite_groups, linkage$to_res)
-    
+
     # Only add edge if it connects different groups
     if (!identical(from_group, to_group)) {
       edges <- append(edges, list(linkage))
     }
   }
-  
+
   list(vertices = vertices, edges = edges)
 }
 
 find_composite_groups <- function(residues, linkages) {
   # Create groups of residues that are linked together
   groups <- list()
-  
+
   # Start with each monosaccharide as its own group
   mono_ids <- names(residues)[sapply(residues, function(r) r$type == "mono")]
   for (id in mono_ids) {
     groups[[length(groups) + 1]] <- as.integer(id)
   }
-  
+
   # Add substituents to their parent monosaccharides
   for (linkage in linkages) {
     from_res <- residues[[as.character(linkage$from_res)]]
     to_res <- residues[[as.character(linkage$to_res)]]
-    
-    if (!is.null(from_res) && !is.null(to_res) && 
-        from_res$type == "mono" && to_res$type == "sub") {
+
+    if (
+      !is.null(from_res) &&
+        !is.null(to_res) &&
+        from_res$type == "mono" &&
+        to_res$type == "sub"
+    ) {
       # Add substituent to monosaccharide group
       for (i in seq_along(groups)) {
         if (linkage$from_res %in% groups[[i]]) {
@@ -615,11 +677,16 @@ find_composite_groups <- function(residues, linkages) {
       }
     }
   }
-  
+
   groups
 }
 
-match_composite_structure <- function(group, residues, linkages, mono_mappings) {
+match_composite_structure <- function(
+  group,
+  residues,
+  linkages,
+  mono_mappings
+) {
   # Try to match the composite structure with known monosaccharides
   for (mono_name in names(mono_mappings)) {
     mapping <- mono_mappings[[mono_name]]
@@ -627,19 +694,24 @@ match_composite_structure <- function(group, residues, linkages, mono_mappings) 
       return(mono_name)
     }
   }
-  
+
   return(NULL)
 }
 
-match_partial_composite_structure <- function(group, residues, linkages, mono_mappings) {
+match_partial_composite_structure <- function(
+  group,
+  residues,
+  linkages,
+  mono_mappings
+) {
   # Try to find the best partial match and identify extra substituents
   best_match <- NULL
   best_extra_subs <- c()
-  
+
   # Get all substituents in this group
   group_subs <- c()
   group_mono <- NULL
-  
+
   for (id in group) {
     res <- residues[[as.character(id)]]
     if (!is.null(res)) {
@@ -650,11 +722,11 @@ match_partial_composite_structure <- function(group, residues, linkages, mono_ma
       }
     }
   }
-  
+
   # Try to find a known composite that uses a subset of our substituents
   for (mono_name in names(mono_mappings)) {
     mapping <- mono_mappings[[mono_name]]
-    
+
     # Get the pattern's substituents
     pattern_subs <- c()
     for (res_line in mapping$res) {
@@ -663,28 +735,36 @@ match_partial_composite_structure <- function(group, residues, linkages, mono_ma
         pattern_subs <- c(pattern_subs, sub_content)
       }
     }
-    
+
     # Check if pattern substituents are a subset of group substituents
     if (length(pattern_subs) > 0 && all(pattern_subs %in% group_subs)) {
       # Get the pattern's monosaccharide
       mono_lines <- mapping$res[stringr::str_detect(mapping$res, "^\\d+b:")]
       if (length(mono_lines) > 0) {
-        pattern_mono_content <- stringr::str_remove(mono_lines[1], "^\\d+b:[abx]-")
-        
+        pattern_mono_content <- stringr::str_remove(
+          mono_lines[1],
+          "^\\d+b:[abx]-"
+        )
+
         # Check if monosaccharide matches
-        if (!is.null(group_mono) && group_mono$content == pattern_mono_content) {
+        if (
+          !is.null(group_mono) && group_mono$content == pattern_mono_content
+        ) {
           # Verify that the pattern substituents actually match with correct linkages
           # by using the full pattern matching function
           if (matches_glycoct_pattern(group, residues, linkages, mapping)) {
             # Exact match - shouldn't be in partial matching function
             next
           }
-          
+
           # For partial matching, only consider if there are extra substituents
           if (length(pattern_subs) < length(group_subs)) {
             extra_subs <- setdiff(group_subs, pattern_subs)
-            
-            if (is.null(best_match) || length(pattern_subs) > length(best_match$pattern_subs)) {
+
+            if (
+              is.null(best_match) ||
+                length(pattern_subs) > length(best_match$pattern_subs)
+            ) {
               best_match <- list(
                 mono_name = mono_name,
                 pattern_subs = pattern_subs
@@ -696,11 +776,16 @@ match_partial_composite_structure <- function(group, residues, linkages, mono_ma
       }
     }
   }
-  
+
   if (!is.null(best_match)) {
     # Format extra substituents with position information
-    formatted_extra_subs <- format_extra_substituents(best_extra_subs, group, residues, linkages)
-    
+    formatted_extra_subs <- format_extra_substituents(
+      best_extra_subs,
+      group,
+      residues,
+      linkages
+    )
+
     return(list(
       mono = best_match$mono_name,
       sub = formatted_extra_subs
@@ -709,40 +794,49 @@ match_partial_composite_structure <- function(group, residues, linkages, mono_ma
     # No partial match found, return base monosaccharide with all substituents
     if (!is.null(group_mono)) {
       base_mono <- map_single_mono(group_mono$content)
-      formatted_subs <- format_extra_substituents(group_subs, group, residues, linkages)
+      formatted_subs <- format_extra_substituents(
+        group_subs,
+        group,
+        residues,
+        linkages
+      )
       return(list(
         mono = base_mono,
         sub = formatted_subs
       ))
     }
   }
-  
+
   return(list(mono = "Unk", sub = ""))
 }
 
 format_extra_substituents <- function(extra_subs, group, residues, linkages) {
   # Format substituents with position information (e.g., "6S" for sulfate at position 6)
   formatted <- c()
-  
+
   for (sub_content in extra_subs) {
     # Find the position of this substituent
     position <- "?"
-    
+
     for (linkage in linkages) {
       if (linkage$to_res %in% group) {
         to_res <- residues[[as.character(linkage$to_res)]]
-        if (!is.null(to_res) && to_res$type == "sub" && to_res$content == sub_content) {
+        if (
+          !is.null(to_res) &&
+            to_res$type == "sub" &&
+            to_res$content == sub_content
+        ) {
           position <- as.character(linkage$from_pos)
           break
         }
       }
     }
-    
+
     # Handle unknown position
     if (position == "-1") {
       position <- "?"
     }
-    
+
     # Format the substituent with position
     if (sub_content == "sulfate") {
       formatted <- c(formatted, paste0(position, "S"))
@@ -765,7 +859,7 @@ format_extra_substituents <- function(extra_subs, group, residues, linkages) {
       formatted <- c(formatted, paste0(position, sub_content))
     }
   }
-  
+
   # Join multiple substituents
   paste(formatted, collapse = ",")
 }
@@ -775,7 +869,7 @@ matches_glycoct_pattern <- function(group, residues, linkages, mapping) {
   group_mono <- NULL
   group_subs <- c()
   group_linkages <- c()
-  
+
   for (id in group) {
     res <- residues[[as.character(id)]]
     if (!is.null(res)) {
@@ -786,66 +880,77 @@ matches_glycoct_pattern <- function(group, residues, linkages, mapping) {
       }
     }
   }
-  
+
   # Get linkages within this group
   for (linkage in linkages) {
     if (linkage$from_res %in% group && linkage$to_res %in% group) {
       from_res <- residues[[as.character(linkage$from_res)]]
       to_res <- residues[[as.character(linkage$to_res)]]
-      if (!is.null(from_res) && !is.null(to_res) &&
-          from_res$type == "mono" && to_res$type == "sub") {
-        group_linkages <- c(group_linkages, paste0(linkage$from_pos, "+", linkage$to_pos))
+      if (
+        !is.null(from_res) &&
+          !is.null(to_res) &&
+          from_res$type == "mono" &&
+          to_res$type == "sub"
+      ) {
+        group_linkages <- c(
+          group_linkages,
+          paste0(linkage$from_pos, "+", linkage$to_pos)
+        )
       }
     }
   }
-  
+
   # Parse the mapping pattern
   pattern_mono <- NULL
   pattern_subs <- c()
   pattern_linkages <- c()
-  
+
   # Extract monosaccharide from pattern
   mono_lines <- mapping$res[stringr::str_detect(mapping$res, "^\\d+b:")]
   if (length(mono_lines) > 0) {
     mono_content <- stringr::str_remove(mono_lines[1], "^\\d+b:")
     pattern_mono <- stringr::str_remove(mono_content, "^[abx]-")
   }
-  
+
   # Extract substituents from pattern
   sub_lines <- mapping$res[stringr::str_detect(mapping$res, "^\\d+s:")]
   for (sub_line in sub_lines) {
     sub_content <- stringr::str_remove(sub_line, "^\\d+s:")
     pattern_subs <- c(pattern_subs, sub_content)
   }
-  
-     # Extract linkages from pattern
-   if (!is.null(mapping$lin)) {
-     for (lin_line in mapping$lin) {
-       link_pattern <- stringr::str_match(lin_line, "\\d+:(\\d+)[do]?\\((\\d+)\\+(\\d+)\\)(\\d+)[dn]?")
-       if (!is.na(link_pattern[1])) {
-         from_pos <- link_pattern[3]
-         to_pos <- link_pattern[4]
-         pattern_linkages <- c(pattern_linkages, paste0(from_pos, "+", to_pos))
-       }
-     }
-   }
-  
+
+  # Extract linkages from pattern
+  if (!is.null(mapping$lin)) {
+    for (lin_line in mapping$lin) {
+      link_pattern <- stringr::str_match(
+        lin_line,
+        "\\d+:(\\d+)[do]?\\((\\d+)\\+(\\d+)\\)(\\d+)[dn]?"
+      )
+      if (!is.na(link_pattern[1])) {
+        from_pos <- link_pattern[3]
+        to_pos <- link_pattern[4]
+        pattern_linkages <- c(pattern_linkages, paste0(from_pos, "+", to_pos))
+      }
+    }
+  }
+
   # Compare structures - exact match for monosaccharide content
-  mono_match <- !is.null(group_mono) && !is.null(pattern_mono) && 
-               group_mono == pattern_mono
-  
+  mono_match <- !is.null(group_mono) &&
+    !is.null(pattern_mono) &&
+    group_mono == pattern_mono
+
   subs_match <- length(group_subs) == length(pattern_subs) &&
-               all(sort(group_subs) == sort(pattern_subs))
-  
+    all(sort(group_subs) == sort(pattern_subs))
+
   linkages_match <- length(group_linkages) == length(pattern_linkages) &&
-                   all(sort(group_linkages) == sort(pattern_linkages))
-  
+    all(sort(group_linkages) == sort(pattern_linkages))
+
   return(mono_match && subs_match && linkages_match)
 }
 
 map_single_mono <- function(content) {
   # Extract monosaccharide name from content like "dglc-HEX-1:5" or "lgal-HEX-1:5|6:d"
-  
+
   # First try to match against known patterns from mono_glycoct.txt
   mono_mappings <- load_mono_mappings()
   for (mono_name in names(mono_mappings)) {
@@ -861,34 +966,56 @@ map_single_mono <- function(content) {
       }
     }
   }
-  
+
   # If no exact match, fall back to basic parsing
   parts <- stringr::str_split(content, "-")[[1]]
   if (length(parts) >= 2) {
     stereo_name <- parts[1]
     class_name <- parts[2]
-    
+
     # Handle specific stereochemistry patterns
-    if (stringr::str_detect(stereo_name, "dglc")) return("Glc")
-    if (stringr::str_detect(stereo_name, "dgal")) return("Gal") 
-    if (stringr::str_detect(stereo_name, "dman")) return("Man")
-    if (stringr::str_detect(stereo_name, "dxyl")) return("Xyl")
-    if (stringr::str_detect(stereo_name, "lgal.*6:d")) return("Fuc")  # Fucose pattern
-    
+    if (stringr::str_detect(stereo_name, "dglc")) {
+      return("Glc")
+    }
+    if (stringr::str_detect(stereo_name, "dgal")) {
+      return("Gal")
+    }
+    if (stringr::str_detect(stereo_name, "dman")) {
+      return("Man")
+    }
+    if (stringr::str_detect(stereo_name, "dxyl")) {
+      return("Xyl")
+    }
+    if (stringr::str_detect(stereo_name, "lgal.*6:d")) {
+      return("Fuc")
+    } # Fucose pattern
+
     # Basic patterns without D/L prefix
-    if (stringr::str_detect(stereo_name, "glc")) return("Glc")
-    if (stringr::str_detect(stereo_name, "gal")) return("Gal") 
-    if (stringr::str_detect(stereo_name, "man")) return("Man")
-    if (stringr::str_detect(stereo_name, "xyl")) return("Xyl")
-    
+    if (stringr::str_detect(stereo_name, "glc")) {
+      return("Glc")
+    }
+    if (stringr::str_detect(stereo_name, "gal")) {
+      return("Gal")
+    }
+    if (stringr::str_detect(stereo_name, "man")) {
+      return("Man")
+    }
+    if (stringr::str_detect(stereo_name, "xyl")) {
+      return("Xyl")
+    }
+
     # Handle GlcA (glucuronic acid) pattern
-    if (stringr::str_detect(content, "dglc.*6:a")) return("GlcA")
-    
+    if (stringr::str_detect(content, "dglc.*6:a")) {
+      return("GlcA")
+    }
+
     # Fallback to class name
-    if (class_name == "HEX") return("Hex")
+    if (class_name == "HEX") {
+      return("Hex")
+    }
     if (class_name == "PEN") return("Pen")
   }
-  
+
   return("Unk")
 }
 
@@ -906,15 +1033,15 @@ find_reducing_end <- function(vertices, edges) {
   if (length(edges) == 0) {
     return(vertices[[1]])
   }
-  
+
   target_ids <- sapply(edges, function(e) e$to_res)
-  
+
   for (vertex in vertices) {
     if (!(vertex$original_id %in% target_ids)) {
       return(vertex)
     }
   }
-  
+
   # Fallback to first vertex
   return(vertices[[1]])
 }
