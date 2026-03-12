@@ -16,9 +16,16 @@ A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.
 Parse IUPAC-extended-style structure characters into a \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}}.
 For more information about IUPAC-extended format, see \doi{10.1351/pac199668101919}.
 }
+\details{
+The function accepts both Unicode format (with \u03b1, \u03b2, and \u2192)
+and plain text format (with "alpha", "beta", and "->"). For example,
+both \code{"\\u03b2-D-Galp-(1\\u21923)-\\u03b1-D-GalpNAc-(1\\u2192"} and
+\code{"beta-D-Galp-(1->3)-alpha-D-GalpNAc-(1->"} are valid inputs.
+}
 \examples{
 iupac <- "\u03b2-D-Galp-(1\u21923)-\u03b1-D-GalpNAc-(1\u2192"
 parse_iupac_extended(iupac)
+parse_iupac_extended("beta-D-Galp-(1->3)-alpha-D-GalpNAc-(1->")
 
 }
 \seealso{
