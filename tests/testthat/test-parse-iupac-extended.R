@@ -17,6 +17,17 @@ test_that("monosaccharides are parsed correctly", {
 })
 
 
+test_that("plain text format is parsed correctly", {
+  expect_mono <- function(iupac_ext, mono) {
+    structure <- parse_iupac_extended(iupac_ext)
+    graph <- glyrepr::get_structure_graphs(structure)
+    expect_equal(igraph::V(graph)$mono, mono)
+  }
+  expect_mono("alpha-D-Glcp-(1->", "Glc")
+  expect_mono("beta-D-Glcp-(1->", "Glc")
+})
+
+
 test_that("generic monosaccharides are parsed correctly", {
   expect_mono <- function(iupac_ext, mono) {
     structure <- parse_iupac_extended(iupac_ext)
