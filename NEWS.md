@@ -1,5 +1,9 @@
 # glyparse (development version)
 
+## Minor improvements and bug fixes
+
+* `parse_iupac_extended()` now accepts input with plain text equivalents ("alpha", "beta", "->"). (#10)
+
 # glyparse 0.5.6
 
 ## Minor improvements and bug fixes
