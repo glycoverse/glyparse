@@ -17,10 +17,10 @@ Parse IUPAC-extended-style structure characters into a \code{\link[glyrepr:glyca
 For more information about IUPAC-extended format, see \doi{10.1351/pac199668101919}.
 }
 \details{
-The function accepts both a Unicode format (using the Greek letters α/β and the
-arrow symbol →) and a plain-text format (using the strings "alpha", "beta",
-and "->"). For example,
-both \code{"β-D-Galp-(1→3)-α-D-GalpNAc-(1→"} and
+The function accepts both a Unicode format (using the Greek letters alpha/beta
+and the arrow symbol ->) and a plain-text format (using the strings "alpha",
+"beta", and "->"). For example,
+both \code{"\\u03b2-D-Galp-(1\\u21923)-\\u03b1-D-GalpNAc-(1\\u2192"} and
 \code{"beta-D-Galp-(1->3)-alpha-D-GalpNAc-(1->"} are valid inputs.
 }
 \examples{
