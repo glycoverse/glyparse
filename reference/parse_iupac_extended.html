@@ -11,7 +11,7 @@ For more information about IUPAC-extended format, see doi:10.1351/pac19966810191
 
     <a class="navbar-brand me-2" href="../index.html">glyparse</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.6.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.5.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -61,6 +61,14 @@ For more information about IUPAC-extended format, see <a href="https://doi.org/1
     <p>A <code><a href="https://glycoverse.github.io/glyrepr/reference/glycan_structure.html" class="external-link">glyrepr::glycan_structure()</a></code> object.</p>
     </div>
     <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>The function accepts both a Unicode format (using the Greek letters alpha/beta
+and the arrow symbol -&gt;) and a plain-text format (using the strings "alpha",
+"beta", and "-&gt;"). For example,
+both <code>"\u03b2-D-Galp-(1\u21923)-\u03b1-D-GalpNAc-(1\u2192"</code> and
+<code>"beta-D-Galp-(1-&gt;3)-alpha-D-GalpNAc-(1-&gt;"</code> are valid inputs.</p>
+    </div>
+    <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="parse_iupac_condensed.html">parse_iupac_condensed()</a></code>, <code><a href="parse_iupac_short.html">parse_iupac_short()</a></code></p></div>
     </div>
@@ -69,6 +77,10 @@ For more information about IUPAC-extended format, see <a href="https://doi.org/1
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">iupac</span> <span class="op">&lt;-</span> <span class="st">"\u03b2-D-Galp-(1\u21923)-\u03b1-D-GalpNAc-(1\u2192"</span></span></span>
 <span class="r-in"><span><span class="fu">parse_iupac_extended</span><span class="op">(</span><span class="va">iupac</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;glycan_structure[1]&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] <span style="color: #FFD700;">Gal</span>(<span style="color: #B2B2B2;">b1-3</span>)<span style="color: #FFD700;">GalNAc</span>(<span style="color: #B2B2B2;">a1-</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> # Unique structures: 1</span>
+<span class="r-in"><span><span class="fu">parse_iupac_extended</span><span class="op">(</span><span class="st">"beta-D-Galp-(1-&gt;3)-alpha-D-GalpNAc-(1-&gt;"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;glycan_structure[1]&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] <span style="color: #FFD700;">Gal</span>(<span style="color: #B2B2B2;">b1-3</span>)<span style="color: #FFD700;">GalNAc</span>(<span style="color: #B2B2B2;">a1-</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> # Unique structures: 1</span>

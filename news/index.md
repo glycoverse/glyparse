@@ -1,6 +1,14 @@
 # Changelog
 
-## glyparse (development version)
+## glyparse 0.5.7
+
+CRAN release: 2026-03-14
+
+### Minor improvements and bug fixes
+
+- [`parse_iupac_extended()`](https://glycoverse.github.io/glyparse/reference/parse_iupac_extended.md)
+  now accepts input with plain text equivalents (“alpha”, “beta”,
+  “-\>”). ([\#10](https://github.com/glycoverse/glyparse/issues/10))
 
 ## glyparse 0.5.6
 
