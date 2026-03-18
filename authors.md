@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/glycoverse/glyparse/blob/main/DESCRIPTION)
+[`DESCRIPTION`](https://github.com/glycoverse/glyparse/blob/v0.5.7/DESCRIPTION)
 
 Fu B (2026). *glyparse: Parsing Glycan Structure Text Representations*.
 R package version 0.5.7, <https://glycoverse.github.io/glyparse/>.
