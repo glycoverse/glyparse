@@ -2,6 +2,10 @@
 
 ## glyparse (development version)
 
+## glyparse 0.5.7
+
+CRAN release: 2026-03-14
+
 ### Minor improvements and bug fixes
 
 - [`parse_iupac_extended()`](https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_extended.md)
