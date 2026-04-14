@@ -16,6 +16,8 @@
 #' 8. StrucGP
 #'
 #' @param x A character vector of structure strings. NA values are allowed and will be returned as NA structures.
+#' @param on_failure How to handle parsing failures. `"error"` aborts when a
+#'   structure cannot be parsed. `"na"` returns `NA` at invalid positions.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
@@ -32,8 +34,8 @@
 #' auto_parse(x)
 #'
 #' @export
-auto_parse <- function(x) {
-  struc_parser_wrapper(x, do_auto_parse)
+auto_parse <- function(x, on_failure = "error") {
+  struc_parser_wrapper(x, do_auto_parse, on_failure = on_failure)
 }
 
 do_auto_parse <- function(x) {

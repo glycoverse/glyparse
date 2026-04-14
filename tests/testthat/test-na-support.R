@@ -104,18 +104,82 @@ test_that("auto_parse handles NA", {
   expect_true(is.na(result[2]))
 })
 
-test_that("invalid structures still error, not treated as NA", {
-  skip_if_not_installed("glyrepr", minimum_version = "0.10.0")
-  expect_error(
-    parse_strucgp_struc(c("valid_structure", "invalid")),
-    "must have no NA in vertex attribute"
+parser_failure_cases <- list(
+  parse_pglyco_struc = list(
+    valid = "(N(F)(N(H)))",
+    invalid = "(N(X))"
+  ),
+  parse_strucgp_struc = list(
+    valid = "A2B2C1D1E2F1fedD1E2edcbB5ba",
+    invalid = "not_valid"
+  ),
+  parse_iupac_condensed = list(
+    valid = "Gal(b1-3)GlcNAc(b1-4)Glc(a1-",
+    invalid = "Gal(b1-3)Bogus(b1-4)Glc(a1-"
+  ),
+  parse_iupac_extended = list(
+    valid = "beta-D-Galp-(1->3)-alpha-D-GalpNAc-(1->",
+    invalid = "beta-D-Bogusp-(1->3)-alpha-D-GalpNAc-(1->"
+  ),
+  parse_iupac_short = list(
+    valid = "Neu5Aca3Gala3(Fuca6)GlcNAcb-",
+    invalid = "Bogusa3GlcNAcb-"
+  ),
+  parse_wurcs = list(
+    valid = paste0(
+      "WURCS=2.0/3,3,2/",
+      "[a2122h-1b_1-5_2*NCC/3=O]",
+      "[a1122h-1b_1-5]",
+      "[a1122h-1a_1-5]/1-2-3/a3-b1_b4-c1"
+    ),
+    invalid = "WURCS=2.0/1,1,0/[axxxxxh-1a_1-5]/1/"
+  ),
+  parse_linear_code = list(
+    valid = "Ma3(Ma6)Mb4GNb4GNb",
+    invalid = "Zz"
+  ),
+  parse_glycoct = list(
+    valid = "RES\n1b:b-dglc-HEX-1:5\nLIN\n1:1d(2+1)2n",
+    invalid = "LIN\n1:1d(2+1)2n"
+  ),
+  auto_parse = list(
+    valid = "Gal(b1-3)GlcNAc(b1-4)Glc(a1-",
+    invalid = "Gal(b1-3)Bogus(b1-4)Glc(a1-"
   )
+)
+
+purrr::iwalk(parser_failure_cases, function(case, parser_name) {
+  test_that(glue::glue("{parser_name} errors on invalid input by default"), {
+    skip_if_not_installed("glyrepr", minimum_version = "0.10.0")
+
+    parser <- get(parser_name)
+
+    err <- rlang::catch_cnd(parser(c(case$valid, case$invalid)), classes = "error")
+
+    expect_s3_class(err, "error")
+    expect_match(conditionMessage(err), "Can't parse", fixed = TRUE)
+  })
+
+  test_that(glue::glue("{parser_name} returns NA for invalid input with on_failure = 'na'"), {
+    skip_if_not_installed("glyrepr", minimum_version = "0.10.0")
+
+    parser <- get(parser_name)
+    input <- c(valid = case$valid, invalid = case$invalid)
+
+    result <- parser(input, on_failure = "na")
+
+    expect_equal(length(result), 2)
+    expect_equal(names(result), names(input))
+    expect_false(is.na(result[["valid"]]))
+    expect_true(is.na(result[["invalid"]]))
+  })
 })
 
-test_that("mixed valid and invalid structures error", {
+test_that("parser functions validate on_failure", {
   skip_if_not_installed("glyrepr", minimum_version = "0.10.0")
+
   expect_error(
-    parse_strucgp_struc(c("A2B2C1D1E2F1fedD1E2edcbB5ba", "not_valid")),
-    "must have no NA in vertex attribute"
+    parse_iupac_condensed("Gal(b1-3)GlcNAc(b1-4)Glc(a1-", on_failure = "ignore"),
+    "`on_failure`"
   )
 })

@@ -4,6 +4,8 @@
 #' To know more about Linear Code, see [this article](https://www.jstage.jst.go.jp/article/tigg1989/14/77/14_77_127/_article).
 #'
 #' @param x A character vector of Linear Code strings. NA values are allowed and will be returned as NA structures.
+#' @param on_failure How to handle parsing failures. `"error"` aborts when a
+#'   structure cannot be parsed. `"na"` returns `NA` at invalid positions.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
@@ -12,8 +14,8 @@
 #' parse_linear_code(linear_code)
 #'
 #' @export
-parse_linear_code <- function(x) {
-  struc_parser_wrapper(x, do_parse_linear_code)
+parse_linear_code <- function(x, on_failure = "error") {
+  struc_parser_wrapper(x, do_parse_linear_code, on_failure = on_failure)
 }
 
 do_parse_linear_code <- function(x) {

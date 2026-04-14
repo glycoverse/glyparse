@@ -4,6 +4,8 @@
 #' For more information about IUPAC-extended format, see \doi{10.1351/pac199668101919}.
 #'
 #' @param x A character vector of IUPAC-extended strings. NA values are allowed and will be returned as NA structures.
+#' @param on_failure How to handle parsing failures. `"error"` aborts when a
+#'   structure cannot be parsed. `"na"` returns `NA` at invalid positions.
 #'
 #' @details
 #' The function accepts both a Unicode format (using the Greek letters alpha/beta
@@ -22,8 +24,8 @@
 #' @seealso [parse_iupac_condensed()], [parse_iupac_short()]
 #'
 #' @export
-parse_iupac_extended <- function(x) {
-  struc_parser_wrapper(x, do_parse_iupac_extended)
+parse_iupac_extended <- function(x, on_failure = "error") {
+  struc_parser_wrapper(x, do_parse_iupac_extended, on_failure = on_failure)
 }
 
 

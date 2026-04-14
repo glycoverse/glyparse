@@ -5,6 +5,8 @@
 #' For more information about WURCS, see [WURCS](https://github.com/glycoinfo/WURCS/wiki).
 #'
 #' @param x A character vector of WURCS strings. NA values are allowed and will be returned as NA structures.
+#' @param on_failure How to handle parsing failures. `"error"` aborts when a
+#'   structure cannot be parsed. `"na"` returns `NA` at invalid positions.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
@@ -17,8 +19,8 @@
 #' parse_wurcs(wurcs)
 #'
 #' @export
-parse_wurcs <- function(x) {
-  struc_parser_wrapper(x, do_parse_wurcs)
+parse_wurcs <- function(x, on_failure = "error") {
+  struc_parser_wrapper(x, do_parse_wurcs, on_failure = on_failure)
 }
 
 

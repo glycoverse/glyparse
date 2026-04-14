@@ -4,10 +4,13 @@
 \alias{parse_iupac_extended}
 \title{Parse IUPAC-extended Structures}
 \usage{
-parse_iupac_extended(x)
+parse_iupac_extended(x, on_failure = "error")
 }
 \arguments{
 \item{x}{A character vector of IUPAC-extended strings. NA values are allowed and will be returned as NA structures.}
+
+\item{on_failure}{How to handle parsing failures. \code{"error"} aborts when a
+structure cannot be parsed. \code{"na"} returns \code{NA} at invalid positions.}
 }
 \value{
 A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.

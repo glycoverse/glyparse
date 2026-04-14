@@ -11,6 +11,8 @@
 #' For more information about GlycoCT format, see the glycoct.md documentation.
 #'
 #' @param x A character vector of GlycoCT strings. NA values are allowed and will be returned as NA structures.
+#' @param on_failure How to handle parsing failures. `"error"` aborts when a
+#'   structure cannot be parsed. `"na"` returns `NA` at invalid positions.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
@@ -27,8 +29,8 @@
 #' parse_glycoct(glycoct)
 #'
 #' @export
-parse_glycoct <- function(x) {
-  struc_parser_wrapper(x, do_parse_glycoct)
+parse_glycoct <- function(x, on_failure = "error") {
+  struc_parser_wrapper(x, do_parse_glycoct, on_failure = on_failure)
 }
 
 do_parse_glycoct <- function(x) {
