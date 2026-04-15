@@ -13,6 +13,29 @@ test_that("struc_parser_wrapper handles duplicate values efficiently", {
   expect_length(unique_result, 3)
 })
 
+test_that("struc_parser_wrapper parses each unique non-NA input once", {
+  parser_calls <- character()
+  parser <- function(x) {
+    parser_calls <<- c(parser_calls, x)
+    graph <- igraph::make_empty_graph(n = 2, directed = TRUE)
+    igraph::V(graph)$name <- c("1", "2")
+    igraph::V(graph)$mono <- c("Hex", "Hex")
+    igraph::V(graph)$sub <- c("", "")
+    graph <- igraph::add_edges(graph, c("2", "1"))
+    igraph::E(graph)$linkage <- "a1-4"
+    graph$anomer <- "a1"
+    graph$alditol <- FALSE
+    graph
+  }
+
+  input <- c("A", "B", NA, "A", "C", "B")
+
+  result <- struc_parser_wrapper(input, parser, on_failure = "error")
+
+  expect_length(result, length(input))
+  expect_equal(parser_calls, c("A", "B", "C"))
+})
+
 test_that("struc_parser_wrapper preserves order with duplicates", {
   input <- c("(N)", "(H)", "(N)", "(F)", "(H)", "(N)")
   result <- parse_pglyco_struc(input)

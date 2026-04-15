@@ -4,10 +4,13 @@
 \alias{parse_linear_code}
 \title{Parse Linear Code Structures}
 \usage{
-parse_linear_code(x)
+parse_linear_code(x, on_failure = "error")
 }
 \arguments{
 \item{x}{A character vector of Linear Code strings. NA values are allowed and will be returned as NA structures.}
+
+\item{on_failure}{How to handle parsing failures. \code{"error"} aborts when a
+structure cannot be parsed. \code{"na"} returns \code{NA} at invalid positions.}
 }
 \value{
 A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.

@@ -22,6 +22,8 @@
 #' In the second case, the anomer is "?2".
 #'
 #' @param x A character vector of IUPAC-condensed strings. NA values are allowed and will be returned as NA structures.
+#' @param on_failure How to handle parsing failures. `"error"` aborts when a
+#'   structure cannot be parsed. `"na"` returns `NA` at invalid positions.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
@@ -32,8 +34,8 @@
 #' @seealso [parse_iupac_short()], [parse_iupac_extended()]
 #'
 #' @export
-parse_iupac_condensed <- function(x) {
-  struc_parser_wrapper(x, do_parse_iupac_condensed)
+parse_iupac_condensed <- function(x, on_failure = "error") {
+  struc_parser_wrapper(x, do_parse_iupac_condensed, on_failure = on_failure)
 }
 
 do_parse_iupac_condensed <- function(x) {
