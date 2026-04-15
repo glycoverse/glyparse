@@ -7,7 +7,7 @@ See example below for the structure format.
 ## Usage
 
 ``` r
-parse_strucgp_struc(x)
+parse_strucgp_struc(x, on_failure = "error")
 ```
 
 ## Arguments
@@ -16,6 +16,11 @@ parse_strucgp_struc(x)
 
   A character vector of StrucGP-style structure strings. NA values are
   allowed and will be returned as NA structures.
+
+- on_failure:
+
+  How to handle parsing failures. `"error"` aborts when a structure
+  cannot be parsed. `"na"` returns `NA` at invalid positions.
 
 ## Value
 

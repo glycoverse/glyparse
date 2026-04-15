@@ -8,7 +8,7 @@ For more information about IUPAC-condensed notation, see
 ## Usage
 
 ``` r
-parse_iupac_condensed(x)
+parse_iupac_condensed(x, on_failure = "error")
 ```
 
 ## Arguments
@@ -17,6 +17,11 @@ parse_iupac_condensed(x)
 
   A character vector of IUPAC-condensed strings. NA values are allowed
   and will be returned as NA structures.
+
+- on_failure:
+
+  How to handle parsing failures. `"error"` aborts when a structure
+  cannot be parsed. `"na"` returns `NA` at invalid positions.
 
 ## Value
 
