@@ -52,6 +52,8 @@ remotes::install_github("glycoverse/glyparse")
 
 ## Documentation
 
+-   🚀 Get started:
+    [Here](https://glycoverse.github.io/glyparse/articles/glyparse.html)
 -   📚 Reference:
     [Here](https://glycoverse.github.io/glyparse/reference/index.html)
 
