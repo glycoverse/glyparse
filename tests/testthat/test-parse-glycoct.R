@@ -228,3 +228,43 @@ test_that("GlycoCT: a complex N-glycan example", {
   expected <- "Neu5Ac(a2-3/6)Gal(b1-4)GlcNAc(b1-2)Man(a1-3)[Gal(b1-4)GlcNAc(b1-2)Man(a1-6)]Man(b1-4)GlcNAc(b1-4)GlcNAc(b1-"
   expect_equal(result, expected)
 })
+
+test_that("GlycoCT: a complex O-Glc glycan example with repeated units", {
+  glycoct <- paste0(
+    "RES\n",
+    "1b:b-dglc-HEX-1:5\n",
+    "2r:r1\n",
+    "3b:b-dgal-HEX-1:5\n",
+    "4b:b-dglc-HEX-1:5\n",
+    "5s:n-acetyl\n",
+    "6b:b-dgal-HEX-1:5\n",
+    "7b:a-lgal-HEX-1:5|6:d\n",
+    "8b:b-dglc-HEX-1:5\n",
+    "9s:n-acetyl\n",
+    "10b:b-dgal-HEX-1:5\n",
+    "11b:a-lgal-HEX-1:5|6:d\n",
+    "LIN\n",
+    "1:1o(4+1)2n\n",
+    "2:2n(4+1)3d\n",
+    "3:3o(3+1)4d\n",
+    "4:4d(2+1)5n\n",
+    "5:4o(4+1)6d\n",
+    "6:6o(2+1)7d\n",
+    "7:3o(6+1)8d\n",
+    "8:8d(2+1)9n\n",
+    "9:8o(4+1)10d\n",
+    "10:10o(2+1)11d\n",
+    "REP\n",
+    "REP1:13o(4+1)12d=7-7\n",
+    "RES\n",
+    "12b:b-dgal-HEX-1:5\n",
+    "13b:b-dglc-HEX-1:5\n",
+    "14s:n-acetyl\n",
+    "LIN\n",
+    "11:12o(3+1)13d\n",
+    "12:13d(2+1)14n"
+  )
+  result <- as.character(parse_glycoct(glycoct))
+  expected <- "Fuc(a1-2)Gal(b1-4)GlcNAc(b1-3)[Fuc(a1-2)Gal(b1-4)GlcNAc(b1-6)]Gal(b1-4)GlcNAc(b1-3)Gal(b1-4)GlcNAc(b1-3)Gal(b1-4)GlcNAc(b1-3)Gal(b1-4)GlcNAc(b1-3)Gal(b1-4)GlcNAc(b1-3)Gal(b1-4)GlcNAc(b1-3)Gal(b1-4)GlcNAc(b1-3)Gal(b1-4)Glc(b1-"
+  expect_equal(result, expected)
+})
