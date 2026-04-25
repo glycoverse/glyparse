@@ -24,6 +24,7 @@ GlycoCT format consists of two parts:
 \itemize{
 \item RES: Contains monosaccharides (lines starting with 'b:') and substituents (lines starting with 's:')
 \item LIN: Contains linkage information between residues
+\item REP: Contains fixed-count repeated units
 }
 
 For more information about GlycoCT format, see the glycoct.md documentation.

@@ -7,6 +7,7 @@
 #' GlycoCT format consists of two parts:
 #' - RES: Contains monosaccharides (lines starting with 'b:') and substituents (lines starting with 's:')
 #' - LIN: Contains linkage information between residues
+#' - REP: Contains fixed-count repeated units
 #'
 #' For more information about GlycoCT format, see the glycoct.md documentation.
 #'
@@ -39,36 +40,397 @@ do_parse_glycoct <- function(x) {
   lines <- stringr::str_trim(lines)
   lines <- lines[lines != ""]
 
-  # Find RES and LIN sections
-  res_start <- which(lines == "RES")
-  lin_start <- which(lines == "LIN")
+  sections <- parse_glycoct_sections(lines)
+  expanded <- expand_glycoct_repeats(sections)
 
-  if (length(res_start) == 0) {
-    cli::cli_abort("No RES section found in GlycoCT string")
-  }
-
-  # Parse RES section
-  if (length(lin_start) == 0) {
-    res_lines <- lines[(res_start + 1):length(lines)]
-  } else {
-    res_lines <- lines[(res_start + 1):(lin_start - 1)]
-  }
-
-  # Parse LIN section (if exists)
-  if (length(lin_start) > 0) {
-    lin_lines <- lines[(lin_start + 1):length(lines)]
-  } else {
-    lin_lines <- character(0)
-  }
-
-  # Parse residues (monosaccharides and substituents)
-  residues <- parse_res_section(res_lines)
-
-  # Parse linkages
-  linkages <- parse_lin_section(lin_lines)
+  residues <- expanded$residues
+  linkages <- expanded$linkages
 
   # Build the graph
   build_glycoct_graph(residues, linkages)
+}
+
+#' Split a GlycoCT input into main and repeated-unit sections.
+#'
+#' @param lines A character vector of trimmed GlycoCT lines.
+#'
+#' @return A list with `main` and `repeats` section data.
+#'
+#' @noRd
+parse_glycoct_sections <- function(lines) {
+  rep_start <- match("REP", lines)
+  main_lines <- if (is.na(rep_start)) {
+    lines
+  } else {
+    lines[seq_len(rep_start - 1)]
+  }
+
+  sections <- list(
+    main = parse_glycoct_res_lin_sections(main_lines),
+    repeats = list()
+  )
+
+  if (is.na(rep_start)) {
+    return(sections)
+  }
+
+  i <- rep_start
+  while (i <= length(lines)) {
+    if (lines[[i]] != "REP") {
+      cli::cli_abort("Expected REP section in GlycoCT string")
+    }
+    i <- i + 1
+
+    header_lines <- character(0)
+    while (i <= length(lines) && lines[[i]] != "RES") {
+      header_lines <- c(header_lines, lines[[i]])
+      i <- i + 1
+    }
+
+    if (length(header_lines) == 0) {
+      cli::cli_abort("No REP header found in GlycoCT string")
+    }
+
+    block_start <- i
+    while (i <= length(lines) && lines[[i]] != "REP") {
+      i <- i + 1
+    }
+    block_lines <- lines[block_start:(i - 1)]
+
+    sections$repeats <- append(
+      sections$repeats,
+      list(list(
+        header = parse_glycoct_rep_header(header_lines[[1]]),
+        sections = parse_glycoct_res_lin_sections(block_lines)
+      ))
+    )
+  }
+
+  sections
+}
+
+#' Extract RES and LIN lines from one GlycoCT section block.
+#'
+#' @param lines A character vector containing one `RES` block and optionally one
+#'   `LIN` block.
+#'
+#' @return A list with `res_lines` and `lin_lines`.
+#'
+#' @noRd
+parse_glycoct_res_lin_sections <- function(lines) {
+  res_start <- match("RES", lines)
+  lin_start <- match("LIN", lines)
+
+  if (is.na(res_start)) {
+    cli::cli_abort("No RES section found in GlycoCT string")
+  }
+
+  res_end <- if (is.na(lin_start)) {
+    length(lines)
+  } else {
+    lin_start - 1
+  }
+
+  res_lines <- if (res_start < res_end) {
+    lines[(res_start + 1):res_end]
+  } else {
+    character(0)
+  }
+
+  lin_lines <- if (!is.na(lin_start) && lin_start < length(lines)) {
+    lines[(lin_start + 1):length(lines)]
+  } else {
+    character(0)
+  }
+
+  list(res_lines = res_lines, lin_lines = lin_lines)
+}
+
+#' Parse a GlycoCT repeated-unit header.
+#'
+#' @param header_line A GlycoCT REP header such as
+#'   `"REP1:13o(4+1)12d=7-7"`.
+#'
+#' @return A list describing the repeat id, boundary linkage, and count.
+#'
+#' @noRd
+parse_glycoct_rep_header <- function(header_line) {
+  pattern <- paste0(
+    "^REP(\\d+):(\\d+)([a-z]?)\\(",
+    "(-?\\d+(?:\\|\\d+)*)\\+(-?\\d+(?:\\|\\d+)*)",
+    "\\)(\\d+)([a-z]?)=(\\d+)-(\\d+)$"
+  )
+  matches <- stringr::str_match(header_line, pattern)
+
+  if (is.na(matches[[1]])) {
+    cli::cli_abort("Invalid REP header in GlycoCT string: {.val {header_line}}")
+  }
+
+  min_count <- as.integer(matches[[9]])
+  max_count <- as.integer(matches[[10]])
+  if (!identical(min_count, max_count)) {
+    cli::cli_abort(
+      "Variable GlycoCT repeat ranges are not supported: {.val {header_line}}"
+    )
+  }
+  if (min_count < 1) {
+    cli::cli_abort(
+      "GlycoCT repeated units must have a positive repeat count: {.val {header_line}}"
+    )
+  }
+
+  list(
+    rep_id = as.integer(matches[[2]]),
+    from_res = as.integer(matches[[3]]),
+    from_pos = matches[[5]],
+    to_res = as.integer(matches[[7]]),
+    to_pos = matches[[6]],
+    count = min_count
+  )
+}
+
+#' Expand fixed GlycoCT repeated units into ordinary residues and linkages.
+#'
+#' @param sections A parsed GlycoCT section list from
+#'   `parse_glycoct_sections()`.
+#'
+#' @return A list with parsed `residues` and `linkages`.
+#'
+#' @noRd
+expand_glycoct_repeats <- function(sections) {
+  residues <- parse_res_section(sections$main$res_lines)
+  linkages <- parse_lin_section(sections$main$lin_lines)
+
+  if (length(sections$repeats) == 0) {
+    return(list(residues = residues, linkages = linkages))
+  }
+
+  placeholders <- parse_glycoct_repeat_placeholders(sections$main$res_lines)
+  if (length(placeholders) == 0) {
+    cli::cli_abort("No repeated-unit placeholder found in GlycoCT string")
+  }
+
+  for (repeat_block in sections$repeats) {
+    placeholder <- find_glycoct_repeat_placeholder(
+      placeholders,
+      repeat_block$header$rep_id
+    )
+    if (is.null(placeholder)) {
+      cli::cli_abort(
+        "No placeholder found for GlycoCT repeated unit {.val REP{repeat_block$header$rep_id}}"
+      )
+    }
+
+    expanded <- expand_one_glycoct_repeat(
+      residues,
+      linkages,
+      placeholder,
+      repeat_block
+    )
+    residues <- expanded$residues
+    linkages <- expanded$linkages
+  }
+
+  list(residues = residues, linkages = linkages)
+}
+
+#' Parse repeated-unit placeholder residues from a GlycoCT RES section.
+#'
+#' @param res_lines A character vector of RES section lines.
+#'
+#' @return A list of placeholder descriptors.
+#'
+#' @noRd
+parse_glycoct_repeat_placeholders <- function(res_lines) {
+  placeholders <- list()
+  pattern <- "^(\\d+)r:r(\\d+)$"
+
+  for (line in res_lines) {
+    matches <- stringr::str_match(line, pattern)
+    if (!is.na(matches[[1]])) {
+      placeholders <- append(
+        placeholders,
+        list(list(
+          id = as.integer(matches[[2]]),
+          rep_id = as.integer(matches[[3]])
+        ))
+      )
+    }
+  }
+
+  placeholders
+}
+
+#' Find the placeholder for a repeated-unit id.
+#'
+#' @param placeholders A list from `parse_glycoct_repeat_placeholders()`.
+#' @param rep_id The numeric repeated-unit id.
+#'
+#' @return A placeholder descriptor or `NULL`.
+#'
+#' @noRd
+find_glycoct_repeat_placeholder <- function(placeholders, rep_id) {
+  for (placeholder in placeholders) {
+    if (identical(placeholder$rep_id, rep_id)) {
+      return(placeholder)
+    }
+  }
+
+  NULL
+}
+
+#' Expand one fixed GlycoCT repeated-unit block.
+#'
+#' @param residues A parsed residue list.
+#' @param linkages A parsed linkage list.
+#' @param placeholder The placeholder descriptor for this repeat.
+#' @param repeat_block Parsed repeated-unit section data.
+#'
+#' @return Updated `residues` and `linkages`.
+#'
+#' @noRd
+expand_one_glycoct_repeat <- function(
+  residues,
+  linkages,
+  placeholder,
+  repeat_block
+) {
+  repeat_residues <- parse_res_section(repeat_block$sections$res_lines)
+  repeat_linkages <- parse_lin_section(repeat_block$sections$lin_lines)
+  header <- repeat_block$header
+
+  if (is.null(repeat_residues[[as.character(header$to_res)]])) {
+    cli::cli_abort("REP start residue is missing from GlycoCT repeat block")
+  }
+  if (is.null(repeat_residues[[as.character(header$from_res)]])) {
+    cli::cli_abort("REP end residue is missing from GlycoCT repeat block")
+  }
+
+  boundary_linkages <- split_glycoct_repeat_boundary_linkages(
+    linkages,
+    placeholder$id
+  )
+  copy_maps <- build_glycoct_repeat_copies(
+    residues,
+    repeat_residues,
+    header$count
+  )
+
+  residues <- copy_maps$residues
+  linkages <- boundary_linkages$kept
+
+  for (copy_map in copy_maps$maps) {
+    linkages <- append(
+      linkages,
+      map_glycoct_linkages(repeat_linkages, copy_map)
+    )
+  }
+
+  if (length(copy_maps$maps) > 1) {
+    for (i in seq_len(length(copy_maps$maps) - 1)) {
+      linkages <- append(
+        linkages,
+        list(list(
+          from_res = unname(copy_maps$maps[[i]][[as.character(header$from_res)]]),
+          from_pos = header$from_pos,
+          to_res = unname(copy_maps$maps[[i + 1]][[as.character(header$to_res)]]),
+          to_pos = header$to_pos
+        ))
+      )
+    }
+  }
+
+  first_start <- unname(copy_maps$maps[[1]][[as.character(header$to_res)]])
+  last_end <- unname(
+    copy_maps$maps[[length(copy_maps$maps)]][[as.character(header$from_res)]]
+  )
+
+  for (linkage in boundary_linkages$incoming) {
+    linkage$to_res <- first_start
+    linkages <- append(linkages, list(linkage))
+  }
+  for (linkage in boundary_linkages$outgoing) {
+    linkage$from_res <- last_end
+    linkages <- append(linkages, list(linkage))
+  }
+
+  list(residues = residues, linkages = linkages)
+}
+
+#' Split linkages that enter or leave a repeated-unit placeholder.
+#'
+#' @param linkages A list of parsed GlycoCT linkages.
+#' @param placeholder_id The placeholder residue id.
+#'
+#' @return A list with kept, incoming, and outgoing linkages.
+#'
+#' @noRd
+split_glycoct_repeat_boundary_linkages <- function(linkages, placeholder_id) {
+  kept <- list()
+  incoming <- list()
+  outgoing <- list()
+
+  for (linkage in linkages) {
+    if (linkage$to_res == placeholder_id) {
+      incoming <- append(incoming, list(linkage))
+    } else if (linkage$from_res == placeholder_id) {
+      outgoing <- append(outgoing, list(linkage))
+    } else {
+      kept <- append(kept, list(linkage))
+    }
+  }
+
+  list(kept = kept, incoming = incoming, outgoing = outgoing)
+}
+
+#' Create residue copies for a repeated unit.
+#'
+#' @param residues The existing parsed residue list.
+#' @param repeat_residues The repeated-unit residue list.
+#' @param count The fixed repeat count.
+#'
+#' @return A list with updated residues and old-to-new id maps.
+#'
+#' @noRd
+build_glycoct_repeat_copies <- function(residues, repeat_residues, count) {
+  maps <- list()
+  next_id <- max(as.integer(c(names(residues), names(repeat_residues)))) + 1L
+  repeat_ids <- as.integer(names(repeat_residues))
+
+  for (copy in seq_len(count)) {
+    copy_map <- stats::setNames(integer(length(repeat_ids)), repeat_ids)
+
+    for (old_id in repeat_ids) {
+      new_id <- next_id
+      next_id <- next_id + 1L
+      residues[[as.character(new_id)]] <- repeat_residues[[as.character(old_id)]]
+      copy_map[[as.character(old_id)]] <- new_id
+    }
+
+    maps <- append(maps, list(copy_map))
+  }
+
+  list(residues = residues, maps = maps)
+}
+
+#' Map repeated-unit linkages through an old-to-new residue id map.
+#'
+#' @param linkages A list of parsed GlycoCT linkages.
+#' @param copy_map A named integer vector mapping original ids to copied ids.
+#'
+#' @return A list of mapped linkages.
+#'
+#' @noRd
+map_glycoct_linkages <- function(linkages, copy_map) {
+  mapped <- list()
+
+  for (linkage in linkages) {
+    linkage$from_res <- unname(copy_map[[as.character(linkage$from_res)]])
+    linkage$to_res <- unname(copy_map[[as.character(linkage$to_res)]])
+    mapped <- append(mapped, list(linkage))
+  }
+
+  mapped
 }
 
 parse_res_section <- function(res_lines) {
@@ -86,7 +448,7 @@ parse_res_section <- function(res_lines) {
     # Rejoin content in case there are multiple colons
     content <- paste(parts[2:length(parts)], collapse = ":")
 
-    if (type == "b") {
+    if (!is.na(type) && type == "b") {
       # Monosaccharide
       anomer <- stringr::str_extract(content, "^[abx]")
       mono_info <- stringr::str_remove(content, "^[abx]-")
@@ -97,7 +459,7 @@ parse_res_section <- function(res_lines) {
         content = mono_info,
         substituents = list()
       )
-    } else if (type == "s") {
+    } else if (!is.na(type) && type == "s") {
       # Substituent
       residues[[as.character(id)]] <- list(
         type = "sub",
@@ -124,7 +486,7 @@ parse_lin_section <- function(lin_lines) {
 
     # Extract components: from_res, positions, to_res
     # Updated pattern to handle negative positions like -1
-    pattern <- "(\\d+)([do]?)\\((-?\\d+(?:\\|\\d+)*)\\+(-?\\d+(?:\\|\\d+)*)\\)(\\d+)([dn]?)"
+    pattern <- "(\\d+)([don]?)\\((-?\\d+(?:\\|\\d+)*)\\+(-?\\d+(?:\\|\\d+)*)\\)(\\d+)([dn]?)"
     matches <- stringr::str_match(link_info, pattern)
 
     if (!is.na(matches[1])) {
@@ -133,11 +495,14 @@ parse_lin_section <- function(lin_lines) {
       to_res <- as.integer(matches[6])
       to_pos <- matches[5]
 
-      linkages[[link_id]] <- list(
-        from_res = from_res,
-        from_pos = from_pos,
-        to_res = to_res,
-        to_pos = to_pos
+      linkages <- append(
+        linkages,
+        list(list(
+          from_res = from_res,
+          from_pos = from_pos,
+          to_res = to_res,
+          to_pos = to_pos
+        ))
       )
     }
   }
