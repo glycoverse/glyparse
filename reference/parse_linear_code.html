@@ -9,7 +9,7 @@ To know more about Linear Code, see this article."><meta property="og:image" con
 
     <a class="navbar-brand me-2" href="../index.html">glyparse</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.5.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.6.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -31,7 +31,7 @@ To know more about Linear Code, see this article."><meta property="og:image" con
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Parse Linear Code Structures</h1>
-      <small class="dont-index">Source: <a href="https://github.com/glycoverse/glyparse/blob/v0.5.7/R/parse-linear-code.R" class="external-link"><code>R/parse-linear-code.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/glycoverse/glyparse/blob/main/R/parse-linear-code.R" class="external-link"><code>R/parse-linear-code.R</code></a></small>
       <div class="d-none name"><code>parse_linear_code.Rd</code></div>
     </div>
 
@@ -42,7 +42,7 @@ To know more about Linear Code, see <a href="https://www.jstage.jst.go.jp/articl
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">parse_linear_code</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">parse_linear_code</span><span class="op">(</span><span class="va">x</span>, on_failure <span class="op">=</span> <span class="st">"error"</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -51,6 +51,11 @@ To know more about Linear Code, see <a href="https://www.jstage.jst.go.jp/articl
 
 <dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
 <dd><p>A character vector of Linear Code strings. NA values are allowed and will be returned as NA structures.</p></dd>
+
+
+<dt id="arg-on-failure">on_failure<a class="anchor" aria-label="anchor" href="#arg-on-failure"></a></dt>
+<dd><p>How to handle parsing failures. <code>"error"</code> aborts when a
+structure cannot be parsed. <code>"na"</code> returns <code>NA</code> at invalid positions.</p></dd>
 
 </dl></div>
     <div class="section level2">

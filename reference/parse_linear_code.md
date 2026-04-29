@@ -8,7 +8,7 @@ article](https://www.jstage.jst.go.jp/article/tigg1989/14/77/14_77_127/_article)
 ## Usage
 
 ``` r
-parse_linear_code(x)
+parse_linear_code(x, on_failure = "error")
 ```
 
 ## Arguments
@@ -17,6 +17,11 @@ parse_linear_code(x)
 
   A character vector of Linear Code strings. NA values are allowed and
   will be returned as NA structures.
+
+- on_failure:
+
+  How to handle parsing failures. `"error"` aborts when a structure
+  cannot be parsed. `"na"` returns `NA` at invalid positions.
 
 ## Value
 

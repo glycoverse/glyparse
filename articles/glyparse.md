@@ -85,10 +85,11 @@ x <- c(
   "WURCS=2.0/3,3,2/[a2122h-1b_1-5][a1122h-1b_1-5][a1122h-1a_1-5]/1-2-3/a4-b1_b3-c1"
 )
 auto_parse(x)
-#> Error in `validate_glycan_structure_vector()`:
-#> ! All structures must have the same monosaccharide type.
-#> ✖ Found 2 concrete and 1 generic structure(s) in the same vector.
-#> ℹ Use `convert_to_generic()` to convert concrete structures to generic type.
+#> <glycan_structure[3]>
+#> [1] Gal(b1-3)GalNAc(b1-
+#> [2] Hex(??-?)HexNAc(??-?)Hex(??-?)[HexNAc(??-?)Hex(??-?)]Hex(??-?)HexNAc(??-?)[dHex(??-?)]HexNAc(??-
+#> [3] Man(a1-3)Man(b1-4)Glc(b1-
+#> # Unique structures: 3
 ```
 
 ## Part 1: IUPAC Family — The Popular Kids 🌟

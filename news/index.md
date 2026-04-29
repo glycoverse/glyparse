@@ -1,5 +1,15 @@
 # Changelog
 
+## glyparse 0.6.0
+
+### New features
+
+- Add a `on_failure` parameter to all parser functions. When
+  `on_failure = "error"`, the parser will throw an error when it
+  encounters an unparsable string. When `on_failure = "na"`, the parser
+  will return NA for unparsable strings. The default is “error”, for
+  backwards compatibility.
+
 ## glyparse 0.5.7
 
 CRAN release: 2026-03-14

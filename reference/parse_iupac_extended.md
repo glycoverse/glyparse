@@ -8,7 +8,7 @@ For more information about IUPAC-extended format, see
 ## Usage
 
 ``` r
-parse_iupac_extended(x)
+parse_iupac_extended(x, on_failure = "error")
 ```
 
 ## Arguments
@@ -17,6 +17,11 @@ parse_iupac_extended(x)
 
   A character vector of IUPAC-extended strings. NA values are allowed
   and will be returned as NA structures.
+
+- on_failure:
+
+  How to handle parsing failures. `"error"` aborts when a structure
+  cannot be parsed. `"na"` returns `NA` at invalid positions.
 
 ## Value
 

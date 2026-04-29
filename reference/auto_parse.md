@@ -24,7 +24,7 @@ Supported types:
 ## Usage
 
 ``` r
-auto_parse(x)
+auto_parse(x, on_failure = "error")
 ```
 
 ## Arguments
@@ -33,6 +33,11 @@ auto_parse(x)
 
   A character vector of structure strings. NA values are allowed and
   will be returned as NA structures.
+
+- on_failure:
+
+  How to handle parsing failures. `"error"` aborts when a structure
+  cannot be parsed. `"na"` returns `NA` at invalid positions.
 
 ## Value
 

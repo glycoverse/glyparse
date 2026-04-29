@@ -7,7 +7,7 @@ GlycoCT is a format used by databases like GlyTouCan and GlyGen.
 ## Usage
 
 ``` r
-parse_glycoct(x)
+parse_glycoct(x, on_failure = "error")
 ```
 
 ## Arguments
@@ -16,6 +16,11 @@ parse_glycoct(x)
 
   A character vector of GlycoCT strings. NA values are allowed and will
   be returned as NA structures.
+
+- on_failure:
+
+  How to handle parsing failures. `"error"` aborts when a structure
+  cannot be parsed. `"na"` returns `NA` at invalid positions.
 
 ## Value
 
