@@ -2,6 +2,8 @@
 
 ## glyparse (development version)
 
+## glyparse 0.6.0
+
 ### New features
 
 - Add a `on_failure` parameter to all parser functions. When
