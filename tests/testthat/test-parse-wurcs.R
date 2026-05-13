@@ -617,6 +617,195 @@ test_that("parse_residue handles ambiguous u residues", {
 })
 
 
+test_that("parse_residue handles unknown ring closure", {
+  expect_unknown_ring_residue <- function(residue, mono, sub = "") {
+    expect_equal(
+      parse_residue(residue),
+      c(mono = mono, anomer = "?1", sub = sub)
+    )
+  }
+
+  purrr::iwalk(
+    c(
+      Glc = "a2122h-1x_1-?",
+      Man = "a1122h-1x_1-?",
+      Gal = "a2112h-1x_1-?",
+      Gul = "a2212h-1x_1-?",
+      Alt = "a2111h-1x_1-?",
+      All = "a2222h-1x_1-?",
+      Tal = "a1112h-1x_1-?",
+      Ido = "a2121h-1x_1-?",
+      GlcA = "a2122A-1x_1-?",
+      ManA = "a1122A-1x_1-?",
+      GalA = "a2112A-1x_1-?",
+      GulA = "a2212A-1x_1-?",
+      AltA = "a2111A-1x_1-?",
+      AllA = "a2222A-1x_1-?",
+      TalA = "a1112A-1x_1-?",
+      IdoA = "a2121A-1x_1-?",
+      Fuc = "a1221m-1x_1-?",
+      Qui = "a2122m-1x_1-?",
+      Rha = "a2211m-1x_1-?",
+      `6dGul` = "a2212m-1x_1-?",
+      `6dAlt` = "a2111m-1x_1-?",
+      `6dTal` = "a1112m-1x_1-?",
+      Oli = "ad122m-1x_1-?",
+      Tyv = "a1d22m-1x_1-?",
+      Abe = "a2d12m-1x_1-?",
+      Par = "a2d22m-1x_1-?",
+      Dig = "ad222m-1x_1-?",
+      Col = "a1d21m-1x_1-?",
+      Ara = "a211h-1x_1-?",
+      Lyx = "a221h-1x_1-?",
+      Xyl = "a212h-1x_1-?",
+      Rib = "a222h-1x_1-?"
+    ),
+    ~ expect_unknown_ring_residue(.x, .y)
+  )
+
+  purrr::iwalk(
+    c(
+      GlcNAc = "a2122h-1x_1-?_2*NCC/3=O",
+      ManNAc = "a1122h-1x_1-?_2*NCC/3=O",
+      GalNAc = "a2112h-1x_1-?_2*NCC/3=O",
+      GulNAc = "a2212h-1x_1-?_2*NCC/3=O",
+      AltNAc = "a2111h-1x_1-?_2*NCC/3=O",
+      AllNAc = "a2222h-1x_1-?_2*NCC/3=O",
+      TalNAc = "a1112h-1x_1-?_2*NCC/3=O",
+      IdoNAc = "a2121h-1x_1-?_2*NCC/3=O",
+      FucNAc = "a1221m-1x_1-?_2*NCC/3=O",
+      QuiNAc = "a2122m-1x_1-?_2*NCC/3=O",
+      RhaNAc = "a2211m-1x_1-?_2*NCC/3=O",
+      `6dAltNAc` = "a2111m-1x_1-?_2*NCC/3=O",
+      `6dTalNAc` = "a1112m-1x_1-?_2*NCC/3=O"
+    ),
+    ~ expect_unknown_ring_residue(.x, .y)
+  )
+
+  purrr::iwalk(
+    c(
+      GlcN = "a2122h-1x_1-?_2*N",
+      ManN = "a1122h-1x_1-?_2*N",
+      GalN = "a2112h-1x_1-?_2*N",
+      GulN = "a2212h-1x_1-?_2*N",
+      AltN = "a2111h-1x_1-?_2*N",
+      AllN = "a2222h-1x_1-?_2*N",
+      TalN = "a1112h-1x_1-?_2*N",
+      IdoN = "a2121h-1x_1-?_2*N"
+    ),
+    ~ expect_unknown_ring_residue(.x, .y)
+  )
+
+  purrr::pwalk(
+    list(
+      c(
+        "a2122A-1x_1-?_2*NCC/3=O",
+        "a1122A-1x_1-?_2*NCC/3=O",
+        "a2112A-1x_1-?_2*NCC/3=O",
+        "a2212A-1x_1-?_2*NCC/3=O",
+        "a2111A-1x_1-?_2*NCC/3=O",
+        "a2222A-1x_1-?_2*NCC/3=O",
+        "a1112A-1x_1-?_2*NCC/3=O",
+        "a2121A-1x_1-?_2*NCC/3=O",
+        "a2212m-1x_1-?_2*NCC/3=O",
+        "ad122m-1x_1-?_2*NCC/3=O",
+        "a1d22m-1x_1-?_2*NCC/3=O",
+        "a2d12m-1x_1-?_2*NCC/3=O",
+        "a2d22m-1x_1-?_2*NCC/3=O",
+        "ad222m-1x_1-?_2*NCC/3=O",
+        "a1d21m-1x_1-?_2*NCC/3=O",
+        "a211h-1x_1-?_2*NCC/3=O",
+        "a221h-1x_1-?_2*NCC/3=O",
+        "a212h-1x_1-?_2*NCC/3=O",
+        "a222h-1x_1-?_2*NCC/3=O"
+      ),
+      c(
+        "GlcA",
+        "ManA",
+        "GalA",
+        "GulA",
+        "AltA",
+        "AllA",
+        "TalA",
+        "IdoA",
+        "6dGul",
+        "Oli",
+        "Tyv",
+        "Abe",
+        "Par",
+        "Dig",
+        "Col",
+        "Ara",
+        "Lyx",
+        "Xyl",
+        "Rib"
+      ),
+      "2NAc"
+    ),
+    expect_unknown_ring_residue
+  )
+
+  purrr::pwalk(
+    list(
+      c(
+        "a2122A-1x_1-?_2*N",
+        "a1122A-1x_1-?_2*N",
+        "a2112A-1x_1-?_2*N",
+        "a2212A-1x_1-?_2*N",
+        "a2111A-1x_1-?_2*N",
+        "a2222A-1x_1-?_2*N",
+        "a1112A-1x_1-?_2*N",
+        "a2121A-1x_1-?_2*N",
+        "a1221m-1x_1-?_2*N",
+        "a2122m-1x_1-?_2*N",
+        "a2211m-1x_1-?_2*N",
+        "a2212m-1x_1-?_2*N",
+        "a2111m-1x_1-?_2*N",
+        "a1112m-1x_1-?_2*N",
+        "ad122m-1x_1-?_2*N",
+        "a1d22m-1x_1-?_2*N",
+        "a2d12m-1x_1-?_2*N",
+        "a2d22m-1x_1-?_2*N",
+        "ad222m-1x_1-?_2*N",
+        "a1d21m-1x_1-?_2*N",
+        "a211h-1x_1-?_2*N",
+        "a221h-1x_1-?_2*N",
+        "a212h-1x_1-?_2*N",
+        "a222h-1x_1-?_2*N"
+      ),
+      c(
+        "GlcA",
+        "ManA",
+        "GalA",
+        "GulA",
+        "AltA",
+        "AllA",
+        "TalA",
+        "IdoA",
+        "Fuc",
+        "Qui",
+        "Rha",
+        "6dGul",
+        "6dAlt",
+        "6dTal",
+        "Oli",
+        "Tyv",
+        "Abe",
+        "Par",
+        "Dig",
+        "Col",
+        "Ara",
+        "Lyx",
+        "Xyl",
+        "Rib"
+      ),
+      "2N"
+    ),
+    expect_unknown_ring_residue
+  )
+})
+
+
 test_that("parse_wurcs correctly handles unknown linkages", {
   expect_equal(
     as.character(parse_wurcs(
@@ -657,6 +846,16 @@ test_that("parse_wurcs handles ambiguous u residues", {
       "WURCS=2.0/2,2,1/[u2122A][a2122h-1x_1-5_2*NCC/3=O]/1-2/a?-b1"
     )),
     "GlcNAc(?1-?)GlcA(??-"
+  )
+})
+
+
+test_that("parse_wurcs handles unknown ring closure", {
+  expect_equal(
+    as.character(parse_wurcs(
+      "WURCS=2.0/5,6,5/[a2122h-1x_1-?_2*NCC/3=O][a1221m-1a_1-5][a2122h-1b_1-5_2*NCC/3=O][a1122h-1b_1-5][a1122h-1a_1-5]/1-2-3-4-5-5/a4-c1_c4-d1_d3-e1_d6-f1_a?-b1"
+    )),
+    "Man(a1-3)[Man(a1-6)]Man(b1-4)GlcNAc(b1-4)[Fuc(a1-?)]GlcNAc(?1-"
   )
 })
 
