@@ -137,6 +137,69 @@ WURCS_MONO_REGEX <- c(
 )
 
 
+WURCS_AMBIGUOUS_MONO_REGEX <- c(
+  "GlcNAc" = "^u2122h_2\\*NCC/3=O",
+  "GalNAc" = "^u2112h_2\\*NCC/3=O",
+  "ManNAc" = "^u1122h_2\\*NCC/3=O",
+  "GulNAc" = "^u2212h_2\\*NCC/3=O",
+  "AltNAc" = "^u2111h_2\\*NCC/3=O",
+  "AllNAc" = "^u2222h_2\\*NCC/3=O",
+  "TalNAc" = "^u1112h_2\\*NCC/3=O",
+  "IdoNAc" = "^u2121h_2\\*NCC/3=O",
+
+  "GlcN" = "^u2122h_2\\*N(?!CC/3=O)",
+  "ManN" = "^u1122h_2\\*N(?!CC/3=O)",
+  "GalN" = "^u2112h_2\\*N(?!CC/3=O)",
+  "GulN" = "^u2212h_2\\*N(?!CC/3=O)",
+  "AltN" = "^u2111h_2\\*N(?!CC/3=O)",
+  "AllN" = "^u2222h_2\\*N(?!CC/3=O)",
+  "TalN" = "^u1112h_2\\*N(?!CC/3=O)",
+  "IdoN" = "^u2121h_2\\*N(?!CC/3=O)",
+
+  "GlcA" = "^u2122A",
+  "ManA" = "^u1122A",
+  "GalA" = "^u2112A",
+  "GulA" = "^u2212A",
+  "AltA" = "^u2111A",
+  "AllA" = "^u2222A",
+  "TalA" = "^u1112A",
+  "IdoA" = "^u2121A",
+
+  "Glc" = "^u2122h(?!_2\\*N(CC/3=O)?)",
+  "Man" = "^u1122h(?!_2\\*N(CC/3=O)?)",
+  "Gal" = "^u2112h(?!_2\\*N(CC/3=O)?)",
+  "Gul" = "^u2212h(?!_2\\*N(CC/3=O)?)",
+  "Alt" = "^u2111h(?!_2\\*N(CC/3=O)?)",
+  "All" = "^u2222h(?!_2\\*N(CC/3=O)?)",
+  "Tal" = "^u1112h(?!_2\\*N(CC/3=O)?)",
+  "Ido" = "^u2121h(?!_2\\*N(CC/3=O)?)",
+
+  "FucNAc" = "^u1221m_2\\*NCC/3=O",
+  "QuiNAc" = "^u2122m_2\\*NCC/3=O",
+  "RhaNAc" = "^u2211m_2\\*NCC/3=O",
+  "6dAltNAc" = "^u2111m_2\\*NCC/3=O",
+  "6dTalNAc" = "^u1112m_2\\*NCC/3=O",
+
+  "Fuc" = "^u1221m(?!_2\\*NCC/3=O)",
+  "Qui" = "^u2122m(?!_2\\*NCC/3=O|_2\\*N_4\\*N)",
+  "Rha" = "^u2211m(?!_2\\*NCC/3=O)",
+  "6dGul" = "^u2212m",
+  "6dAlt" = "^u2111m(?!_2\\*NCC/3=O)",
+  "6dTal" = "^u1112m(?!_2\\*NCC/3=O)",
+
+  "Oli" = "^ud122m",
+  "Tyv" = "^u1d22m",
+  "Abe" = "^u2d12m",
+  "Par" = "^u2d22m",
+  "Dig" = "^ud222m",
+  "Col" = "^u1d21m",
+  "Ara" = "^u211h",
+  "Lyx" = "^u221h",
+  "Xyl" = "^u212h",
+  "Rib" = "^u222h"
+)
+
+
 WURCS_SUB_REGEX <- c(
   "Me" = "OC",
   "Ac" = "OCC/3=O",
@@ -165,14 +228,28 @@ parse_residue <- function(residue) {
     ~ stringr::str_detect(residue, .x)
   )
   if (mono_idx == 0) {
-    cli::cli_abort("Unable to parse residue: {.str {residue}}")
-  }
-  mono <- names(WURCS_MONO_REGEX)[[mono_idx]]
+    ambiguous_mono_idx <- purrr::detect_index(
+      WURCS_AMBIGUOUS_MONO_REGEX,
+      ~ stringr::str_detect(residue, .x)
+    )
+    if (ambiguous_mono_idx == 0) {
+      cli::cli_abort("Unable to parse residue: {.str {residue}}")
+    }
+    mono <- names(WURCS_AMBIGUOUS_MONO_REGEX)[[ambiguous_mono_idx]]
+    mono_pattern <- WURCS_AMBIGUOUS_MONO_REGEX[[ambiguous_mono_idx]]
+    anomer <- "??"
+  } else {
+    mono <- names(WURCS_MONO_REGEX)[[mono_idx]]
+    mono_pattern <- WURCS_MONO_REGEX[[mono_idx]]
 
-  # Get anomeric carbon and anomer
-  anomer_code <- stringr::str_extract(residue, "-(\\d+[abx])_", group = 1)
-  anomer <- stringr::str_replace(anomer_code, "x", "?")
-  anomer <- paste0(stringr::str_sub(anomer, 2), stringr::str_sub(anomer, 1, 1))
+    # Get anomeric carbon and anomer
+    anomer_code <- stringr::str_extract(residue, "-(\\d+[abx])_", group = 1)
+    anomer <- stringr::str_replace(anomer_code, "x", "?")
+    anomer <- paste0(
+      stringr::str_sub(anomer, 2),
+      stringr::str_sub(anomer, 1, 1)
+    )
+  }
 
   # Get substituent(s)
   # For Neu5Ac and Neu5Gc, we need special handling since the 5-position NAc/NGc
@@ -192,7 +269,7 @@ parse_residue <- function(residue) {
     }
   } else {
     # For other monosaccharides, use the standard approach
-    sub_code <- stringr::str_remove(residue, WURCS_MONO_REGEX[[mono_idx]])
+    sub_code <- stringr::str_remove(residue, mono_pattern)
   }
 
   if (sub_code == "") {
