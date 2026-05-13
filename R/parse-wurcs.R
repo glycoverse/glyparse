@@ -137,6 +137,69 @@ WURCS_MONO_REGEX <- c(
 )
 
 
+WURCS_UNKNOWN_RING_MONO_REGEX <- c(
+  "GlcNAc" = "^a2122h-1[abx]_1-\\?_2\\*NCC/3=O",
+  "GalNAc" = "^a2112h-1[abx]_1-\\?_2\\*NCC/3=O",
+  "ManNAc" = "^a1122h-1[abx]_1-\\?_2\\*NCC/3=O",
+  "GulNAc" = "^a2212h-1[abx]_1-\\?_2\\*NCC/3=O",
+  "AltNAc" = "^a2111h-1[abx]_1-\\?_2\\*NCC/3=O",
+  "AllNAc" = "^a2222h-1[abx]_1-\\?_2\\*NCC/3=O",
+  "TalNAc" = "^a1112h-1[abx]_1-\\?_2\\*NCC/3=O",
+  "IdoNAc" = "^a2121h-1[abx]_1-\\?_2\\*NCC/3=O",
+
+  "GlcN" = "^a2122h-1[abx]_1-\\?_2\\*N(?!CC/3=O)",
+  "ManN" = "^a1122h-1[abx]_1-\\?_2\\*N(?!CC/3=O)",
+  "GalN" = "^a2112h-1[abx]_1-\\?_2\\*N(?!CC/3=O)",
+  "GulN" = "^a2212h-1[abx]_1-\\?_2\\*N(?!CC/3=O)",
+  "AltN" = "^a2111h-1[abx]_1-\\?_2\\*N(?!CC/3=O)",
+  "AllN" = "^a2222h-1[abx]_1-\\?_2\\*N(?!CC/3=O)",
+  "TalN" = "^a1112h-1[abx]_1-\\?_2\\*N(?!CC/3=O)",
+  "IdoN" = "^a2121h-1[abx]_1-\\?_2\\*N(?!CC/3=O)",
+
+  "GlcA" = "^a2122A-1[abx]_1-\\?",
+  "ManA" = "^a1122A-1[abx]_1-\\?",
+  "GalA" = "^a2112A-1[abx]_1-\\?",
+  "GulA" = "^a2212A-1[abx]_1-\\?",
+  "AltA" = "^a2111A-1[abx]_1-\\?",
+  "AllA" = "^a2222A-1[abx]_1-\\?",
+  "TalA" = "^a1112A-1[abx]_1-\\?",
+  "IdoA" = "^a2121A-1[abx]_1-\\?",
+
+  "Glc" = "^a2122h-1[abx]_1-\\?(?!_2\\*N(CC/3=O)?)",
+  "Man" = "^a1122h-1[abx]_1-\\?(?!_2\\*N(CC/3=O)?)",
+  "Gal" = "^a2112h-1[abx]_1-\\?(?!_2\\*N(CC/3=O)?)",
+  "Gul" = "^a2212h-1[abx]_1-\\?(?!_2\\*N(CC/3=O)?)",
+  "Alt" = "^a2111h-1[abx]_1-\\?(?!_2\\*N(CC/3=O)?)",
+  "All" = "^a2222h-1[abx]_1-\\?(?!_2\\*N(CC/3=O)?)",
+  "Tal" = "^a1112h-1[abx]_1-\\?(?!_2\\*N(CC/3=O)?)",
+  "Ido" = "^a2121h-1[abx]_1-\\?(?!_2\\*N(CC/3=O)?)",
+
+  "FucNAc" = "^a1221m-1[abx]_1-\\?_2\\*NCC/3=O",
+  "QuiNAc" = "^a2122m-1[abx]_1-\\?_2\\*NCC/3=O",
+  "RhaNAc" = "^a2211m-1[abx]_1-\\?_2\\*NCC/3=O",
+  "6dAltNAc" = "^a2111m-1[abx]_1-\\?_2\\*NCC/3=O",
+  "6dTalNAc" = "^a1112m-1[abx]_1-\\?_2\\*NCC/3=O",
+
+  "Fuc" = "^a1221m-1[abx]_1-\\?(?!_2\\*NCC/3=O)",
+  "Qui" = "^a2122m-1[abx]_1-\\?(?!_2\\*NCC/3=O|_2\\*N_4\\*N)",
+  "Rha" = "^a2211m-1[abx]_1-\\?(?!_2\\*NCC/3=O)",
+  "6dGul" = "^a2212m-1[abx]_1-\\?",
+  "6dAlt" = "^a2111m-1[abx]_1-\\?(?!_2\\*NCC/3=O)",
+  "6dTal" = "^a1112m-1[abx]_1-\\?(?!_2\\*NCC/3=O)",
+
+  "Oli" = "^ad122m-1[abx]_1-\\?",
+  "Tyv" = "^a1d22m-1[abx]_1-\\?",
+  "Abe" = "^a2d12m-1[abx]_1-\\?",
+  "Par" = "^a2d22m-1[abx]_1-\\?",
+  "Dig" = "^ad222m-1[abx]_1-\\?",
+  "Col" = "^a1d21m-1[abx]_1-\\?",
+  "Ara" = "^a211h-1[abx]_1-\\?",
+  "Lyx" = "^a221h-1[abx]_1-\\?",
+  "Xyl" = "^a212h-1[abx]_1-\\?",
+  "Rib" = "^a222h-1[abx]_1-\\?"
+)
+
+
 WURCS_AMBIGUOUS_MONO_REGEX <- c(
   "GlcNAc" = "^u2122h_2\\*NCC/3=O",
   "GalNAc" = "^u2112h_2\\*NCC/3=O",
@@ -228,16 +291,31 @@ parse_residue <- function(residue) {
     ~ stringr::str_detect(residue, .x)
   )
   if (mono_idx == 0) {
-    ambiguous_mono_idx <- purrr::detect_index(
-      WURCS_AMBIGUOUS_MONO_REGEX,
+    unknown_ring_mono_idx <- purrr::detect_index(
+      WURCS_UNKNOWN_RING_MONO_REGEX,
       ~ stringr::str_detect(residue, .x)
     )
-    if (ambiguous_mono_idx == 0) {
-      cli::cli_abort("Unable to parse residue: {.str {residue}}")
+    if (unknown_ring_mono_idx > 0) {
+      mono <- names(WURCS_UNKNOWN_RING_MONO_REGEX)[[unknown_ring_mono_idx]]
+      mono_pattern <- WURCS_UNKNOWN_RING_MONO_REGEX[[unknown_ring_mono_idx]]
+      anomer_code <- stringr::str_extract(residue, "-(\\d+[abx])_", group = 1)
+      anomer <- stringr::str_replace(anomer_code, "x", "?")
+      anomer <- paste0(
+        stringr::str_sub(anomer, 2),
+        stringr::str_sub(anomer, 1, 1)
+      )
+    } else {
+      ambiguous_mono_idx <- purrr::detect_index(
+        WURCS_AMBIGUOUS_MONO_REGEX,
+        ~ stringr::str_detect(residue, .x)
+      )
+      if (ambiguous_mono_idx == 0) {
+        cli::cli_abort("Unable to parse residue: {.str {residue}}")
+      }
+      mono <- names(WURCS_AMBIGUOUS_MONO_REGEX)[[ambiguous_mono_idx]]
+      mono_pattern <- WURCS_AMBIGUOUS_MONO_REGEX[[ambiguous_mono_idx]]
+      anomer <- "??"
     }
-    mono <- names(WURCS_AMBIGUOUS_MONO_REGEX)[[ambiguous_mono_idx]]
-    mono_pattern <- WURCS_AMBIGUOUS_MONO_REGEX[[ambiguous_mono_idx]]
-    anomer <- "??"
   } else {
     mono <- names(WURCS_MONO_REGEX)[[mono_idx]]
     mono_pattern <- WURCS_MONO_REGEX[[mono_idx]]
