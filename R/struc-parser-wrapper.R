@@ -9,23 +9,33 @@
 #' @return A [glyrepr::glycan_structure()] object.
 #' @noRd
 struc_parser_wrapper <- function(
-    x,
-    parser,
-    on_failure = "error",
-    call = rlang::caller_env()
+  x,
+  parser,
+  on_failure = "error",
+  call = rlang::caller_env()
 ) {
   on_failure <- validate_struc_parser_wrapper_args(x, on_failure, call = call)
   wrapper_input <- prepare_struc_parser_input(x)
 
   if (wrapper_input$all_na) {
-    return(make_na_glycan_structure(wrapper_input$size, names = wrapper_input$names))
+    return(make_na_glycan_structure(
+      wrapper_input$size,
+      names = wrapper_input$names
+    ))
   }
 
   parsed_unique <- parse_unique_structures(wrapper_input$unique_x, parser)
-  abort_on_invalid_parse(parsed_unique$invalid_unique_x, on_failure, call = call)
+  abort_on_invalid_parse(
+    parsed_unique$invalid_unique_x,
+    on_failure,
+    call = call
+  )
 
   if (length(parsed_unique$valid_unique_x) == 0) {
-    return(make_na_glycan_structure(wrapper_input$size, names = wrapper_input$names))
+    return(make_na_glycan_structure(
+      wrapper_input$size,
+      names = wrapper_input$names
+    ))
   }
 
   build_wrapped_structure(
