@@ -286,10 +286,6 @@ WURCS_SUB_REGEX <- c(
 #' @return A normalized substituent code.
 #' @noRd
 normalize_n_sulfate_sub_code <- function(residue, sub_code) {
-  if (sub_code != "SO/3=O/3=O") {
-    return(sub_code)
-  }
-
   n_sulfate_pos <- stringr::str_extract(
     residue,
     "_(\\d+|\\?)\\*NSO/3=O/3=O",
@@ -299,7 +295,14 @@ normalize_n_sulfate_sub_code <- function(residue, sub_code) {
     return(sub_code)
   }
 
-  stringr::str_glue("_{n_sulfate_pos}*OSO/3=O/3=O")
+  if (!stringr::str_starts(sub_code, "SO/3=O/3=O")) {
+    return(sub_code)
+  }
+
+  n_sulfate_sub_code <- stringr::str_glue(
+    "_{n_sulfate_pos}*OSO/3=O/3=O"
+  )
+  stringr::str_replace(sub_code, "^SO/3=O/3=O", n_sulfate_sub_code)
 }
 
 

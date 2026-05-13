@@ -807,10 +807,10 @@ test_that("parse_residue handles unknown ring closure", {
 
 
 test_that("parse_residue handles N-sulfate on amino sugars", {
-  expect_n_sulfate_residue <- function(residue, mono, anomer) {
+  expect_n_sulfate_residue <- function(residue, mono, anomer, sub = "2S") {
     expect_equal(
       parse_residue(residue),
-      c(mono = mono, anomer = anomer, sub = "2S")
+      c(mono = mono, anomer = anomer, sub = sub)
     )
   }
 
@@ -848,6 +848,24 @@ test_that("parse_residue handles N-sulfate on amino sugars", {
       .y,
       "?1"
     )
+  )
+  purrr::iwalk(
+    hexn_codes,
+    ~ expect_n_sulfate_residue(
+      stringr::str_glue("u{.x}_2*NSO/3=O/3=O_6*OSO/3=O/3=O"),
+      .y,
+      "??",
+      "2S,6S"
+    )
+  )
+
+  expect_equal(
+    parse_residue("a2122h-1x_1-5_2*NSO/3=O/3=O_6*OSO/3=O/3=O"),
+    c(mono = "GlcN", anomer = "?1", sub = "2S,6S")
+  )
+  expect_equal(
+    parse_residue("a2122h-1x_1-?_2*NSO/3=O/3=O_6*OSO/3=O/3=O"),
+    c(mono = "GlcN", anomer = "?1", sub = "2S,6S")
   )
 })
 
@@ -919,6 +937,14 @@ test_that("parse_wurcs handles N-sulfate on amino sugars", {
     )),
     "GlcN2S(?1-?)GlcA(??-"
   )
+
+  structure <- parse_wurcs(
+    "WURCS=2.0/1,1,0/[u2122h_2*NSO/3=O/3=O_6*OSO/3=O/3=O]/1/"
+  )
+  graph <- glyrepr::get_structure_graphs(structure)
+  expect_equal(igraph::vertex_attr(graph, "mono"), "GlcN")
+  expect_equal(igraph::vertex_attr(graph, "sub"), "2S,6S")
+  expect_equal(graph$anomer, "??")
 })
 
 
