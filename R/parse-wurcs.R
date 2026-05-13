@@ -277,6 +277,32 @@ WURCS_SUB_REGEX <- c(
 )
 
 
+#' Restore WURCS N-sulfate as a sulfate substituent.
+#'
+#' @param residue A WURCS monosaccharide residue.
+#' @param sub_code The substituent part left after removing the matched
+#'   monosaccharide pattern.
+#'
+#' @return A normalized substituent code.
+#' @noRd
+normalize_n_sulfate_sub_code <- function(residue, sub_code) {
+  if (sub_code != "SO/3=O/3=O") {
+    return(sub_code)
+  }
+
+  n_sulfate_pos <- stringr::str_extract(
+    residue,
+    "_(\\d+|\\?)\\*NSO/3=O/3=O",
+    group = 1
+  )
+  if (is.na(n_sulfate_pos)) {
+    return(sub_code)
+  }
+
+  stringr::str_glue("_{n_sulfate_pos}*OSO/3=O/3=O")
+}
+
+
 parse_residue <- function(residue) {
   # This function accepts a WURCS residue (something in "[]"),
   # and returns a named vector of c(mono, anomer, sub)
@@ -349,6 +375,7 @@ parse_residue <- function(residue) {
     # For other monosaccharides, use the standard approach
     sub_code <- stringr::str_remove(residue, mono_pattern)
   }
+  sub_code <- normalize_n_sulfate_sub_code(residue, sub_code)
 
   if (sub_code == "") {
     sub <- ""

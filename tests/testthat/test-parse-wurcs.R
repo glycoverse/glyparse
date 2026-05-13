@@ -806,6 +806,52 @@ test_that("parse_residue handles unknown ring closure", {
 })
 
 
+test_that("parse_residue handles N-sulfate on amino sugars", {
+  expect_n_sulfate_residue <- function(residue, mono, anomer) {
+    expect_equal(
+      parse_residue(residue),
+      c(mono = mono, anomer = anomer, sub = "2S")
+    )
+  }
+
+  hexn_codes <- c(
+    GlcN = "2122h",
+    ManN = "1122h",
+    GalN = "2112h",
+    GulN = "2212h",
+    AltN = "2111h",
+    AllN = "2222h",
+    TalN = "1112h",
+    IdoN = "2121h"
+  )
+
+  purrr::iwalk(
+    hexn_codes,
+    ~ expect_n_sulfate_residue(
+      stringr::str_glue("u{.x}_2*NSO/3=O/3=O"),
+      .y,
+      "??"
+    )
+  )
+  purrr::iwalk(
+    hexn_codes,
+    ~ expect_n_sulfate_residue(
+      stringr::str_glue("a{.x}-1x_1-5_2*NSO/3=O/3=O"),
+      .y,
+      "?1"
+    )
+  )
+  purrr::iwalk(
+    hexn_codes,
+    ~ expect_n_sulfate_residue(
+      stringr::str_glue("a{.x}-1x_1-?_2*NSO/3=O/3=O"),
+      .y,
+      "?1"
+    )
+  )
+})
+
+
 test_that("parse_wurcs correctly handles unknown linkages", {
   expect_equal(
     as.character(parse_wurcs(
@@ -856,6 +902,22 @@ test_that("parse_wurcs handles unknown ring closure", {
       "WURCS=2.0/5,6,5/[a2122h-1x_1-?_2*NCC/3=O][a1221m-1a_1-5][a2122h-1b_1-5_2*NCC/3=O][a1122h-1b_1-5][a1122h-1a_1-5]/1-2-3-4-5-5/a4-c1_c4-d1_d3-e1_d6-f1_a?-b1"
     )),
     "Man(a1-3)[Man(a1-6)]Man(b1-4)GlcNAc(b1-4)[Fuc(a1-?)]GlcNAc(?1-"
+  )
+})
+
+
+test_that("parse_wurcs handles N-sulfate on amino sugars", {
+  expect_equal(
+    as.character(parse_wurcs(
+      "WURCS=2.0/2,2,1/[u2122h_2*NSO/3=O/3=O][a2122A-1x_1-5]/1-2/a?-b1"
+    )),
+    "GlcA(?1-?)GlcN2S(??-"
+  )
+  expect_equal(
+    as.character(parse_wurcs(
+      "WURCS=2.0/2,2,1/[u2122A][a2122h-1x_1-5_2*NSO/3=O/3=O]/1-2/a?-b1"
+    )),
+    "GlcN2S(?1-?)GlcA(??-"
   )
 })
 

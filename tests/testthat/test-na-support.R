@@ -154,32 +154,43 @@ purrr::iwalk(parser_failure_cases, function(case, parser_name) {
 
     parser <- get(parser_name)
 
-    err <- rlang::catch_cnd(parser(c(case$valid, case$invalid)), classes = "error")
+    err <- rlang::catch_cnd(
+      parser(c(case$valid, case$invalid)),
+      classes = "error"
+    )
 
     expect_s3_class(err, "error")
     expect_match(conditionMessage(err), "Can't parse", fixed = TRUE)
   })
 
-  test_that(glue::glue("{parser_name} returns NA for invalid input with on_failure = 'na'"), {
-    skip_if_not_installed("glyrepr", minimum_version = "0.10.0")
+  test_that(
+    glue::glue(
+      "{parser_name} returns NA for invalid input with on_failure = 'na'"
+    ),
+    {
+      skip_if_not_installed("glyrepr", minimum_version = "0.10.0")
 
-    parser <- get(parser_name)
-    input <- c(valid = case$valid, invalid = case$invalid)
+      parser <- get(parser_name)
+      input <- c(valid = case$valid, invalid = case$invalid)
 
-    result <- parser(input, on_failure = "na")
+      result <- parser(input, on_failure = "na")
 
-    expect_equal(length(result), 2)
-    expect_equal(names(result), names(input))
-    expect_false(is.na(result[["valid"]]))
-    expect_true(is.na(result[["invalid"]]))
-  })
+      expect_equal(length(result), 2)
+      expect_equal(names(result), names(input))
+      expect_false(is.na(result[["valid"]]))
+      expect_true(is.na(result[["invalid"]]))
+    }
+  )
 })
 
 test_that("parser functions validate on_failure", {
   skip_if_not_installed("glyrepr", minimum_version = "0.10.0")
 
   expect_error(
-    parse_iupac_condensed("Gal(b1-3)GlcNAc(b1-4)Glc(a1-", on_failure = "ignore"),
+    parse_iupac_condensed(
+      "Gal(b1-3)GlcNAc(b1-4)Glc(a1-",
+      on_failure = "ignore"
+    ),
     "`on_failure`"
   )
 })
