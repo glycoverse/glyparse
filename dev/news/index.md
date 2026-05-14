@@ -2,7 +2,18 @@
 
 ## glyparse (development version)
 
+### Minor improvements and bug fixes
+
+- [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
+  now supports ambiguous `u` residues and unknown ring closure residues
+  (`?` ring position).
+- [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
+  now correctly handles WURCS N-sulfate substituent codes
+  (`*NSO/3=O/3=O`).
+
 ## glyparse 0.6.0
+
+CRAN release: 2026-04-29
 
 ### New features
 
