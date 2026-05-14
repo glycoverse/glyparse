@@ -4,6 +4,7 @@
 
 * `parse_wurcs()` now supports ambiguous `u` residues and unknown ring closure residues (`?` ring position).
 * `parse_wurcs()` now correctly handles WURCS N-sulfate substituent codes (`*NSO/3=O/3=O`).
+* `parse_glycoct()` now preserves unknown reducing-end ring positions and matches amino sugars with unknown ring bounds.
 
 # glyparse 0.6.0
 
