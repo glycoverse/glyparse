@@ -94,6 +94,7 @@ parse_res_section <- function(res_lines) {
       residues[[as.character(id)]] <- list(
         type = "mono",
         anomer = anomer,
+        anomer_pos = extract_glycoct_anomer_pos(mono_info),
         content = mono_info,
         substituents = list()
       )
@@ -107,6 +108,16 @@ parse_res_section <- function(res_lines) {
   }
 
   residues
+}
+
+#' Extract the anomeric position from a GlycoCT monosaccharide descriptor
+#'
+#' @param content GlycoCT monosaccharide content without the leading anomer.
+#'
+#' @return A character scalar with the anomeric position, or `NA`.
+#' @noRd
+extract_glycoct_anomer_pos <- function(content) {
+  stringr::str_extract(content, "-(\\d+|x):", group = 1)
 }
 
 parse_lin_section <- function(lin_lines) {
@@ -225,24 +236,35 @@ build_glycoct_graph <- function(residues, linkages) {
   # Set graph attributes (reducing end properties)
   reducing_end <- find_reducing_end(consolidated$vertices, consolidated$edges)
   if (!is.null(reducing_end)) {
-    # Get the anomer position for this monosaccharide
-    anomer_pos <- decide_anomer_pos(reducing_end$mono)
-    # Combine anomer configuration with position
-    anomer_config <- stringr::str_extract(reducing_end$anomer, "^[abx]")
-    if (is.na(anomer_config)) {
-      anomer_config <- "?"
-    }
-    # Handle unknown anomer configuration
-    if (anomer_config == "x") {
-      anomer_config <- "?"
-    }
-    g$anomer <- paste0(anomer_config, anomer_pos)
+    g$anomer <- format_glycoct_reducing_anomer(reducing_end)
   } else {
     g$anomer <- "?1"
   }
   g$alditol <- FALSE
 
   g
+}
+
+#' Format the reducing-end anomer stored in a GlycoCT graph
+#'
+#' @param reducing_end A consolidated reducing-end vertex.
+#'
+#' @return A character scalar such as `"a1"`, `"?1"`, or `"??"`.
+#' @noRd
+format_glycoct_reducing_anomer <- function(reducing_end) {
+  anomer_config <- stringr::str_extract(reducing_end$anomer, "^[abx]")
+  if (is.na(anomer_config) || anomer_config == "x") {
+    anomer_config <- "?"
+  }
+
+  anomer_pos <- reducing_end$anomer_pos
+  if (is.null(anomer_pos) || is.na(anomer_pos)) {
+    anomer_pos <- decide_anomer_pos(reducing_end$mono)
+  } else if (anomer_pos == "x") {
+    anomer_pos <- "?"
+  }
+
+  paste0(anomer_config, anomer_pos)
 }
 
 load_mono_mappings <- function() {
@@ -576,7 +598,8 @@ consolidate_residues <- function(residues, linkages, mono_mappings) {
             original_id = group[1],
             mono = mono_name,
             sub = "",
-            anomer = res$anomer
+            anomer = res$anomer,
+            anomer_pos = res$anomer_pos
           ))
         )
       }
@@ -610,7 +633,8 @@ consolidate_residues <- function(residues, linkages, mono_mappings) {
               original_id = main_mono_id,
               mono = matched,
               sub = "",
-              anomer = main_mono$anomer
+              anomer = main_mono$anomer,
+              anomer_pos = main_mono$anomer_pos
             ))
           )
         } else {
@@ -627,7 +651,8 @@ consolidate_residues <- function(residues, linkages, mono_mappings) {
               original_id = main_mono_id,
               mono = partial_result$mono,
               sub = partial_result$sub,
-              anomer = main_mono$anomer
+              anomer = main_mono$anomer,
+              anomer_pos = main_mono$anomer_pos
             ))
           )
         }

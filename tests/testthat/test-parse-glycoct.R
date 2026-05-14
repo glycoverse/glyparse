@@ -161,6 +161,16 @@ test_that("GlycoCT: GlcA3S(?1-?)Gal(?1-?)GlcNAc(?1-, (Unknown linkages and anome
   expect_equal(result, expected)
 })
 
+test_that("GlycoCT handles unknown reducing-end ring bounds", {
+  glycoct <- "RES\n1b:x-dglc-HEX-x:x"
+
+  result <- parse_glycoct(glycoct)
+  graph <- glyrepr::get_structure_graphs(result)
+
+  expect_equal(as.character(result), "Glc(??-")
+  expect_equal(graph$anomer, "??")
+})
+
 test_that("all monosaccharides can be parsed", {
   expect_mono_equal <- function(x, expected) {
     graph <- glyrepr::get_structure_graphs(x, return_list = FALSE)
