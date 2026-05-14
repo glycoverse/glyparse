@@ -10,6 +10,9 @@
 - [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
   now correctly handles WURCS N-sulfate substituent codes
   (`*NSO/3=O/3=O`).
+- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
+  now preserves unknown reducing-end ring positions and matches amino
+  sugars with unknown ring bounds.
 
 ## glyparse 0.6.0
 
