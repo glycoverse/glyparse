@@ -120,6 +120,49 @@ extract_glycoct_anomer_pos <- function(content) {
   stringr::str_extract(content, "-(\\d+|x):", group = 1)
 }
 
+#' Extract the ring-bounds component from a GlycoCT monosaccharide descriptor
+#'
+#' @param content GlycoCT monosaccharide content without the leading anomer.
+#'
+#' @return A character scalar with the ring bounds, or `NA`.
+#' @noRd
+extract_glycoct_ring_bounds <- function(content) {
+  stringr::str_extract(content, "-((?:\\d+|x):(?:\\d+|x))", group = 1)
+}
+
+#' Remove the ring-bounds component from a GlycoCT monosaccharide descriptor
+#'
+#' @param content GlycoCT monosaccharide content without the leading anomer.
+#'
+#' @return A normalized descriptor used for monosaccharide matching.
+#' @noRd
+remove_glycoct_ring_bounds <- function(content) {
+  stringr::str_remove(content, "-(?:\\d+|x):(?:\\d+|x)")
+}
+
+#' Check whether two GlycoCT monosaccharide descriptors are compatible
+#'
+#' @param x,y GlycoCT monosaccharide content without the leading anomer.
+#'
+#' @return A logical scalar.
+#' @noRd
+glycoct_mono_content_matches <- function(x, y) {
+  same_core <- remove_glycoct_ring_bounds(x) == remove_glycoct_ring_bounds(y)
+  if (!same_core) {
+    return(FALSE)
+  }
+
+  x_bounds <- extract_glycoct_ring_bounds(x)
+  y_bounds <- extract_glycoct_ring_bounds(y)
+  if (is.na(x_bounds) || is.na(y_bounds)) {
+    return(identical(x_bounds, y_bounds))
+  }
+
+  identical(x_bounds, y_bounds) ||
+    stringr::str_detect(x_bounds, "x") ||
+    stringr::str_detect(y_bounds, "x")
+}
+
 parse_lin_section <- function(lin_lines) {
   linkages <- list()
 
@@ -775,7 +818,11 @@ match_partial_composite_structure <- function(
 
         # Check if monosaccharide matches
         if (
-          !is.null(group_mono) && group_mono$content == pattern_mono_content
+          !is.null(group_mono) &&
+            glycoct_mono_content_matches(
+              group_mono$content,
+              pattern_mono_content
+            )
         ) {
           # Verify that the pattern substituents actually match with correct linkages
           # by using the full pattern matching function
@@ -964,7 +1011,7 @@ matches_glycoct_pattern <- function(group, residues, linkages, mapping) {
   # Compare structures - exact match for monosaccharide content
   mono_match <- !is.null(group_mono) &&
     !is.null(pattern_mono) &&
-    group_mono == pattern_mono
+    glycoct_mono_content_matches(group_mono, pattern_mono)
 
   subs_match <- length(group_subs) == length(pattern_subs) &&
     all(sort(group_subs) == sort(pattern_subs))
@@ -987,7 +1034,7 @@ map_single_mono <- function(content) {
       mono_line <- mapping$res[[1]]
       if (stringr::str_detect(mono_line, "^\\d+b:")) {
         pattern_content <- stringr::str_remove(mono_line, "^\\d+b:[abx]-")
-        if (content == pattern_content) {
+        if (glycoct_mono_content_matches(content, pattern_content)) {
           return(mono_name)
         }
       }
