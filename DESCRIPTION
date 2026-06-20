@@ -19,7 +19,6 @@ Suggests:
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 URL: https://glycoverse.github.io/glyparse/, https://github.com/glycoverse/glyparse
 Imports: 
     checkmate,
@@ -36,3 +35,4 @@ Depends:
     R (>= 4.1)
 VignetteBuilder: knitr
 BugReports: https://github.com/glycoverse/glyparse/issues
+Config/roxygen2/version: 8.0.0
