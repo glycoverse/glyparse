@@ -2,6 +2,10 @@
 
 ## glyparse (development version)
 
+## glyparse 0.6.1
+
+CRAN release: 2026-06-20
+
 ### Minor improvements and bug fixes
 
 - [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
