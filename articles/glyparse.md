@@ -21,6 +21,7 @@ documentation
 [here](https://glycoverse.github.io/glyrepr/articles/glyrepr.html).
 
 ``` r
+
 library(glyparse)
 ```
 
@@ -29,16 +30,16 @@ library(glyparse)
 Before we dive in, let’s see what we’re dealing with. Here’s the same
 N-glycan core structure written in different formats:
 
-| Format              | Example                                                                                   | Where You’ll See It      |
-|---------------------|-------------------------------------------------------------------------------------------|--------------------------|
-| **IUPAC-condensed** | `Man(a1-3)[Man(a1-6)]Man(b1-4)GlcNAc(b1-4)GlcNAc`                                         | Literature, UniCarbKB    |
-| **IUPAC-short**     | `Mana3(Mana6)Manb4GlcNAcb4GlcNAc`                                                         | Literature, UniCarbKB    |
-| **IUPAC-extended**  | `alpha-D-Man-(1->3)-[alpha-D-Man-(1->6)]-beta-D-Man-(1->4)-beta-D-GlcNAc-(1->4)-D-GlcNAc` | Literature, UniCarbKB    |
-| **GlycoCT**         | Complex multi-line format                                                                 | Literature, GlycomeDB    |
-| **WURCS**           | `WURCS=2.0/3,5,4/[...]/1-1-2-3-3/a4-b1_b4-c1...`                                          | Literature, GlyTouCan    |
-| **Linear Code**     | `Ma3(Ma6)Mb4GNb4GNb`                                                                      | Literature               |
-| **pGlyco**          | `(N(N(H(H(H)))))`                                                                         | pGlyco software results  |
-| **StrucGP**         | `A2B2C1D1E2fedcba`                                                                        | StrucGP software results |
+| Format | Example | Where You’ll See It |
+|----|----|----|
+| **IUPAC-condensed** | `Man(a1-3)[Man(a1-6)]Man(b1-4)GlcNAc(b1-4)GlcNAc` | Literature, UniCarbKB |
+| **IUPAC-short** | `Mana3(Mana6)Manb4GlcNAcb4GlcNAc` | Literature, UniCarbKB |
+| **IUPAC-extended** | `alpha-D-Man-(1->3)-[alpha-D-Man-(1->6)]-beta-D-Man-(1->4)-beta-D-GlcNAc-(1->4)-D-GlcNAc` | Literature, UniCarbKB |
+| **GlycoCT** | Complex multi-line format | Literature, GlycomeDB |
+| **WURCS** | `WURCS=2.0/3,5,4/[...]/1-1-2-3-3/a4-b1_b4-c1...` | Literature, GlyTouCan |
+| **Linear Code** | `Ma3(Ma6)Mb4GNb4GNb` | Literature |
+| **pGlyco** | `(N(N(H(H(H)))))` | pGlyco software results |
+| **StrucGP** | `A2B2C1D1E2fedcba` | StrucGP software results |
 
 Confusing, right? 😵‍💫 `glyparse` understands them all!
 
@@ -79,6 +80,7 @@ This function tries to identify the format automatically and use the
 appropriate parser. Even input with mixed formats is supported.
 
 ``` r
+
 x <- c(
   "Gal(b1-3)GalNAc(b1-",
   "(N(F)(N(H(H(N))(H(N(H))))))",
@@ -105,6 +107,7 @@ Want to know more about IUPAC-condensed format? Check
 [this](https://glycoverse.github.io/glyrepr/articles/iupac.html) out!
 
 ``` r
+
 # Single structure
 iupac_condensed <- "Neu5Ac(a2-3)Gal(b1-4)[Fuc(a1-3)]GlcNAc(b1-4)Gal(b1-4)Glc(a1-"
 parse_iupac_condensed(iupac_condensed)
@@ -114,6 +117,7 @@ parse_iupac_condensed(iupac_condensed)
 ```
 
 ``` r
+
 # Multiple structures at once
 glycans <- c(
   "Man(a1-3)[Man(a1-6)]Man(b1-4)GlcNAc(b1-4)GlcNAc(b1-",  # N-glycan core
@@ -134,6 +138,7 @@ This compact format is popular in research papers because it saves
 space:
 
 ``` r
+
 # The same structures in short format
 iupac_short <- c(
   "Mana3(Mana6)Manb4GlcNAcb4GlcNAcb-",
@@ -156,6 +161,7 @@ infer common linkage positions (like Neu5Ac always being a2-linked).
 This verbose format includes full chemical names and stereochemistry:
 
 ``` r
+
 iupac_extended <- paste0(
   "α-D-Manp-(1→3)[α-D-Manp-(1→6)]-β-D-Manp-(1→4)",
   "-β-D-GlcpNAc-(1→4)-β-D-GlcpNAc-(1→"
@@ -174,6 +180,7 @@ GlycoCT is used in literature for precise representation and in
 databases like GlycomeDB. It’s more complex but extremely precise:
 
 ``` r
+
 glycoct <- paste0(
   "RES\n",
   "1b:b-dglc-HEX-1:5\n",
@@ -195,6 +202,7 @@ WURCS (Web3 Unique Representation of Carbohydrate Structures) is used in
 literature for complex structures and in databases like GlyTouCan:
 
 ``` r
+
 wurcs <- paste0(
   "WURCS=2.0/3,3,2/",
   "[a2122h-1b_1-5][a1122h-1b_1-5][a1122h-1a_1-5]/",
@@ -212,6 +220,7 @@ Linear Code is a simplified format used in literature for complex
 structures:
 
 ``` r
+
 linear_code <- "Ma3(Ma6)Mb4GNb4GNb"
 parse_linear_code(linear_code)
 #> <glycan_structure[1]>
@@ -227,6 +236,7 @@ If you work with glycoproteomics, you might encounter pGlyco’s
 parenthetical notation:
 
 ``` r
+
 pglyco <- "(N(F)(N(H(H(N))(H(N(H))))))"
 parse_pglyco_struc(pglyco)
 #> <glycan_structure[1]>
@@ -245,6 +255,7 @@ This cryptic notation actually represents a complex N-glycan:
 StrucGP uses a letter-based encoding system:
 
 ``` r
+
 strucgp <- "A2B2C1D1E2F1fedD1E2edcbB5ba"
 parse_strucgp_struc(strucgp)
 #> <glycan_structure[1]>
