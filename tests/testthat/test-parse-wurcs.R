@@ -870,6 +870,108 @@ test_that("parse_residue handles N-sulfate on amino sugars", {
 })
 
 
+test_that("parse_residue handles alditol residues", {
+  expect_alditol_residue <- function(residue, mono) {
+    anomer <- paste0("?", glyrepr::get_anomer_pos(mono))
+    expect_equal(
+      parse_residue(residue),
+      c(mono = mono, anomer = anomer, sub = "")
+    )
+  }
+
+  alditol_residues <- c(
+    Glc = "h2122h",
+    Man = "h1122h",
+    Gal = "h2112h",
+    Gul = "h2212h",
+    Alt = "h2221h",
+    All = "h2222h",
+    Tal = "h1222h",
+    Ido = "h2121h",
+    GlcNAc = "h2122h_2*NCC/3=O",
+    GalNAc = "h2112h_2*NCC/3=O",
+    ManNAc = "h1122h_2*NCC/3=O",
+    GulNAc = "h2212h_2*NCC/3=O",
+    AltNAc = "h2221h_5*NCC/3=O",
+    AllNAc = "h2222h_2*NCC/3=O",
+    TalNAc = "h1222h_5*NCC/3=O",
+    IdoNAc = "h2121h_2*NCC/3=O",
+    GlcN = "h2122h_2*N",
+    ManN = "h1122h_2*N",
+    GalN = "h2112h_2*N",
+    GulN = "h2212h_2*N",
+    AltN = "h2221h_5*N",
+    AllN = "h2222h_2*N",
+    TalN = "h1222h_5*N",
+    IdoN = "h2121h_2*N",
+    Fuc = "h1221m",
+    Qui = "h2122m",
+    Rha = "h2211m",
+    `6dGul` = "h2212m",
+    `6dAlt` = "h2111m",
+    `6dTal` = "h1112m",
+    FucNAc = "h1221m_2*NCC/3=O",
+    QuiNAc = "h2122m_2*NCC/3=O",
+    RhaNAc = "h2211m_2*NCC/3=O",
+    `6dAltNAc` = "h2111m_2*NCC/3=O",
+    `6dTalNAc` = "h1112m_2*NCC/3=O",
+    Oli = "hd122m",
+    Tyv = "h1d22m",
+    Abe = "h2d12m",
+    Par = "h2d22m",
+    Dig = "hd222m",
+    Col = "h1d21m",
+    Lyx = "h221h",
+    Xyl = "h212h",
+    Rib = "h222h",
+    Neu5Ac = "hUd21122h_5*NCC/3=O",
+    Neu5Gc = "hUd21122h_5*NCCO/3=O",
+    Kdn = "hUd21122h",
+    Neu = "hUd21122h_5*N",
+    Pse = "hUd22111m_5*N_7*N",
+    Leg = "hUd21122m_5*N_7*N",
+    Aci = "hUd21111m_5*N_7*N",
+    `4eLeg` = "hUd11122m_5*N_7*N",
+    Bac = "h2122m_2*N_4*N",
+    LDmanHep = "h21122h",
+    Kdo = "hUd1122h",
+    Dha = "A122dUh",
+    DDmanHep = "h11222h",
+    MurNAc = "h2122h_2*NCC/3=O_3*OC^RCO/4=O/3C",
+    MurNGc = "h2122h_2*NCCO/3=O_3*OC^RCO/4=O/3C",
+    Mur = "h2122h_3*OC^RCO/4=O/3C",
+    Fru = "hU122h",
+    Tag = "hU112h",
+    Sor = "hU121h",
+    Psi = "hU222h"
+  )
+
+  purrr::iwalk(alditol_residues, ~ expect_alditol_residue(.x, .y))
+
+  # GlycanFormatConverter emits h221h for both Ara-ol and Lyx-ol. WURCS
+  # canonicalizes that alditol descriptor back to Lyx-ol, so parse the distinct
+  # descriptor deterministically.
+  expect_alditol_residue("h221h", "Lyx")
+})
+
+
+test_that("parse_wurcs warns and uses unknown reducing-end anomers for alditols", {
+  glcnac_alditol <- "WURCS=2.0/1,1,0/[h2122h_2*NCC/3=O]/1/"
+  expect_warning(
+    glcnac_structure <- parse_wurcs(glcnac_alditol),
+    "regular reducing-end glycans with unknown anomer configurations"
+  )
+  expect_equal(as.character(glcnac_structure), "GlcNAc(?1-")
+
+  linked_alditol <- "WURCS=2.0/2,2,1/[h2122h_2*NCC/3=O][a2112h-1b_1-5]/1-2/a4-b1"
+  expect_warning(
+    linked_structure <- parse_wurcs(linked_alditol),
+    "regular reducing-end glycans with unknown anomer configurations"
+  )
+  expect_equal(as.character(linked_structure), "Gal(b1-4)GlcNAc(?1-")
+})
+
+
 test_that("parse_wurcs correctly handles unknown linkages", {
   expect_equal(
     as.character(parse_wurcs(

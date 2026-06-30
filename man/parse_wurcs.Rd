@@ -19,6 +19,8 @@ A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.
 This function parses WURCS strings into a \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}}.
 Currently, only WURCS 2.0 is supported.
 For more information about WURCS, see \href{https://github.com/glycoinfo/WURCS/wiki}{WURCS}.
+Alditol residues are parsed as regular reducing-end glycans with unknown
+anomer configurations.
 }
 \examples{
 wurcs <- paste0(
