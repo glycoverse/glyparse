@@ -1,5 +1,9 @@
 # glyparse (development version)
 
+## Minor improvements and bug fixes
+
+* `parse_wurcs()` now parses WURCS alditol residues as regular reducing-end glycans with unknown anomer configurations. (#21)
+
 # glyparse 0.6.1
 
 ## Minor improvements and bug fixes
