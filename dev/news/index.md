@@ -8,6 +8,10 @@
   now parses WURCS alditol residues as regular reducing-end glycans with
   unknown anomer configurations.
   ([\#21](https://github.com/glycoverse/glyparse/issues/21))
+- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
+  now parses GlycoCT alditol residues as regular reducing-end glycans
+  with unknown anomer configurations.
+  ([\#22](https://github.com/glycoverse/glyparse/issues/22))
 
 ## glyparse 0.6.1
 

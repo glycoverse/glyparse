@@ -37,6 +37,9 @@ GlycoCT format consists of two parts:
 
 - LIN: Contains linkage information between residues
 
+Alditol residues are parsed as regular reducing-end glycans with unknown
+anomer configurations.
+
 For more information about GlycoCT format, see the glycoct.md
 documentation.
 
