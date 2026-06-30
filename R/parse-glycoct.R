@@ -8,6 +8,9 @@
 #' - RES: Contains monosaccharides (lines starting with 'b:') and substituents (lines starting with 's:')
 #' - LIN: Contains linkage information between residues
 #'
+#' Alditol residues are parsed as regular reducing-end glycans with unknown
+#' anomer configurations.
+#'
 #' For more information about GlycoCT format, see the glycoct.md documentation.
 #'
 #' @param x A character vector of GlycoCT strings. NA values are allowed and will be returned as NA structures.
@@ -63,6 +66,9 @@ do_parse_glycoct <- function(x) {
 
   # Parse residues (monosaccharides and substituents)
   residues <- parse_res_section(res_lines)
+  if (has_glycoct_alditol_residue(residues)) {
+    warn_glycoct_alditol()
+  }
 
   # Parse linkages
   linkages <- parse_lin_section(lin_lines)
@@ -88,14 +94,15 @@ parse_res_section <- function(res_lines) {
 
     if (type == "b") {
       # Monosaccharide
-      anomer <- stringr::str_extract(content, "^[abx]")
-      mono_info <- stringr::str_remove(content, "^[abx]-")
+      anomer <- stringr::str_extract(content, "^[abxo]")
+      mono_info <- stringr::str_remove(content, "^[abxo]-")
 
       residues[[as.character(id)]] <- list(
         type = "mono",
         anomer = anomer,
         anomer_pos = extract_glycoct_anomer_pos(mono_info),
         content = mono_info,
+        is_alditol = is_glycoct_alditol_mono(mono_info),
         substituents = list()
       )
     } else if (type == "s") {
@@ -108,6 +115,42 @@ parse_res_section <- function(res_lines) {
   }
 
   residues
+}
+
+#' Check whether a GlycoCT monosaccharide descriptor is an alditol
+#'
+#' @param content GlycoCT monosaccharide content without the leading anomer.
+#'
+#' @return A logical scalar.
+#' @noRd
+is_glycoct_alditol_mono <- function(content) {
+  isTRUE(stringr::str_detect(content, "-0:0")) &&
+    isTRUE(stringr::str_detect(content, "\\|1:aldi"))
+}
+
+#' Check whether parsed GlycoCT residues contain an alditol
+#'
+#' @param residues A parsed GlycoCT residue list.
+#'
+#' @return A logical scalar.
+#' @noRd
+has_glycoct_alditol_residue <- function(residues) {
+  any(purrr::map_lgl(
+    residues,
+    ~ identical(.x$type, "mono") && isTRUE(.x$is_alditol)
+  ))
+}
+
+#' Warn about alditol normalization in GlycoCT parsing
+#'
+#' @return `NULL`, invisibly.
+#' @noRd
+warn_glycoct_alditol <- function() {
+  cli::cli_warn(c(
+    "Alditol GlycoCT residues are parsed as regular reducing-end glycans with unknown anomer configurations.",
+    "i" = "For example, GlcNAc-ol is returned as GlcNAc(?1-."
+  ))
+  invisible(NULL)
 }
 
 #' Extract the anomeric position from a GlycoCT monosaccharide descriptor
@@ -147,6 +190,12 @@ remove_glycoct_ring_bounds <- function(content) {
 #' @return A logical scalar.
 #' @noRd
 glycoct_mono_content_matches <- function(x, y) {
+  x_alditol <- is_glycoct_alditol_mono(x)
+  y_alditol <- is_glycoct_alditol_mono(y)
+  if (!identical(x_alditol, y_alditol)) {
+    return(FALSE)
+  }
+
   same_core <- remove_glycoct_ring_bounds(x) == remove_glycoct_ring_bounds(y)
   if (!same_core) {
     return(FALSE)
@@ -233,7 +282,11 @@ build_glycoct_graph <- function(residues, linkages) {
       to_vertex <- consolidated$vertices[[to_idx]]
 
       # Handle unknown anomer and positions
-      anomer_char <- if (to_vertex$anomer == "x") "?" else to_vertex$anomer
+      anomer_char <- if (to_vertex$anomer %in% c("x", "o")) {
+        "?"
+      } else {
+        to_vertex$anomer
+      }
       to_pos_str <- if (edge$to_pos == "-1") "?" else as.character(edge$to_pos)
       from_pos_str <- if (edge$from_pos == "-1") {
         "?"
@@ -295,6 +348,10 @@ build_glycoct_graph <- function(residues, linkages) {
 #' @return A character scalar such as `"a1"`, `"?1"`, or `"??"`.
 #' @noRd
 format_glycoct_reducing_anomer <- function(reducing_end) {
+  if (isTRUE(reducing_end$is_alditol)) {
+    return(paste0("?", glyrepr::get_anomer_pos(reducing_end$mono)))
+  }
+
   anomer_config <- stringr::str_extract(reducing_end$anomer, "^[abx]")
   if (is.na(anomer_config) || anomer_config == "x") {
     anomer_config <- "?"
@@ -622,7 +679,239 @@ load_mono_mappings <- function() {
   return(GLYCOCT_MAP)
 }
 
+#' Load GlycoCT alditol monosaccharide mappings
+#'
+#' @return A named list of GlycoCT alditol residue mappings.
+#' @noRd
+load_alditol_mono_mappings <- function() {
+  # GlycanFormatConverter represents GlycoCT alditols as open-chain residues
+  # with 0:0 ring bounds and a 1:aldi modification.
+  GLYCOCT_ALDITOL_MAP <- list(
+    "Glc" = list(
+      res = c("1b:o-dglc-HEX-0:0|1:aldi"),
+      lin = NULL
+    ),
+    "Man" = list(
+      res = c("1b:o-dman-HEX-0:0|1:aldi"),
+      lin = NULL
+    ),
+    "Gal" = list(
+      res = c("1b:o-dgal-HEX-0:0|1:aldi"),
+      lin = NULL
+    ),
+    "Gul" = list(
+      res = c("1b:o-dgul-HEX-0:0|1:aldi"),
+      lin = NULL
+    ),
+    "Alt" = list(
+      res = c("1b:o-ltal-HEX-0:0|1:aldi"),
+      lin = NULL
+    ),
+    "All" = list(
+      res = c("1b:o-dall-HEX-0:0|1:aldi"),
+      lin = NULL
+    ),
+    "Tal" = list(
+      res = c("1b:o-dalt-HEX-0:0|1:aldi"),
+      lin = NULL
+    ),
+    "Ido" = list(
+      res = c("1b:o-lido-HEX-0:0|1:aldi"),
+      lin = NULL
+    ),
+    "GlcNAc" = list(
+      res = c("1b:o-dglc-HEX-0:0|1:aldi", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "GalNAc" = list(
+      res = c("1b:o-dgal-HEX-0:0|1:aldi", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "ManNAc" = list(
+      res = c("1b:o-dman-HEX-0:0|1:aldi", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "GulNAc" = list(
+      res = c("1b:o-dgul-HEX-0:0|1:aldi", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "AltNAc" = list(
+      res = c("1b:o-ltal-HEX-0:0|1:aldi", "2s:n-acetyl"),
+      lin = c("1:1d(5+1)2n")
+    ),
+    "AllNAc" = list(
+      res = c("1b:o-dall-HEX-0:0|1:aldi", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "TalNAc" = list(
+      res = c("1b:o-dalt-HEX-0:0|1:aldi", "2s:n-acetyl"),
+      lin = c("1:1d(5+1)2n")
+    ),
+    "IdoNAc" = list(
+      res = c("1b:o-lido-HEX-0:0|1:aldi", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "GlcN" = list(
+      res = c("1b:o-dglc-HEX-0:0|1:aldi", "2s:amino"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "ManN" = list(
+      res = c("1b:o-dman-HEX-0:0|1:aldi", "2s:amino"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "GalN" = list(
+      res = c("1b:o-dgal-HEX-0:0|1:aldi", "2s:amino"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "GulN" = list(
+      res = c("1b:o-dgul-HEX-0:0|1:aldi", "2s:amino"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "AltN" = list(
+      res = c("1b:o-ltal-HEX-0:0|1:aldi", "2s:amino"),
+      lin = c("1:1d(5+1)2n")
+    ),
+    "AllN" = list(
+      res = c("1b:o-dall-HEX-0:0|1:aldi", "2s:amino"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "TalN" = list(
+      res = c("1b:o-dalt-HEX-0:0|1:aldi", "2s:amino"),
+      lin = c("1:1d(5+1)2n")
+    ),
+    "IdoN" = list(
+      res = c("1b:o-lido-HEX-0:0|1:aldi", "2s:amino"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "Fuc" = list(
+      res = c("1b:o-lgal-HEX-0:0|1:aldi|6:d"),
+      lin = NULL
+    ),
+    "Qui" = list(
+      res = c("1b:o-dglc-HEX-0:0|1:aldi|6:d"),
+      lin = NULL
+    ),
+    "Rha" = list(
+      res = c("1b:o-lman-HEX-0:0|1:aldi|6:d"),
+      lin = NULL
+    ),
+    "6dGul" = list(
+      res = c("1b:o-dgul-HEX-0:0|1:aldi|6:d"),
+      lin = NULL
+    ),
+    "6dAlt" = list(
+      res = c("1b:o-lalt-HEX-0:0|1:aldi|6:d"),
+      lin = NULL
+    ),
+    "6dTal" = list(
+      res = c("1b:o-dtal-HEX-0:0|1:aldi|6:d"),
+      lin = NULL
+    ),
+    "FucNAc" = list(
+      res = c("1b:o-lgal-HEX-0:0|1:aldi|6:d", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "QuiNAc" = list(
+      res = c("1b:o-dglc-HEX-0:0|1:aldi|6:d", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "RhaNAc" = list(
+      res = c("1b:o-lman-HEX-0:0|1:aldi|6:d", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "6dAltNAc" = list(
+      res = c("1b:o-lalt-HEX-0:0|1:aldi|6:d", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "6dTalNAc" = list(
+      res = c("1b:o-dtal-HEX-0:0|1:aldi|6:d", "2s:n-acetyl"),
+      lin = c("1:1d(2+1)2n")
+    ),
+    "Oli" = list(
+      res = c("1b:o-dara-HEX-0:0|1:aldi|2:d|6:d"),
+      lin = NULL
+    ),
+    "Tyv" = list(
+      res = c("1b:o-dara-HEX-0:0|1:aldi|3:d|6:d"),
+      lin = NULL
+    ),
+    "Abe" = list(
+      res = c("1b:o-dxyl-HEX-0:0|1:aldi|3:d|6:d"),
+      lin = NULL
+    ),
+    "Par" = list(
+      res = c("1b:o-drib-HEX-0:0|1:aldi|3:d|6:d"),
+      lin = NULL
+    ),
+    "Dig" = list(
+      res = c("1b:o-drib-HEX-0:0|1:aldi|2:d|6:d"),
+      lin = NULL
+    ),
+    "Col" = list(
+      res = c("1b:o-lxyl-HEX-0:0|1:aldi|3:d|6:d"),
+      lin = NULL
+    ),
+    "Lyx" = list(
+      res = c("1b:o-llyx-PEN-0:0|1:aldi"),
+      lin = NULL
+    ),
+    "Xyl" = list(
+      res = c("1b:o-dxyl-PEN-0:0|1:aldi"),
+      lin = NULL
+    ),
+    "Rib" = list(
+      res = c("1b:o-drib-PEN-0:0|1:aldi"),
+      lin = NULL
+    ),
+    "Bac" = list(
+      res = c(
+        "1b:o-dglc-HEX-0:0|1:aldi|6:d",
+        "2s:amino",
+        "3s:amino"
+      ),
+      lin = c("1:1d(2+1)2n", "2:1d(4+1)3n")
+    ),
+    "LDmanHep" = list(
+      res = c("1b:o-dgro-dgal-HEP-0:0|1:aldi"),
+      lin = NULL
+    ),
+    "DDmanHep" = list(
+      res = c("1b:o-dgro-dman-HEP-0:0|1:aldi"),
+      lin = NULL
+    ),
+    "MurNAc" = list(
+      res = c(
+        "1b:o-dglc-HEX-0:0|1:aldi",
+        "2s:n-acetyl",
+        "3s:(r)-carboxyethyl"
+      ),
+      lin = c("1:1d(2+1)2n", "2:1o(3+1)3n")
+    ),
+    "MurNGc" = list(
+      res = c(
+        "1b:o-dglc-HEX-0:0|1:aldi",
+        "2s:n-glycolyl",
+        "3s:(r)-carboxyethyl"
+      ),
+      lin = c("1:1d(2+1)2n", "2:1o(3+1)3n")
+    ),
+    "Mur" = list(
+      res = c("1b:o-dglc-HEX-0:0|1:aldi", "2s:(r)-carboxyethyl"),
+      lin = c("1:1o(3+1)2n")
+    )
+  )
+
+  return(GLYCOCT_ALDITOL_MAP)
+}
+
 consolidate_residues <- function(residues, linkages, mono_mappings) {
+  has_alditol <- has_glycoct_alditol_residue(residues)
+  alditol_mappings <- if (has_alditol) {
+    load_alditol_mono_mappings()
+  } else {
+    list()
+  }
+
   # Group residues by their linkage relationships to identify composite structures
   composite_groups <- find_composite_groups(residues, linkages)
 
@@ -642,7 +931,8 @@ consolidate_residues <- function(residues, linkages, mono_mappings) {
             mono = mono_name,
             sub = "",
             anomer = res$anomer,
-            anomer_pos = res$anomer_pos
+            anomer_pos = res$anomer_pos,
+            is_alditol = isTRUE(res$is_alditol)
           ))
         )
       }
@@ -652,8 +942,16 @@ consolidate_residues <- function(residues, linkages, mono_mappings) {
         group,
         residues,
         linkages,
-        mono_mappings
+        alditol_mappings
       )
+      if (is.null(matched)) {
+        matched <- match_composite_structure(
+          group,
+          residues,
+          linkages,
+          mono_mappings
+        )
+      }
 
       # Find the main monosaccharide (the one with type "mono")
       main_mono_id <- NULL
@@ -677,16 +975,22 @@ consolidate_residues <- function(residues, linkages, mono_mappings) {
               mono = matched,
               sub = "",
               anomer = main_mono$anomer,
-              anomer_pos = main_mono$anomer_pos
+              anomer_pos = main_mono$anomer_pos,
+              is_alditol = isTRUE(main_mono$is_alditol)
             ))
           )
         } else {
           # No exact match - try partial matching with extra substituents
+          partial_mappings <- if (isTRUE(main_mono$is_alditol)) {
+            alditol_mappings
+          } else {
+            mono_mappings
+          }
           partial_result <- match_partial_composite_structure(
             group,
             residues,
             linkages,
-            mono_mappings
+            partial_mappings
           )
           vertices <- append(
             vertices,
@@ -695,7 +999,8 @@ consolidate_residues <- function(residues, linkages, mono_mappings) {
               mono = partial_result$mono,
               sub = partial_result$sub,
               anomer = main_mono$anomer,
-              anomer_pos = main_mono$anomer_pos
+              anomer_pos = main_mono$anomer_pos,
+              is_alditol = isTRUE(main_mono$is_alditol)
             ))
           )
         }
@@ -758,8 +1063,9 @@ match_composite_structure <- function(
   mono_mappings
 ) {
   # Try to match the composite structure with known monosaccharides
-  for (mono_name in names(mono_mappings)) {
-    mapping <- mono_mappings[[mono_name]]
+  for (idx in seq_along(mono_mappings)) {
+    mono_name <- names(mono_mappings)[[idx]]
+    mapping <- mono_mappings[[idx]]
     if (matches_glycoct_pattern(group, residues, linkages, mapping)) {
       return(mono_name)
     }
@@ -794,8 +1100,9 @@ match_partial_composite_structure <- function(
   }
 
   # Try to find a known composite that uses a subset of our substituents
-  for (mono_name in names(mono_mappings)) {
-    mapping <- mono_mappings[[mono_name]]
+  for (idx in seq_along(mono_mappings)) {
+    mono_name <- names(mono_mappings)[[idx]]
+    mapping <- mono_mappings[[idx]]
 
     # Get the pattern's substituents
     pattern_subs <- c()
@@ -813,7 +1120,7 @@ match_partial_composite_structure <- function(
       if (length(mono_lines) > 0) {
         pattern_mono_content <- stringr::str_remove(
           mono_lines[1],
-          "^\\d+b:[abx]-"
+          "^\\d+b:[abxo]-"
         )
 
         # Check if monosaccharide matches
@@ -983,7 +1290,7 @@ matches_glycoct_pattern <- function(group, residues, linkages, mapping) {
   mono_lines <- mapping$res[stringr::str_detect(mapping$res, "^\\d+b:")]
   if (length(mono_lines) > 0) {
     mono_content <- stringr::str_remove(mono_lines[1], "^\\d+b:")
-    pattern_mono <- stringr::str_remove(mono_content, "^[abx]-")
+    pattern_mono <- stringr::str_remove(mono_content, "^[abxo]-")
   }
 
   # Extract substituents from pattern
@@ -1025,20 +1332,28 @@ matches_glycoct_pattern <- function(group, residues, linkages, mapping) {
 map_single_mono <- function(content) {
   # Extract monosaccharide name from content like "dglc-HEX-1:5" or "lgal-HEX-1:5|6:d"
 
-  # First try to match against known patterns from mono_glycoct.txt
-  mono_mappings <- load_mono_mappings()
-  for (mono_name in names(mono_mappings)) {
-    mapping <- mono_mappings[[mono_name]]
+  is_alditol <- is_glycoct_alditol_mono(content)
+  mono_mappings <- if (is_alditol) {
+    load_alditol_mono_mappings()
+  } else {
+    load_mono_mappings()
+  }
+  for (idx in seq_along(mono_mappings)) {
+    mono_name <- names(mono_mappings)[[idx]]
+    mapping <- mono_mappings[[idx]]
     if (length(mapping$res) == 1) {
       # Single monosaccharide without substituents
       mono_line <- mapping$res[[1]]
       if (stringr::str_detect(mono_line, "^\\d+b:")) {
-        pattern_content <- stringr::str_remove(mono_line, "^\\d+b:[abx]-")
+        pattern_content <- stringr::str_remove(mono_line, "^\\d+b:[abxo]-")
         if (glycoct_mono_content_matches(content, pattern_content)) {
           return(mono_name)
         }
       }
     }
+  }
+  if (is_alditol) {
+    return("Unk")
   }
 
   # If no exact match, fall back to basic parsing

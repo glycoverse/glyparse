@@ -3,6 +3,7 @@
 ## Minor improvements and bug fixes
 
 * `parse_wurcs()` now parses WURCS alditol residues as regular reducing-end glycans with unknown anomer configurations. (#21)
+* `parse_glycoct()` now parses GlycoCT alditol residues as regular reducing-end glycans with unknown anomer configurations. (#22)
 
 # glyparse 0.6.1
 
