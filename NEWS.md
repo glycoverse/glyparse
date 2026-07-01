@@ -2,6 +2,7 @@
 
 ## Minor improvements and bug fixes
 
+* Add `parse_glycam_iupac()` to parse GlyCAM IUPAC structures. (#25)
 * `parse_wurcs()` now supports additional generic WURCS residue descriptors. (#23)
 * `parse_wurcs()` now supports ambiguous WURCS sialic acid descriptors. (#23)
 * `parse_wurcs()` now supports uppercase WURCS residue IDs for large structures. (#23)
