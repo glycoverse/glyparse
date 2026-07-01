@@ -3,10 +3,10 @@
 ## New features
 
 * Add `parse_glycam_iupac()` to parse GlyCAM IUPAC structures. (#25)
+* `auto_parse()` now detects GlyCAM IUPAC structures and routes them to `parse_glycam_iupac()`. (#26)
 
 ## Minor improvements and bug fixes
 
-* `auto_parse()` now detects GlyCAM IUPAC structures and routes them to `parse_glycam_iupac()`. (#26)
 * `parse_wurcs()` now supports additional generic WURCS residue descriptors. (#23)
 * `parse_wurcs()` now supports ambiguous WURCS sialic acid descriptors. (#23)
 * `parse_wurcs()` now supports uppercase WURCS residue IDs for large structures. (#23)
@@ -156,6 +156,7 @@
   ```
 
   Now:
+
   ```r
   > parse_iupac_condensed("bad_glycan")
   ```
@@ -186,3 +187,4 @@
 * `parse_iupac_short()`, `parse_iupac_extended()`, `parse_iupac_condensed()`,
   `parse_wurcs()` now support multiple substituents on the same monosaccharide,
   to align with the updates in `glyrepr` v0.5.0.
+
