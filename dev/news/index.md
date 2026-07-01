@@ -13,6 +13,17 @@
 - [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
   now supports uppercase WURCS residue IDs for large structures.
   ([\#23](https://github.com/glycoverse/glyparse/issues/23))
+- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
+  now accepts space-separated GlycoCT records, such as records stored in
+  CSV exports.
+  ([\#24](https://github.com/glycoverse/glyparse/issues/24))
+- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
+  now supports generic GlycoCT `HEX`, N-acetylated `HEX`, deoxy-`HEX`,
+  and sialic acid descriptors.
+  ([\#24](https://github.com/glycoverse/glyparse/issues/24))
+- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
+  now maps direct GlycoCT `n-sulfate` substituents to N-sulfated amino
+  sugars. ([\#24](https://github.com/glycoverse/glyparse/issues/24))
 - [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
   now parses WURCS alditol residues as regular reducing-end glycans with
   unknown anomer configurations.
