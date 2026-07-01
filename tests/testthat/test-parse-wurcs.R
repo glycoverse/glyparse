@@ -635,6 +635,10 @@ test_that("parse_residue maps generic WURCS descriptors to generic monosaccharid
     c(mono = "dHex", anomer = "??", sub = "")
   )
   expect_equal(
+    parse_residue("a2112m-1x_1-5_2*NCC/3=O"),
+    c(mono = "dHexNAc", anomer = "?1", sub = "")
+  )
+  expect_equal(
     parse_residue("a4334m-1x_1-?"),
     c(mono = "dHex", anomer = "?1", sub = "")
   )
@@ -645,6 +649,10 @@ test_that("parse_residue maps generic WURCS descriptors to generic monosaccharid
   expect_equal(
     parse_residue("AUd21122h_5*NCC/3=O"),
     c(mono = "Neu5Ac", anomer = "??", sub = "")
+  )
+  expect_equal(
+    parse_residue("AUd21122h_4*OCC/3=O_5*NCC/3=O"),
+    c(mono = "Neu5Ac", anomer = "??", sub = "4Ac")
   )
 })
 

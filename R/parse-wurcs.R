@@ -139,6 +139,7 @@ WURCS_MONO_REGEX <- c(
   "dHexNAc" = "^axxxxm-1[abx]_1-5_2\\*NCC/3=O",
   "dHex" = "^axxxxm-1[abx]_1-5",
   "Pen" = "^axxxh-1[abx]_1-5",
+  "dHexNAc" = "^a2112m-1[abx]_1-5_2\\*NCC/3=O",
   "dHex" = "^a2112m-1[abx]_1-5",
   "Fru" = "^ha122h-2[abx]_2-6",
   "Tag" = "^ha112h-2[abx]_2-6",
@@ -214,15 +215,16 @@ WURCS_UNKNOWN_RING_MONO_REGEX <- c(
   "dHexNAc" = "^axxxxm-1[abx]_1-\\?_2\\*NCC/3=O",
   "dHex" = "^axxxxm-1[abx]_1-\\?",
   "Pen" = "^axxxh-1[abx]_1-\\?",
+  "dHexNAc" = "^a2112m-1[abx]_1-\\?_2\\*NCC/3=O",
   "dHex" = "^a2112m-1[abx]_1-\\?",
   "dHex" = "^a4334m-1[abx]_1-\\?"
 )
 
 
 WURCS_AMBIGUOUS_MONO_REGEX <- c(
-  "Neu5Ac" = "^AUd21122h_5\\*NCC/3=O",
-  "Neu5Gc" = "^AUd21122h_5\\*NCCO/3=O",
-  "Neu" = "^AUd21122h_5\\*N",
+  "Neu5Ac" = "^AUd21122h.*_5\\*NCC/3=O",
+  "Neu5Gc" = "^AUd21122h.*_5\\*NCCO/3=O",
+  "Neu" = "^AUd21122h.*_5\\*N",
   "Kdn" = "^AUd21122h",
 
   "GlcNAc" = "^u2122h_2\\*NCC/3=O",
@@ -291,6 +293,7 @@ WURCS_AMBIGUOUS_MONO_REGEX <- c(
   "dHexNAc" = "^uxxxxm_2\\*NCC/3=O",
   "dHex" = "^uxxxxm",
   "Pen" = "^uxxxh",
+  "dHexNAc" = "^u2112m_2\\*NCC/3=O",
   "dHex" = "^u2112m"
 )
 
@@ -558,6 +561,20 @@ parse_residue <- function(residue) {
       # Remove the base Kdn pattern and the 5*NCCO/3=O
       sub_code <- stringr::str_remove(residue, base_kdn_pattern)
       sub_code <- stringr::str_remove(sub_code, "_5\\*NCCO/3=O")
+    }
+  } else if (
+    mono %in%
+      c("Neu5Ac", "Neu5Gc", "Neu") &&
+      stringr::str_starts(residue, "AUd")
+  ) {
+    base_kdn_pattern <- "^AUd21122h"
+    sub_code <- stringr::str_remove(residue, base_kdn_pattern)
+    if (mono == "Neu5Ac") {
+      sub_code <- stringr::str_remove(sub_code, "_5\\*NCC/3=O")
+    } else if (mono == "Neu5Gc") {
+      sub_code <- stringr::str_remove(sub_code, "_5\\*NCCO/3=O")
+    } else {
+      sub_code <- stringr::str_remove(sub_code, "_5\\*N(?!CC(O)?/3=O)")
     }
   } else {
     # For other monosaccharides, use the standard approach
