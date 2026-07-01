@@ -1265,7 +1265,7 @@ match_generic_glycoct_composite <- function(group, residues, linkages) {
 
   if (
     is_generic_glycoct_hex(group_mono$content) &&
-      identical(group_subs, "n-acetyl") &&
+      "n-acetyl" %in% group_subs &&
       has_glycoct_substituent_at(group, residues, linkages, "n-acetyl", "2")
   ) {
     mono <- if (is_generic_glycoct_dhex(group_mono$content)) {
@@ -1273,25 +1273,87 @@ match_generic_glycoct_composite <- function(group, residues, linkages) {
     } else {
       "HexNAc"
     }
-
-    return(list(mono = mono, sub = ""))
-  }
-
-  if (
-    is_generic_glycoct_non(group_mono$content) &&
-      length(group_subs) == 1 &&
-      group_subs %in% c("n-acetyl", "n-glycolyl") &&
-      has_glycoct_substituent_at(group, residues, linkages, group_subs, "5")
-  ) {
-    mono <- dplyr::case_when(
-      group_subs == "n-acetyl" ~ "Neu5Ac",
-      group_subs == "n-glycolyl" ~ "Neu5Gc"
+    extra_subs <- group_subs[group_subs != "n-acetyl"]
+    extra_sub <- format_extra_substituents(
+      extra_subs,
+      group,
+      residues,
+      linkages
     )
 
-    return(list(mono = mono, sub = ""))
+    return(list(mono = mono, sub = extra_sub))
+  }
+
+  sialic_identity_sub <- find_generic_glycoct_sialic_identity_sub(
+    group,
+    residues,
+    linkages,
+    group_mono$content,
+    group_subs
+  )
+  if (!is.na(sialic_identity_sub)) {
+    mono <- dplyr::case_when(
+      sialic_identity_sub == "n-acetyl" ~ "Neu5Ac",
+      sialic_identity_sub == "n-glycolyl" ~ "Neu5Gc"
+    )
+    extra_subs <- group_subs[group_subs != sialic_identity_sub]
+    extra_sub <- format_extra_substituents(
+      extra_subs,
+      group,
+      residues,
+      linkages
+    )
+
+    return(list(mono = mono, sub = extra_sub))
   }
 
   NULL
+}
+
+#' Find the identity-defining substituent for generic GlycoCT sialic acids
+#'
+#' @param group A vector of residue IDs in one composite group.
+#' @param residues A parsed GlycoCT residue list.
+#' @param linkages A parsed GlycoCT linkage list.
+#' @param mono_content GlycoCT monosaccharide content without the leading
+#'   anomer.
+#' @param group_subs Substituent content strings in the group.
+#'
+#' @return A character scalar with the identity-defining substituent, or `NA`
+#'   when the group is not a supported generic sialic acid.
+#' @noRd
+find_generic_glycoct_sialic_identity_sub <- function(
+  group,
+  residues,
+  linkages,
+  mono_content,
+  group_subs
+) {
+  if (!is_generic_glycoct_non(mono_content)) {
+    return(NA_character_)
+  }
+
+  candidate_subs <- c("n-acetyl", "n-glycolyl")
+  matched_subs <- candidate_subs[
+    candidate_subs %in%
+      group_subs &
+      purrr::map_lgl(
+        candidate_subs,
+        ~ has_glycoct_substituent_at(
+          group,
+          residues,
+          linkages,
+          .x,
+          "5"
+        )
+      )
+  ]
+
+  if (length(matched_subs) != 1) {
+    return(NA_character_)
+  }
+
+  matched_subs
 }
 
 #' Map a GlycoCT monosaccharide with direct N-sulfation to an amino sugar

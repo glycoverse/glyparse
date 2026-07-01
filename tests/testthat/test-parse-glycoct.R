@@ -40,7 +40,17 @@ test_that("GlycoCT maps generic HEX descriptors", {
     "LIN\n",
     "1:1d(2+1)2n"
   )
+  hexnac_6s <- paste0(
+    "RES\n",
+    "1b:x-HEX-1:x\n",
+    "2s:n-acetyl\n",
+    "3s:sulfate\n",
+    "LIN\n",
+    "1:1d(2+1)2n\n",
+    "2:1o(6+1)3n"
+  )
   expect_equal(as.character(parse_glycoct(hexnac)), "HexNAc(?1-")
+  expect_equal(as.character(parse_glycoct(hexnac_6s)), "HexNAc6S(?1-")
 })
 
 test_that("GlycoCT maps generic Neu5Ac descriptors", {
@@ -58,9 +68,29 @@ test_that("GlycoCT maps generic Neu5Ac descriptors", {
     "LIN\n",
     "1:1d(5+1)2n"
   )
+  neu5ac_9ac <- paste0(
+    "RES\n",
+    "1b:x-NON-2:6|1:a|2:keto|3:d\n",
+    "2s:n-acetyl\n",
+    "3s:acetyl\n",
+    "LIN\n",
+    "1:1d(5+1)2n\n",
+    "2:1o(9+1)3n"
+  )
+  neu5gc_9s <- paste0(
+    "RES\n",
+    "1b:x-NON-2:6|1:a|2:keto|3:d\n",
+    "2s:n-glycolyl\n",
+    "3s:sulfate\n",
+    "LIN\n",
+    "1:1d(5+1)2n\n",
+    "2:1o(9+1)3n"
+  )
 
   expect_equal(as.character(parse_glycoct(neu5ac)), "Neu5Ac(?2-")
   expect_equal(as.character(parse_glycoct(neu5gc)), "Neu5Gc(?2-")
+  expect_equal(as.character(parse_glycoct(neu5ac_9ac)), "Neu5Ac9Ac(?2-")
+  expect_equal(as.character(parse_glycoct(neu5gc_9s)), "Neu5Gc9S(?2-")
 })
 
 test_that("GlycoCT maps direct n-sulfate substituents", {
