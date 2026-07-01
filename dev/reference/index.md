@@ -4,6 +4,8 @@
 
 - [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
   : Automatic Structure Parsing
+- [`parse_glycam_iupac()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycam_iupac.md)
+  : Parse GlyCAM IUPAC Structures
 - [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
   : Parse GlycoCT Structures
 - [`parse_iupac_condensed()`](https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_condensed.md)

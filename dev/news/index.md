@@ -2,6 +2,13 @@
 
 ## glyparse (development version)
 
+### New features
+
+- Add
+  [`parse_glycam_iupac()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycam_iupac.md)
+  to parse GlyCAM IUPAC structures.
+  ([\#25](https://github.com/glycoverse/glyparse/issues/25))
+
 ### Minor improvements and bug fixes
 
 - [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
