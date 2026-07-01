@@ -8,6 +8,10 @@
   [`parse_glycam_iupac()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycam_iupac.md)
   to parse GlyCAM IUPAC structures.
   ([\#25](https://github.com/glycoverse/glyparse/issues/25))
+- [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
+  now detects GlyCAM IUPAC structures and routes them to
+  [`parse_glycam_iupac()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycam_iupac.md).
+  ([\#26](https://github.com/glycoverse/glyparse/issues/26))
 
 ### Minor improvements and bug fixes
 

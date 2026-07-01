@@ -13,13 +13,15 @@ Supported types:
 
 4.  IUPAC-short
 
-5.  WURCS
+5.  GlyCAM IUPAC
 
-6.  Linear Code
+6.  WURCS
 
-7.  pGlyco
+7.  Linear Code
 
-8.  StrucGP
+8.  pGlyco
+
+9.  StrucGP
 
 ## Usage
 
