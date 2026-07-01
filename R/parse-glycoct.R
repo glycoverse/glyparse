@@ -37,10 +37,7 @@ parse_glycoct <- function(x, on_failure = "error") {
 }
 
 do_parse_glycoct <- function(x) {
-  # Split the input into lines
-  lines <- stringr::str_split(x, "\n")[[1]]
-  lines <- stringr::str_trim(lines)
-  lines <- lines[lines != ""]
+  lines <- split_glycoct_lines(x)
 
   # Find RES and LIN sections
   res_start <- which(lines == "RES")
@@ -75,6 +72,28 @@ do_parse_glycoct <- function(x) {
 
   # Build the graph
   build_glycoct_graph(residues, linkages)
+}
+
+#' Split a GlycoCT record into parser lines
+#'
+#' @param x A GlycoCT string.
+#'
+#' @return A character vector with section headers, residue lines, and linkage
+#'   lines as separate entries.
+#' @noRd
+split_glycoct_lines <- function(x) {
+  lines <- stringr::str_split(x, "\n")[[1]]
+  lines <- stringr::str_trim(lines)
+  lines <- lines[lines != ""]
+
+  if (
+    length(lines) == 1 &&
+      isTRUE(stringr::str_detect(lines, "^RES\\s+"))
+  ) {
+    return(stringr::str_split(lines, "\\s+")[[1]])
+  }
+
+  lines
 }
 
 parse_res_section <- function(res_lines) {
@@ -1080,6 +1099,11 @@ match_partial_composite_structure <- function(
   linkages,
   mono_mappings
 ) {
+  generic_result <- match_generic_glycoct_composite(group, residues, linkages)
+  if (!is.null(generic_result)) {
+    return(generic_result)
+  }
+
   # Try to find the best partial match and identify extra substituents
   best_match <- NULL
   best_extra_subs <- c()
@@ -1189,6 +1213,197 @@ match_partial_composite_structure <- function(
   }
 
   return(list(mono = "Unk", sub = ""))
+}
+
+#' Match generic GlycoCT monosaccharide composites
+#'
+#' @param group A vector of residue IDs in one composite group.
+#' @param residues A parsed GlycoCT residue list.
+#' @param linkages A parsed GlycoCT linkage list.
+#'
+#' @return A list with `mono` and `sub`, or `NULL` if no generic composite
+#'   matches.
+#' @noRd
+match_generic_glycoct_composite <- function(group, residues, linkages) {
+  group_mono <- NULL
+  group_subs <- c()
+
+  for (id in group) {
+    res <- residues[[as.character(id)]]
+    if (is.null(res)) {
+      next
+    }
+    if (res$type == "mono") {
+      group_mono <- res
+    } else if (res$type == "sub") {
+      group_subs <- c(group_subs, res$content)
+    }
+  }
+
+  if (is.null(group_mono)) {
+    return(NULL)
+  }
+
+  if (
+    "n-sulfate" %in%
+      group_subs &&
+      has_glycoct_substituent_at(group, residues, linkages, "n-sulfate", "2")
+  ) {
+    amino_mono <- map_glycoct_n_sulfate_mono(group_mono$content)
+    if (!is.na(amino_mono)) {
+      extra_subs <- group_subs[group_subs != "n-sulfate"]
+      extra_sub <- format_extra_substituents(
+        extra_subs,
+        group,
+        residues,
+        linkages
+      )
+      sub <- paste(c("2S", extra_sub[extra_sub != ""]), collapse = ",")
+      return(list(mono = amino_mono, sub = sub))
+    }
+  }
+
+  if (
+    is_generic_glycoct_hex(group_mono$content) &&
+      "n-acetyl" %in% group_subs &&
+      has_glycoct_substituent_at(group, residues, linkages, "n-acetyl", "2")
+  ) {
+    mono <- if (is_generic_glycoct_dhex(group_mono$content)) {
+      "dHexNAc"
+    } else {
+      "HexNAc"
+    }
+    extra_subs <- group_subs[group_subs != "n-acetyl"]
+    extra_sub <- format_extra_substituents(
+      extra_subs,
+      group,
+      residues,
+      linkages
+    )
+
+    return(list(mono = mono, sub = extra_sub))
+  }
+
+  sialic_identity_sub <- find_generic_glycoct_sialic_identity_sub(
+    group,
+    residues,
+    linkages,
+    group_mono$content,
+    group_subs
+  )
+  if (!is.na(sialic_identity_sub)) {
+    mono <- dplyr::case_when(
+      sialic_identity_sub == "n-acetyl" ~ "Neu5Ac",
+      sialic_identity_sub == "n-glycolyl" ~ "Neu5Gc"
+    )
+    extra_subs <- group_subs[group_subs != sialic_identity_sub]
+    extra_sub <- format_extra_substituents(
+      extra_subs,
+      group,
+      residues,
+      linkages
+    )
+
+    return(list(mono = mono, sub = extra_sub))
+  }
+
+  NULL
+}
+
+#' Find the identity-defining substituent for generic GlycoCT sialic acids
+#'
+#' @param group A vector of residue IDs in one composite group.
+#' @param residues A parsed GlycoCT residue list.
+#' @param linkages A parsed GlycoCT linkage list.
+#' @param mono_content GlycoCT monosaccharide content without the leading
+#'   anomer.
+#' @param group_subs Substituent content strings in the group.
+#'
+#' @return A character scalar with the identity-defining substituent, or `NA`
+#'   when the group is not a supported generic sialic acid.
+#' @noRd
+find_generic_glycoct_sialic_identity_sub <- function(
+  group,
+  residues,
+  linkages,
+  mono_content,
+  group_subs
+) {
+  if (!is_generic_glycoct_non(mono_content)) {
+    return(NA_character_)
+  }
+
+  candidate_subs <- c("n-acetyl", "n-glycolyl")
+  matched_subs <- candidate_subs[
+    candidate_subs %in%
+      group_subs &
+      purrr::map_lgl(
+        candidate_subs,
+        ~ has_glycoct_substituent_at(
+          group,
+          residues,
+          linkages,
+          .x,
+          "5"
+        )
+      )
+  ]
+
+  if (length(matched_subs) != 1) {
+    return(NA_character_)
+  }
+
+  matched_subs
+}
+
+#' Map a GlycoCT monosaccharide with direct N-sulfation to an amino sugar
+#'
+#' @param content GlycoCT monosaccharide content without the leading anomer.
+#'
+#' @return A monosaccharide name, or `NA` if unsupported.
+#' @noRd
+map_glycoct_n_sulfate_mono <- function(content) {
+  base_mono <- map_single_mono(content)
+  if (identical(base_mono, "Unk")) {
+    return(NA_character_)
+  }
+
+  if (identical(base_mono, "Hex")) {
+    return("HexN")
+  }
+
+  paste0(base_mono, "N")
+}
+
+#' Check whether a GlycoCT group contains a linked substituent
+#'
+#' @param group A vector of residue IDs in one composite group.
+#' @param residues A parsed GlycoCT residue list.
+#' @param linkages A parsed GlycoCT linkage list.
+#' @param substituent A substituent content string.
+#' @param position A monosaccharide position string.
+#'
+#' @return A logical scalar.
+#' @noRd
+has_glycoct_substituent_at <- function(
+  group,
+  residues,
+  linkages,
+  substituent,
+  position
+) {
+  any(purrr::map_lgl(linkages, function(linkage) {
+    from_res <- residues[[as.character(linkage$from_res)]]
+    to_res <- residues[[as.character(linkage$to_res)]]
+    !is.null(from_res) &&
+      !is.null(to_res) &&
+      linkage$from_res %in% group &&
+      linkage$to_res %in% group &&
+      identical(from_res$type, "mono") &&
+      identical(to_res$type, "sub") &&
+      identical(to_res$content, substituent) &&
+      identical(linkage$from_pos, position)
+  }))
 }
 
 format_extra_substituents <- function(extra_subs, group, residues, linkages) {
@@ -1356,6 +1571,13 @@ map_single_mono <- function(content) {
     return("Unk")
   }
 
+  if (is_generic_glycoct_dhex(content)) {
+    return("dHex")
+  }
+  if (is_generic_glycoct_hex(content)) {
+    return("Hex")
+  }
+
   # If no exact match, fall back to basic parsing
   parts <- stringr::str_split(content, "-")[[1]]
   if (length(parts) >= 2) {
@@ -1406,6 +1628,42 @@ map_single_mono <- function(content) {
   }
 
   return("Unk")
+}
+
+#' Check whether a GlycoCT content string is a generic hexose
+#'
+#' @param content GlycoCT monosaccharide content without the leading anomer.
+#'
+#' @return A logical scalar.
+#' @noRd
+is_generic_glycoct_hex <- function(content) {
+  isTRUE(stringr::str_detect(
+    content,
+    "^HEX-(?:\\d+|x):(?:\\d+|x)(?:\\|6:d)?$"
+  ))
+}
+
+#' Check whether a GlycoCT content string is a generic deoxyhexose
+#'
+#' @param content GlycoCT monosaccharide content without the leading anomer.
+#'
+#' @return A logical scalar.
+#' @noRd
+is_generic_glycoct_dhex <- function(content) {
+  isTRUE(stringr::str_detect(
+    content,
+    "^HEX-(?:\\d+|x):(?:\\d+|x)\\|6:d$"
+  ))
+}
+
+#' Check whether a GlycoCT content string is a generic sialic acid backbone
+#'
+#' @param content GlycoCT monosaccharide content without the leading anomer.
+#'
+#' @return A logical scalar.
+#' @noRd
+is_generic_glycoct_non <- function(content) {
+  isTRUE(identical(content, "NON-2:6|1:a|2:keto|3:d"))
 }
 
 find_group_containing <- function(groups, res_id) {

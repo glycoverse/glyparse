@@ -5,6 +5,9 @@
 * `parse_wurcs()` now supports additional generic WURCS residue descriptors. (#23)
 * `parse_wurcs()` now supports ambiguous WURCS sialic acid descriptors. (#23)
 * `parse_wurcs()` now supports uppercase WURCS residue IDs for large structures. (#23)
+* `parse_glycoct()` now accepts space-separated GlycoCT records, such as records stored in CSV exports. (#24)
+* `parse_glycoct()` now supports generic GlycoCT `HEX`, N-acetylated `HEX`, deoxy-`HEX`, and sialic acid descriptors. (#24)
+* `parse_glycoct()` now maps direct GlycoCT `n-sulfate` substituents to N-sulfated amino sugars. (#24)
 * `parse_wurcs()` now parses WURCS alditol residues as regular reducing-end glycans with unknown anomer configurations. (#21)
 * `parse_glycoct()` now parses GlycoCT alditol residues as regular reducing-end glycans with unknown anomer configurations. (#22)
 
