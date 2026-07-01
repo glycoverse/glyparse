@@ -5,6 +5,15 @@
 ### Minor improvements and bug fixes
 
 - [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
+  now supports additional generic WURCS residue descriptors.
+  ([\#23](https://github.com/glycoverse/glyparse/issues/23))
+- [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
+  now supports ambiguous WURCS sialic acid descriptors.
+  ([\#23](https://github.com/glycoverse/glyparse/issues/23))
+- [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
+  now supports uppercase WURCS residue IDs for large structures.
+  ([\#23](https://github.com/glycoverse/glyparse/issues/23))
+- [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
   now parses WURCS alditol residues as regular reducing-end glycans with
   unknown anomer configurations.
   ([\#21](https://github.com/glycoverse/glyparse/issues/21))
