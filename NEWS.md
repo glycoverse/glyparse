@@ -2,6 +2,9 @@
 
 ## Minor improvements and bug fixes
 
+* `parse_wurcs()` now supports additional generic WURCS residue descriptors. (#23)
+* `parse_wurcs()` now supports ambiguous WURCS sialic acid descriptors. (#23)
+* `parse_wurcs()` now supports uppercase WURCS residue IDs for large structures. (#23)
 * `parse_wurcs()` now parses WURCS alditol residues as regular reducing-end glycans with unknown anomer configurations. (#21)
 * `parse_glycoct()` now parses GlycoCT alditol residues as regular reducing-end glycans with unknown anomer configurations. (#22)
 

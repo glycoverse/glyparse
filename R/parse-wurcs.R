@@ -132,6 +132,15 @@ WURCS_MONO_REGEX <- c(
   "MurNAc" = "^a2122h-1[abx]_1-5_2\\*NCC/3=O_3\\*OC\\^RCO/4=O/3C",
   "MurNGc" = "^a2122h-1[abx]_1-5_2\\*NCCO/3=O_3\\*OC\\^RCO/4=O/3C",
   "Mur" = "^a2122h-1[abx]_1-5_3\\*OC\\^RCO/4=O/3C",
+  "HexNAc" = "^axxxxh-1[abx]_1-5_2\\*NCC/3=O",
+  "HexN" = "^axxxxh-1[abx]_1-5_2\\*N(?!CC/3=O)",
+  "HexA" = "^axxxxA-1[abx]_1-5",
+  "Hex" = "^axxxxh-1[abx]_1-5",
+  "dHexNAc" = "^axxxxm-1[abx]_1-5_2\\*NCC/3=O",
+  "dHex" = "^axxxxm-1[abx]_1-5",
+  "Pen" = "^axxxh-1[abx]_1-5",
+  "dHexNAc" = "^a2112m-1[abx]_1-5_2\\*NCC/3=O",
+  "dHex" = "^a2112m-1[abx]_1-5",
   "Fru" = "^ha122h-2[abx]_2-6",
   "Tag" = "^ha112h-2[abx]_2-6",
   "Sor" = "^ha121h-2[abx]_2-6",
@@ -198,11 +207,26 @@ WURCS_UNKNOWN_RING_MONO_REGEX <- c(
   "Ara" = "^a211h-1[abx]_1-\\?",
   "Lyx" = "^a221h-1[abx]_1-\\?",
   "Xyl" = "^a212h-1[abx]_1-\\?",
-  "Rib" = "^a222h-1[abx]_1-\\?"
+  "Rib" = "^a222h-1[abx]_1-\\?",
+  "HexNAc" = "^axxxxh-1[abx]_1-\\?_2\\*NCC/3=O",
+  "HexN" = "^axxxxh-1[abx]_1-\\?_2\\*N(?!CC/3=O)",
+  "HexA" = "^axxxxA-1[abx]_1-\\?",
+  "Hex" = "^axxxxh-1[abx]_1-\\?",
+  "dHexNAc" = "^axxxxm-1[abx]_1-\\?_2\\*NCC/3=O",
+  "dHex" = "^axxxxm-1[abx]_1-\\?",
+  "Pen" = "^axxxh-1[abx]_1-\\?",
+  "dHexNAc" = "^a2112m-1[abx]_1-\\?_2\\*NCC/3=O",
+  "dHex" = "^a2112m-1[abx]_1-\\?",
+  "dHex" = "^a4334m-1[abx]_1-\\?"
 )
 
 
 WURCS_AMBIGUOUS_MONO_REGEX <- c(
+  "Neu5Ac" = "^AUd21122h.*_5\\*NCC/3=O",
+  "Neu5Gc" = "^AUd21122h.*_5\\*NCCO/3=O",
+  "Neu" = "^AUd21122h.*_5\\*N",
+  "Kdn" = "^AUd21122h",
+
   "GlcNAc" = "^u2122h_2\\*NCC/3=O",
   "GalNAc" = "^u2112h_2\\*NCC/3=O",
   "ManNAc" = "^u1122h_2\\*NCC/3=O",
@@ -261,7 +285,16 @@ WURCS_AMBIGUOUS_MONO_REGEX <- c(
   "Ara" = "^u211h",
   "Lyx" = "^u221h",
   "Xyl" = "^u212h",
-  "Rib" = "^u222h"
+  "Rib" = "^u222h",
+  "HexNAc" = "^uxxxxh_2\\*NCC/3=O",
+  "HexN" = "^uxxxxh_2\\*N(?!CC/3=O)",
+  "HexA" = "^uxxxxA",
+  "Hex" = "^uxxxxh",
+  "dHexNAc" = "^uxxxxm_2\\*NCC/3=O",
+  "dHex" = "^uxxxxm",
+  "Pen" = "^uxxxh",
+  "dHexNAc" = "^u2112m_2\\*NCC/3=O",
+  "dHex" = "^u2112m"
 )
 
 
@@ -336,7 +369,14 @@ WURCS_ALDITOL_MONO_REGEX <- c(
   "Fru" = "^hU122h",
   "Tag" = "^hU112h",
   "Sor" = "^hU121h",
-  "Psi" = "^hU222h"
+  "Psi" = "^hU222h",
+  "HexNAc" = "^hxxxxh_2\\*NCC/3=O",
+  "HexN" = "^hxxxxh_2\\*N(?!CC/3=O)",
+  "HexA" = "^hxxxxA",
+  "Hex" = "^hxxxxh",
+  "dHexNAc" = "^hxxxxm_2\\*NCC/3=O",
+  "dHex" = "^hxxxxm",
+  "Pen" = "^hxxxh"
 )
 
 
@@ -411,6 +451,31 @@ normalize_n_sulfate_sub_code <- function(residue, sub_code) {
 }
 
 
+#' Get the anomeric position used for alditol normalization.
+#'
+#' @param mono A monosaccharide name.
+#'
+#' @return A character scalar containing the anomeric position.
+#' @noRd
+wurcs_anomer_pos <- function(mono) {
+  switch(
+    mono,
+    Hex = "1",
+    HexNAc = "1",
+    HexN = "1",
+    HexA = "1",
+    dHex = "1",
+    dHexNAc = "1",
+    Pen = "1",
+    Neu5Ac = "2",
+    Neu5Gc = "2",
+    Neu = "2",
+    Kdn = "2",
+    glyrepr::get_anomer_pos(mono)
+  )
+}
+
+
 parse_residue <- function(residue) {
   # This function accepts a WURCS residue (something in "[]"),
   # and returns a named vector of c(mono, anomer, sub)
@@ -448,7 +513,7 @@ parse_residue <- function(residue) {
       if (alditol_mono_idx > 0) {
         mono <- names(WURCS_ALDITOL_MONO_REGEX)[[alditol_mono_idx]]
         mono_pattern <- WURCS_ALDITOL_MONO_REGEX[[alditol_mono_idx]]
-        anomer <- paste0("?", glyrepr::get_anomer_pos(mono))
+        anomer <- paste0("?", wurcs_anomer_pos(mono))
         is_alditol <- TRUE
       } else {
         ambiguous_mono_idx <- purrr::detect_index(
@@ -479,7 +544,12 @@ parse_residue <- function(residue) {
   # Get substituent(s)
   # For Neu5Ac and Neu5Gc, we need special handling since the 5-position NAc/NGc
   # is part of the monosaccharide itself, not an additional substituent
-  if (mono %in% c("Neu5Ac", "Neu5Gc") && !is_alditol) {
+  if (
+    mono %in%
+      c("Neu5Ac", "Neu5Gc") &&
+      !is_alditol &&
+      stringr::str_starts(residue, "Aad")
+  ) {
     # For Neu5Ac/Neu5Gc, remove the base Kdn structure and the characteristic 5-position modification
     base_kdn_pattern <- "^Aad21122h-2[abx]_2-6"
     if (mono == "Neu5Ac") {
@@ -491,6 +561,20 @@ parse_residue <- function(residue) {
       # Remove the base Kdn pattern and the 5*NCCO/3=O
       sub_code <- stringr::str_remove(residue, base_kdn_pattern)
       sub_code <- stringr::str_remove(sub_code, "_5\\*NCCO/3=O")
+    }
+  } else if (
+    mono %in%
+      c("Neu5Ac", "Neu5Gc", "Neu") &&
+      stringr::str_starts(residue, "AUd")
+  ) {
+    base_kdn_pattern <- "^AUd21122h"
+    sub_code <- stringr::str_remove(residue, base_kdn_pattern)
+    if (mono == "Neu5Ac") {
+      sub_code <- stringr::str_remove(sub_code, "_5\\*NCC/3=O")
+    } else if (mono == "Neu5Gc") {
+      sub_code <- stringr::str_remove(sub_code, "_5\\*NCCO/3=O")
+    } else {
+      sub_code <- stringr::str_remove(sub_code, "_5\\*N(?!CC(O)?/3=O)")
     }
   } else {
     # For other monosaccharides, use the standard approach
@@ -618,7 +702,13 @@ parse_one_linkage <- function(x) {
 }
 
 letter_to_int <- function(letter) {
-  utf8ToInt(letter) - utf8ToInt("a") + 1
+  if (stringr::str_detect(letter, "^[a-z]$")) {
+    return(utf8ToInt(letter) - utf8ToInt("a") + 1)
+  }
+  if (stringr::str_detect(letter, "^[A-Z]$")) {
+    return(utf8ToInt(letter) - utf8ToInt("A") + 27)
+  }
+  cli::cli_abort("Invalid WURCS residue ID: {.str {letter}}")
 }
 
 

@@ -617,6 +617,46 @@ test_that("parse_residue handles ambiguous u residues", {
 })
 
 
+test_that("parse_residue maps generic WURCS descriptors to generic monosaccharides", {
+  expect_equal(
+    parse_residue("axxxxh-1x_1-5"),
+    c(mono = "Hex", anomer = "?1", sub = "")
+  )
+  expect_equal(
+    parse_residue("axxxxh-1b_1-5_2*NCC/3=O"),
+    c(mono = "HexNAc", anomer = "b1", sub = "")
+  )
+  expect_equal(
+    parse_residue("uxxxxm"),
+    c(mono = "dHex", anomer = "??", sub = "")
+  )
+  expect_equal(
+    parse_residue("u2112m"),
+    c(mono = "dHex", anomer = "??", sub = "")
+  )
+  expect_equal(
+    parse_residue("a2112m-1x_1-5_2*NCC/3=O"),
+    c(mono = "dHexNAc", anomer = "?1", sub = "")
+  )
+  expect_equal(
+    parse_residue("a4334m-1x_1-?"),
+    c(mono = "dHex", anomer = "?1", sub = "")
+  )
+  expect_equal(
+    parse_residue("hxxxxh_2*NCC/3=O"),
+    c(mono = "HexNAc", anomer = "?1", sub = "")
+  )
+  expect_equal(
+    parse_residue("AUd21122h_5*NCC/3=O"),
+    c(mono = "Neu5Ac", anomer = "??", sub = "")
+  )
+  expect_equal(
+    parse_residue("AUd21122h_4*OCC/3=O_5*NCC/3=O"),
+    c(mono = "Neu5Ac", anomer = "??", sub = "4Ac")
+  )
+})
+
+
 test_that("parse_residue handles unknown ring closure", {
   expect_unknown_ring_residue <- function(residue, mono, sub = "") {
     expect_equal(
@@ -802,6 +842,17 @@ test_that("parse_residue handles unknown ring closure", {
       "2N"
     ),
     expect_unknown_ring_residue
+  )
+})
+
+
+test_that("letter_to_int handles uppercase WURCS residue IDs", {
+  expect_equal(letter_to_int("z"), 26)
+  expect_equal(letter_to_int("A"), 27)
+  expect_equal(letter_to_int("K"), 37)
+  expect_equal(
+    parse_one_linkage("a6-K1"),
+    list(from = 1, to = 37, linkage = "1-6")
   )
 })
 
