@@ -3,6 +3,7 @@
 ## New features
 
 * Add `parse_glycam_iupac()` to parse GlyCAM IUPAC structures. (#25)
+* `auto_parse()` now detects GlyCAM IUPAC structures and routes them to `parse_glycam_iupac()`. (#26)
 
 ## Minor improvements and bug fixes
 
@@ -155,6 +156,7 @@
   ```
 
   Now:
+
   ```r
   > parse_iupac_condensed("bad_glycan")
   ```

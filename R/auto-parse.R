@@ -10,10 +10,11 @@
 #' 2. IUPAC-condensed
 #' 3. IUPAC-extended
 #' 4. IUPAC-short
-#' 5. WURCS
-#' 6. Linear Code
-#' 7. pGlyco
-#' 8. StrucGP
+#' 5. GlyCAM IUPAC
+#' 6. WURCS
+#' 7. Linear Code
+#' 8. pGlyco
+#' 9. StrucGP
 #'
 #' @param x A character vector of structure strings. NA values are allowed and will be returned as NA structures.
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
@@ -52,6 +53,8 @@ choose_parser <- function(x) {
     return(do_parse_pglyco_struc)
   } else if (stringr::str_starts(x, "A") && stringr::str_ends(x, "a")) {
     return(do_parse_strucgp_struc)
+  } else if (stringr::str_ends(x, "-OH")) {
+    return(do_parse_glycam_iupac)
   } else if (
     stringr::str_detect(x, "\\u2192") || # Unicode arrow →
       stringr::str_detect(x, "->") || # Plain text arrow ->
