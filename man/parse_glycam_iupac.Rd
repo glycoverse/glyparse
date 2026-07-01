@@ -27,7 +27,10 @@ terminal reducing-end residues end in \code{"-OH"}, and residue modifiers are
 written in brackets, such as \code{"DGalp[6S]b1-4"}.
 
 The parser normalizes GlyCAM IUPAC into IUPAC-condensed notation, then uses
-the IUPAC-condensed parser to construct the glycan structure.
+the IUPAC-condensed parser to construct the glycan structure. Explicit
+reducing-end moieties, such as \code{"-OH"} or \code{"-OME"}, are normalized to the
+regular reducing-end IUPAC-condensed form because glyrepr does not represent
+the terminal moiety separately.
 }
 \examples{
 glycam <- "DManpa1-3[DManpa1-6]DManpb1-4DGlcpNAcb1-OH"

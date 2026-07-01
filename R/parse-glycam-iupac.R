@@ -10,7 +10,10 @@
 #' written in brackets, such as `"DGalp[6S]b1-4"`.
 #'
 #' The parser normalizes GlyCAM IUPAC into IUPAC-condensed notation, then uses
-#' the IUPAC-condensed parser to construct the glycan structure.
+#' the IUPAC-condensed parser to construct the glycan structure. Explicit
+#' reducing-end moieties, such as `"-OH"` or `"-OME"`, are normalized to the
+#' regular reducing-end IUPAC-condensed form because glyrepr does not represent
+#' the terminal moiety separately.
 #'
 #' @param x A character vector of GlyCAM IUPAC strings. NA values are allowed
 #'   and will be returned as NA structures.
@@ -84,13 +87,16 @@ convert_glycam_iupac_token <- function(token) {
 
   mono <- convert_glycam_iupac_mono(residue_match[1, 2])
   modifiers <- convert_glycam_iupac_modifiers(
-    stringr::str_extract_all(token, "\\[[0-9][A-Za-z]+\\]")[[1]]
+    stringr::str_extract_all(
+      token,
+      "\\[[0-9][A-Za-z]+(?:,[0-9][A-Za-z]+)*\\]"
+    )[[1]]
   )
   anomer <- residue_match[1, 3]
   anomer_pos <- residue_match[1, 4]
   linked_pos <- residue_match[1, 5]
 
-  if (identical(linked_pos, "OH")) {
+  if (is_glycam_iupac_reducing_end_moiety(linked_pos)) {
     return(stringr::str_glue("{mono}{modifiers}({anomer}{anomer_pos}-"))
   }
 
@@ -105,11 +111,22 @@ convert_glycam_iupac_token <- function(token) {
 glycam_iupac_residue_pattern <- function() {
   paste0(
     "([DL][A-Za-z0-9]+?)",
-    "(?:\\[[0-9][A-Za-z]+\\])*",
+    "(?:\\[[0-9][A-Za-z]+(?:,[0-9][A-Za-z]+)*\\])*",
     "([ab\\?])",
     "([0-9\\?])-",
-    "([0-9\\?]|OH)"
+    "([0-9\\?]|[A-Za-z][A-Za-z0-9]*)"
   )
+}
+
+
+#' Check whether a GlyCAM token suffix is a reducing-end moiety
+#'
+#' @param x A residue suffix captured after the linkage dash.
+#'
+#' @return A logical scalar.
+#' @noRd
+is_glycam_iupac_reducing_end_moiety <- function(x) {
+  isTRUE(stringr::str_detect(x, "^[A-Za-z][A-Za-z0-9]*$"))
 }
 
 
@@ -165,6 +182,8 @@ convert_glycam_iupac_modifiers <- function(modifiers) {
 
   converted <- modifiers |>
     stringr::str_remove_all("\\[|\\]") |>
+    stringr::str_split(",") |>
+    unlist(use.names = FALSE) |>
     stringr::str_replace("A$", "Ac")
 
   paste0(converted, collapse = "")
