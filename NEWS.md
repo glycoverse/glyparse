@@ -1,8 +1,11 @@
 # glyparse (development version)
 
-## Minor improvements and bug fixes
+## New features
 
 * Add `parse_glycam_iupac()` to parse GlyCAM IUPAC structures. (#25)
+
+## Minor improvements and bug fixes
+
 * `parse_wurcs()` now supports additional generic WURCS residue descriptors. (#23)
 * `parse_wurcs()` now supports ambiguous WURCS sialic acid descriptors. (#23)
 * `parse_wurcs()` now supports uppercase WURCS residue IDs for large structures. (#23)
@@ -137,9 +140,11 @@
 
 * Better error messages.
   Before:
+
   ```r
   > parse_iupac_condensed("bad_glycan")
   ```
+
   ```
   Error in `purrr::map()` at glyparse/R/struc-parser-wrapper.R:13:3:
   ℹ In index: 1.
@@ -148,10 +153,12 @@
   ℹ Invalid characters or format in IUPAC-condensed string
   Run `rlang::last_trace()` to see where the error occurred.
   ```
+
   Now:
   ```r
   > parse_iupac_condensed("bad_glycan")
   ```
+
   ```
   Error in `parse_iupac_condensed()`:
   ! Can't parse: "bad_glycan"
@@ -178,3 +185,4 @@
 * `parse_iupac_short()`, `parse_iupac_extended()`, `parse_iupac_condensed()`,
   `parse_wurcs()` now support multiple substituents on the same monosaccharide,
   to align with the updates in `glyrepr` v0.5.0.
+
