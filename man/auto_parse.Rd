@@ -27,6 +27,7 @@ Supported types:
 \item IUPAC-extended
 \item IUPAC-short
 \item GlyCAM IUPAC
+\item IUPAC-compact
 \item WURCS
 \item Linear Code
 \item pGlyco
