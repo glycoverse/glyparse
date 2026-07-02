@@ -3,6 +3,7 @@
 export(auto_parse)
 export(parse_glycam_iupac)
 export(parse_glycoct)
+export(parse_iupac_compact)
 export(parse_iupac_condensed)
 export(parse_iupac_extended)
 export(parse_iupac_short)

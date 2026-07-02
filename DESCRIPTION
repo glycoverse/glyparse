@@ -7,8 +7,8 @@ Authors@R:
 Description: 
     Provides functions to parse glycan structure text representations
     into 'glyrepr' glycan structures. Currently, it supports StrucGP-style,
-    pGlyco-style, IUPAC-condensed, IUPAC-extended, IUPAC-short, WURCS,
-    Linear Code, and GlycoCT format. It also provides an automatic parser
+    pGlyco-style, IUPAC-condensed, IUPAC-extended, IUPAC-short, IUPAC-compact,
+    WURCS, Linear Code, and GlycoCT format. It also provides an automatic parser
     to detect the format and parse the structure string.
 License: MIT + file LICENSE
 Suggests: 
