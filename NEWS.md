@@ -2,10 +2,10 @@
 
 ## New features
 
-* Add `parse_iupac_compact()` to parse IUPAC-compact structures.
+* Add `parse_iupac_compact()` to parse IUPAC-compact structures. (#28)
 * Add `parse_glycam_iupac()` to parse GlyCAM IUPAC structures. (#25, #27)
 * `auto_parse()` now detects GlyCAM IUPAC structures and routes them to `parse_glycam_iupac()`. (#26)
-* `auto_parse()` now detects IUPAC-compact structures and routes them to `parse_iupac_compact()`.
+* `auto_parse()` now detects IUPAC-compact structures and routes them to `parse_iupac_compact()`. (#28)
 
 ## Minor improvements and bug fixes
 
