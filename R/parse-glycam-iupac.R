@@ -89,7 +89,7 @@ convert_glycam_iupac_token <- function(token) {
   modifiers <- convert_glycam_iupac_modifiers(
     stringr::str_extract_all(
       token,
-      "\\[[0-9][A-Za-z]+(?:,[0-9][A-Za-z]+)*\\]"
+      glycam_iupac_modifier_pattern()
     )[[1]]
   )
   anomer <- residue_match[1, 3]
@@ -110,12 +110,23 @@ convert_glycam_iupac_token <- function(token) {
 #' @noRd
 glycam_iupac_residue_pattern <- function() {
   paste0(
-    "([DL][A-Za-z0-9]+?)",
-    "(?:\\[[0-9][A-Za-z]+(?:,[0-9][A-Za-z]+)*\\])*",
+    "([A-Za-z0-9]+?)",
+    "(?:",
+    glycam_iupac_modifier_pattern(),
+    ")*",
     "([ab\\?])",
     "([0-9\\?])-",
     "([0-9\\?]|[A-Za-z][A-Za-z0-9]*)"
   )
+}
+
+
+#' Create the GlyCAM IUPAC modifier regex
+#'
+#' @return A regex pattern for one bracketed GlyCAM modifier group.
+#' @noRd
+glycam_iupac_modifier_pattern <- function() {
+  "\\[[0-9\\?][A-Za-z]+(?:,[0-9\\?][A-Za-z]+)*\\]"
 }
 
 
@@ -137,27 +148,7 @@ is_glycam_iupac_reducing_end_moiety <- function(x) {
 #' @return A glyrepr monosaccharide name.
 #' @noRd
 convert_glycam_iupac_mono <- function(mono) {
-  mono_map <- c(
-    DFucp = "Fuc",
-    DGalp = "Gal",
-    DGalpNAc = "GalNAc",
-    DGlcp = "Glc",
-    DGlcpA = "GlcA",
-    DGlcpNAc = "GlcNAc",
-    DKDNp = "Kdn",
-    DManp = "Man",
-    DManpNAc = "ManNAc",
-    DNeup5Ac = "Neu5Ac",
-    DNeup5Gc = "Neu5Gc",
-    DRibp = "Rib",
-    DXylf = "Xyl",
-    DXylp = "Xyl",
-    LArap = "Ara",
-    LFucp = "Fuc",
-    LGulp = "Gul",
-    LIdopA = "IdoA",
-    LRhap = "Rha"
-  )
+  mono_map <- glycam_iupac_mono_map()
 
   converted <- unname(mono_map[[mono]])
   if (is.null(converted)) {
@@ -165,6 +156,97 @@ convert_glycam_iupac_mono <- function(mono) {
   }
 
   converted
+}
+
+
+#' Map GlyCAM monosaccharide labels to glyrepr monosaccharide labels
+#'
+#' @return A named character vector mapping GlyCAM labels to glyrepr labels.
+#' @noRd
+glycam_iupac_mono_map <- function() {
+  c(
+    Hexp = "Hex",
+    DFucp = "Fuc",
+    DGalp = "Gal",
+    DGalpA = "GalA",
+    DGalpN = "GalN",
+    DGalpNAc = "GalNAc",
+    DGlcp = "Glc",
+    DGlcpA = "GlcA",
+    DGlcpN = "GlcN",
+    DGlcpNAc = "GlcNAc",
+    DGulp = "Gul",
+    DGulpA = "GulA",
+    DGulpN = "GulN",
+    DGulpNAc = "GulNAc",
+    DManp = "Man",
+    DManpA = "ManA",
+    DManpN = "ManN",
+    DManpNAc = "ManNAc",
+    DAllp = "All",
+    DAllpA = "AllA",
+    DAllpN = "AllN",
+    DAllpNAc = "AllNAc",
+    DTalp = "Tal",
+    DTalpA = "TalA",
+    DTalpN = "TalN",
+    DTalpNAc = "TalNAc",
+    LAltp = "Alt",
+    LAltpA = "AltA",
+    LAltpN = "AltN",
+    LAltpNAc = "AltNAc",
+    LIdop = "Ido",
+    LIdopA = "IdoA",
+    LIdopN = "IdoN",
+    LIdopNAc = "IdoNAc",
+    DQuip = "Qui",
+    DQuipNAc = "QuiNAc",
+    D6dGulp = "6dGul",
+    D6dTalp = "6dTal",
+    L6dAltp = "6dAlt",
+    L6dAltpNAc = "6dAltNAc",
+    D6dTalpNAc = "6dTalNAc",
+    LFucp = "Fuc",
+    LFucpNAc = "FucNAc",
+    LRhap = "Rha",
+    LRhapNAc = "RhaNAc",
+    DOlip = "Oli",
+    DTyvp = "Tyv",
+    DAbep = "Abe",
+    DParp = "Par",
+    DDigp = "Dig",
+    LColp = "Col",
+    LArap = "Ara",
+    LLyxp = "Lyx",
+    DRibp = "Rib",
+    DXylf = "Xyl",
+    DXylp = "Xyl",
+    DNeup5Ac = "Neu5Ac",
+    DNeup5Gc = "Neu5Gc",
+    Neup = "Neu",
+    Neup5Ac = "Neu5Ac",
+    Neup5Gc = "Neu5Gc",
+    DKDNp = "Kdn",
+    Kdnp = "Kdn",
+    Psep = "Pse",
+    Legp = "Leg",
+    Acip = "Aci",
+    `4eLegp` = "4eLeg",
+    DBacp = "Bac",
+    LDmanHepp = "LDmanHep",
+    DKdop = "Kdo",
+    DDhap = "Dha",
+    DDmanHepp = "DDmanHep",
+    DMurp = "Mur",
+    DMurpNAc = "MurNAc",
+    DMurpNGc = "MurNGc",
+    DApif = "Api",
+    DApip = "Api",
+    DFrup = "Fru",
+    DTagp = "Tag",
+    LSorp = "Sor",
+    DPsip = "Psi"
+  )
 }
 
 
