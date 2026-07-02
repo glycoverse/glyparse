@@ -7,7 +7,8 @@
 - Add
   [`parse_glycam_iupac()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycam_iupac.md)
   to parse GlyCAM IUPAC structures.
-  ([\#25](https://github.com/glycoverse/glyparse/issues/25))
+  ([\#25](https://github.com/glycoverse/glyparse/issues/25),
+  [\#27](https://github.com/glycoverse/glyparse/issues/27))
 - [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
   now detects GlyCAM IUPAC structures and routes them to
   [`parse_glycam_iupac()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycam_iupac.md).
@@ -15,10 +16,6 @@
 
 ### Minor improvements and bug fixes
 
-- [`parse_glycam_iupac()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycam_iupac.md)
-  now recognizes more GlyCAM monosaccharide labels, generic `Hex`,
-  unknown modifier positions, and unknown linkage positions.
-  ([\#27](https://github.com/glycoverse/glyparse/issues/27))
 - [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
   now supports additional generic WURCS residue descriptors.
   ([\#23](https://github.com/glycoverse/glyparse/issues/23))
