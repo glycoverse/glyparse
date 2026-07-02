@@ -19,6 +19,7 @@
 #'   and will be returned as NA structures.
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
 #'   structure cannot be parsed. `"na"` returns `NA` at invalid positions.
+#' @param progress Whether to show a progress bar while parsing.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
@@ -29,8 +30,13 @@
 #' @seealso [parse_iupac_condensed()]
 #'
 #' @export
-parse_glycam_iupac <- function(x, on_failure = "error") {
-  struc_parser_wrapper(x, do_parse_glycam_iupac, on_failure = on_failure)
+parse_glycam_iupac <- function(x, on_failure = "error", progress = FALSE) {
+  struc_parser_wrapper(
+    x,
+    do_parse_glycam_iupac,
+    on_failure = on_failure,
+    progress = progress
+  )
 }
 
 

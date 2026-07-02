@@ -4,6 +4,7 @@
 #' @param parser A parser function that returns one glycan graph per string.
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
 #'   structure cannot be parsed. `"na"` returns `NA` at invalid positions.
+#' @param progress Whether to show a progress bar while parsing.
 #' @param call The call to report in user-facing errors.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
@@ -12,9 +13,15 @@ struc_parser_wrapper <- function(
   x,
   parser,
   on_failure = "error",
+  progress = FALSE,
   call = rlang::caller_env()
 ) {
-  on_failure <- validate_struc_parser_wrapper_args(x, on_failure, call = call)
+  on_failure <- validate_struc_parser_wrapper_args(
+    x,
+    on_failure,
+    progress,
+    call = call
+  )
   wrapper_input <- prepare_struc_parser_input(x)
 
   if (wrapper_input$all_na) {
@@ -24,7 +31,11 @@ struc_parser_wrapper <- function(
     ))
   }
 
-  parsed_unique <- parse_unique_structures(wrapper_input$unique_x, parser)
+  parsed_unique <- parse_unique_structures(
+    wrapper_input$unique_x,
+    parser,
+    progress = progress
+  )
   abort_on_invalid_parse(
     parsed_unique$invalid_unique_x,
     on_failure,
@@ -49,12 +60,14 @@ struc_parser_wrapper <- function(
 #'
 #' @param x A character vector of structure strings.
 #' @param on_failure How to handle parsing failures.
+#' @param progress Whether to show a progress bar while parsing.
 #' @param call The call to report in user-facing errors.
 #'
 #' @return The validated `on_failure` value.
 #' @noRd
-validate_struc_parser_wrapper_args <- function(x, on_failure, call) {
+validate_struc_parser_wrapper_args <- function(x, on_failure, progress, call) {
   checkmate::assert_character(x)
+  checkmate::assert_flag(progress)
   rlang::arg_match(
     on_failure,
     values = c("error", "na"),
@@ -87,10 +100,11 @@ prepare_struc_parser_input <- function(x) {
 #'
 #' @param unique_x A character vector of unique, non-`NA` structure strings.
 #' @param parser A parser function that returns one glycan graph per string.
+#' @param progress Whether to show a progress bar while parsing.
 #'
 #' @return A list containing valid and invalid unique parse results.
 #' @noRd
-parse_unique_structures <- function(unique_x, parser) {
+parse_unique_structures <- function(unique_x, parser, progress = FALSE) {
   safe_parse_one_structure <- purrr::possibly(
     parse_one_structure,
     otherwise = NA
@@ -98,7 +112,8 @@ parse_unique_structures <- function(unique_x, parser) {
   parsed_unique_structures <- purrr::map(
     unique_x,
     safe_parse_one_structure,
-    parser = parser
+    parser = parser,
+    .progress = progress
   )
   invalid_mask <- purrr::map_lgl(parsed_unique_structures, ~ identical(.x, NA))
   list(

@@ -4,7 +4,7 @@
 \alias{parse_glycam_iupac}
 \title{Parse GlyCAM IUPAC Structures}
 \usage{
-parse_glycam_iupac(x, on_failure = "error")
+parse_glycam_iupac(x, on_failure = "error", progress = FALSE)
 }
 \arguments{
 \item{x}{A character vector of GlyCAM IUPAC strings. NA values are allowed
@@ -12,6 +12,8 @@ and will be returned as NA structures.}
 
 \item{on_failure}{How to handle parsing failures. \code{"error"} aborts when a
 structure cannot be parsed. \code{"na"} returns \code{NA} at invalid positions.}
+
+\item{progress}{Whether to show a progress bar while parsing.}
 }
 \value{
 A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.

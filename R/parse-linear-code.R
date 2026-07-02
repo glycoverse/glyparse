@@ -6,6 +6,7 @@
 #' @param x A character vector of Linear Code strings. NA values are allowed and will be returned as NA structures.
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
 #'   structure cannot be parsed. `"na"` returns `NA` at invalid positions.
+#' @param progress Whether to show a progress bar while parsing.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
@@ -14,8 +15,13 @@
 #' parse_linear_code(linear_code)
 #'
 #' @export
-parse_linear_code <- function(x, on_failure = "error") {
-  struc_parser_wrapper(x, do_parse_linear_code, on_failure = on_failure)
+parse_linear_code <- function(x, on_failure = "error", progress = FALSE) {
+  struc_parser_wrapper(
+    x,
+    do_parse_linear_code,
+    on_failure = on_failure,
+    progress = progress
+  )
 }
 
 do_parse_linear_code <- function(x) {
