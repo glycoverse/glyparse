@@ -7,6 +7,7 @@
 
 ## Minor improvements and bug fixes
 
+* `parse_glycam_iupac()` now recognizes more GlyCAM monosaccharide labels, generic `Hex`, unknown modifier positions, and unknown linkage positions. (#27)
 * `parse_wurcs()` now supports additional generic WURCS residue descriptors. (#23)
 * `parse_wurcs()` now supports ambiguous WURCS sialic acid descriptors. (#23)
 * `parse_wurcs()` now supports uppercase WURCS residue IDs for large structures. (#23)
@@ -187,4 +188,3 @@
 * `parse_iupac_short()`, `parse_iupac_extended()`, `parse_iupac_condensed()`,
   `parse_wurcs()` now support multiple substituents on the same monosaccharide,
   to align with the updates in `glyrepr` v0.5.0.
-
