@@ -50,7 +50,7 @@ choose_parser <- function(x) {
     return(do_parse_glycoct)
   } else if (stringr::str_detect(x, "WURCS")) {
     return(do_parse_wurcs)
-  } else if (stringr::str_starts(x, stringr::fixed("("))) {
+  } else if (stringr::str_starts(x,"\\([HNAGFSap]")) {
     return(do_parse_pglyco_struc)
   } else if (stringr::str_starts(x, "A") && stringr::str_ends(x, "a")) {
     return(do_parse_strucgp_struc)
