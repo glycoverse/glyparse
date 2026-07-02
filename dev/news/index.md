@@ -15,6 +15,10 @@
 
 ### Minor improvements and bug fixes
 
+- [`parse_glycam_iupac()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycam_iupac.md)
+  now recognizes more GlyCAM monosaccharide labels, generic `Hex`,
+  unknown modifier positions, and unknown linkage positions.
+  ([\#27](https://github.com/glycoverse/glyparse/issues/27))
 - [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
   now supports additional generic WURCS residue descriptors.
   ([\#23](https://github.com/glycoverse/glyparse/issues/23))
