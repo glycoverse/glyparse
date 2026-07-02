@@ -5,6 +5,10 @@
 ### New features
 
 - Add
+  [`parse_iupac_compact()`](https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_compact.md)
+  to parse IUPAC-compact structures.
+  ([\#28](https://github.com/glycoverse/glyparse/issues/28))
+- Add
   [`parse_glycam_iupac()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycam_iupac.md)
   to parse GlyCAM IUPAC structures.
   ([\#25](https://github.com/glycoverse/glyparse/issues/25),
@@ -13,6 +17,10 @@
   now detects GlyCAM IUPAC structures and routes them to
   [`parse_glycam_iupac()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycam_iupac.md).
   ([\#26](https://github.com/glycoverse/glyparse/issues/26))
+- [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
+  now detects IUPAC-compact structures and routes them to
+  [`parse_iupac_compact()`](https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_compact.md).
+  ([\#28](https://github.com/glycoverse/glyparse/issues/28))
 
 ### Minor improvements and bug fixes
 

@@ -8,6 +8,8 @@
   : Parse GlyCAM IUPAC Structures
 - [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
   : Parse GlycoCT Structures
+- [`parse_iupac_compact()`](https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_compact.md)
+  : Parse IUPAC-compact Structures
 - [`parse_iupac_condensed()`](https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_condensed.md)
   : Parse IUPAC-condensed Structures
 - [`parse_iupac_extended()`](https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_extended.md)
