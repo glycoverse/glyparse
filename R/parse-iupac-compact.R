@@ -9,6 +9,9 @@
 #' notation into IUPAC-condensed notation, then uses the IUPAC-condensed parser
 #' to construct the glycan structure.
 #'
+#' Alditol glycans are parsed as regular reducing-end glycans with unknown
+#' anomer configurations.
+#'
 #' @param x A character vector of IUPAC-compact strings. NA values are allowed
 #'   and will be returned as NA structures.
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
@@ -35,6 +38,10 @@ parse_iupac_compact <- function(x, on_failure = "error") {
 #' @return A glycan graph.
 #' @noRd
 do_parse_iupac_compact <- function(x) {
+  if (is_iupac_compact_alditol(x)) {
+    warn_iupac_compact_alditol()
+  }
+
   do_parse_iupac_condensed(convert_iupac_compact_to_condensed(x))
 }
 
@@ -51,6 +58,7 @@ convert_iupac_compact_to_condensed <- function(x) {
     normalize_iupac_compact_modifiers() |>
     normalize_iupac_compact_branches() |>
     normalize_iupac_compact_linkages() |>
+    normalize_iupac_compact_alditol() |>
     normalize_iupac_compact_terminal()
 }
 
@@ -121,6 +129,29 @@ normalize_iupac_compact_linkages <- function(x) {
 }
 
 
+#' Normalize IUPAC-compact alditol suffixes
+#'
+#' @param x A single partially normalized IUPAC-compact string.
+#'
+#' @return A character scalar with alditol suffix removed and reducing-end
+#'   anomer set to unknown.
+#' @noRd
+normalize_iupac_compact_alditol <- function(x) {
+  if (!is_iupac_compact_alditol(x)) {
+    return(x)
+  }
+
+  x <- stringr::str_remove(x, "\\+aldi$")
+  terminal <- iupac_compact_terminal_match(x)
+  if (is.null(terminal)) {
+    return(x)
+  }
+
+  replacement <- paste0(terminal$mono, terminal$modifiers)
+  stringr::str_replace(x, iupac_compact_terminal_pattern(), replacement)
+}
+
+
 #' Normalize the reducing-end terminal of an IUPAC-compact string
 #'
 #' @param x A single partially normalized IUPAC-compact string.
@@ -128,14 +159,14 @@ normalize_iupac_compact_linkages <- function(x) {
 #' @return A character scalar with a reducing-end IUPAC-condensed linkage.
 #' @noRd
 normalize_iupac_compact_terminal <- function(x) {
-  terminal_match <- match_iupac_compact_terminal(x)
-  if (is.na(terminal_match[1, 1])) {
+  terminal_match <- iupac_compact_terminal_match(x)
+  if (is.null(terminal_match)) {
     return(x)
   }
 
-  mono <- terminal_match[1, 2]
-  modifiers <- terminal_match[1, 3]
-  anomer <- terminal_match[1, 4]
+  mono <- terminal_match$mono
+  modifiers <- terminal_match$modifiers
+  anomer <- terminal_match$anomer
   if (is.na(anomer)) {
     anomer <- "?"
   }
@@ -146,6 +177,30 @@ normalize_iupac_compact_terminal <- function(x) {
 }
 
 
+#' Check whether a string is an IUPAC-compact alditol glycan
+#'
+#' @param x A single structure string.
+#'
+#' @return A logical scalar.
+#' @noRd
+is_iupac_compact_alditol <- function(x) {
+  isTRUE(stringr::str_ends(x, stringr::fixed("+aldi")))
+}
+
+
+#' Warn about alditol normalization in IUPAC-compact parsing.
+#'
+#' @return `NULL`, invisibly.
+#' @noRd
+warn_iupac_compact_alditol <- function() {
+  cli::cli_warn(c(
+    "Alditol IUPAC-compact glycans are parsed as regular reducing-end glycans with unknown anomer configurations.",
+    "i" = "For example, Glc-ol is returned as Glc(?1-."
+  ))
+  invisible(NULL)
+}
+
+
 #' Check whether a string looks like IUPAC-compact notation
 #'
 #' @param x A single structure string.
@@ -153,22 +208,29 @@ normalize_iupac_compact_terminal <- function(x) {
 #' @return A logical scalar.
 #' @noRd
 is_iupac_compact_string <- function(x) {
-  stringr::str_detect(x, iupac_compact_linkage_pattern()) ||
-    !is.na(match_iupac_compact_terminal(normalize_iupac_compact_aliases(x))[
-      1,
-      1
-    ])
+  is_iupac_compact_alditol(x) ||
+    stringr::str_detect(x, iupac_compact_linkage_pattern()) ||
+    !is.null(iupac_compact_terminal_match(normalize_iupac_compact_aliases(x)))
 }
 
 
-#' Match the terminal monosaccharide of an IUPAC-compact string
+#' Match terminal monosaccharide fields of an IUPAC-compact string
 #'
 #' @param x A single structure string.
 #'
-#' @return A stringr match matrix.
+#' @return A named list of terminal fields, or `NULL` when unmatched.
 #' @noRd
-match_iupac_compact_terminal <- function(x) {
-  stringr::str_match(x, iupac_compact_terminal_pattern())
+iupac_compact_terminal_match <- function(x) {
+  match <- stringr::str_match(x, iupac_compact_terminal_pattern())
+  if (is.na(match[1, "mono"])) {
+    return(NULL)
+  }
+
+  list(
+    mono = match[1, "mono"],
+    modifiers = match[1, "modifiers"],
+    anomer = match[1, "anomer"]
+  )
 }
 
 
@@ -194,8 +256,8 @@ normalize_one_iupac_compact_modifier_match <- function(x) {
     x,
     paste0("^", iupac_compact_modifier_before_mono_pattern(), "$")
   )
-  modifier <- modifier_match[1, 2]
-  mono <- modifier_match[1, 3]
+  modifier <- modifier_match[1, "modifier"]
+  mono <- modifier_match[1, "mono"]
 
   if (stringr::str_detect(modifier, "^[A-Za-z]")) {
     modifier <- stringr::str_glue("?{modifier}")
@@ -220,13 +282,13 @@ iupac_compact_linkage_pattern <- function() {
 #' @noRd
 iupac_compact_terminal_pattern <- function() {
   paste0(
-    "(",
+    "(?<mono>",
     iupac_compact_monosaccharide_pattern(),
     ")",
-    "((?:",
+    "(?<modifiers>(?:",
     iupac_compact_modifier_pattern(),
     ")*)",
-    "([ab\\?])?",
+    "(?<anomer>[ab\\?])?",
     "$"
   )
 }
@@ -248,11 +310,11 @@ iupac_compact_modifier_pattern <- function() {
 iupac_compact_modifier_before_mono_pattern <- function() {
   paste0(
     "\\(",
-    "([0-9\\?]*(?:",
+    "(?<modifier>[0-9\\?]*(?:",
     iupac_compact_substituent_pattern(),
     "))",
     "\\)",
-    "(",
+    "(?<mono>",
     iupac_compact_monosaccharide_pattern(),
     ")"
   )
@@ -271,15 +333,7 @@ iupac_compact_substituent_pattern <- local({
       return(pattern)
     }
 
-    substituents <- glyrepr::available_substituents()
-    substituents <- unique(substituents[order(
-      nchar(substituents),
-      decreasing = TRUE
-    )])
-    pattern <<- paste0(
-      purrr::map_chr(substituents, escape_regex),
-      collapse = "|"
-    )
+    pattern <<- literal_regex_alternation(glyrepr::available_substituents())
     pattern
   }
 })
@@ -297,9 +351,7 @@ iupac_compact_monosaccharide_pattern <- local({
       return(pattern)
     }
 
-    monos <- c("Neu5Ac", "Neu5Gc", glyrepr::available_monosaccharides())
-    monos <- unique(monos[order(nchar(monos), decreasing = TRUE)])
-    pattern <<- paste0(purrr::map_chr(monos, escape_regex), collapse = "|")
+    pattern <<- literal_regex_alternation(glyrepr::available_monosaccharides())
     pattern
   }
 })
@@ -313,6 +365,8 @@ iupac_compact_monosaccharide_pattern <- local({
 #' @noRd
 iupac_compact_default_anomer_pos <- function(mono) {
   if (glyrepr::get_mono_type(mono) != "concrete") {
+    # TODO: Remove this fallback when glyrepr::get_mono_type() and
+    # glyrepr::get_anomer_pos() support generic glycans.
     return("1")
   }
 
@@ -320,16 +374,14 @@ iupac_compact_default_anomer_pos <- function(mono) {
 }
 
 
-#' Escape literal text for use in a regex
+#' Create a regex alternation from literal tokens
 #'
-#' @param x A character vector.
+#' @param x A character vector of literal regex alternatives.
 #'
-#' @return A character vector with regex metacharacters escaped.
+#' @return A regex alternation pattern.
 #' @noRd
-escape_regex <- function(x) {
-  stringr::str_replace_all(
-    x,
-    "([\\\\.\\^\\$\\|\\(\\)\\[\\]\\{\\}\\*\\+\\?])",
-    "\\\\\\1"
-  )
+literal_regex_alternation <- function(x) {
+  # glyrepr names include prefix overlaps, so match the longest tokens first.
+  x <- x[order(nchar(x), decreasing = TRUE)]
+  paste0(purrr::map_chr(x, stringr::str_escape), collapse = "|")
 }

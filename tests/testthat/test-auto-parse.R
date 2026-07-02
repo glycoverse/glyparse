@@ -61,6 +61,16 @@ test_that("auto_parse correctly identifies and parses IUPAC-compact format", {
   expect_equal(as.character(result), as.character(expected))
 })
 
+test_that("auto_parse correctly identifies and parses IUPAC-compact alditols", {
+  input <- "Glc+aldi"
+  expect_warning(
+    result <- auto_parse(input),
+    "regular reducing-end glycans with unknown anomer configurations"
+  )
+  expected <- suppressWarnings(parse_iupac_compact(input))
+  expect_equal(as.character(result), as.character(expected))
+})
+
 test_that("auto_parse works with mixed format vector", {
   mixed_input <- c(
     "Gal(b1-3)GlcNAc(b1-4)Glc(a1-", # IUPAC-condensed

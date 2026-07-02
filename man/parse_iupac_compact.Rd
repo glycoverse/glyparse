@@ -25,6 +25,9 @@ are written directly after the monosaccharide, such as \code{"Galb1-3GlcNAc"},
 and branches are written in parentheses. The parser normalizes compact
 notation into IUPAC-condensed notation, then uses the IUPAC-condensed parser
 to construct the glycan structure.
+
+Alditol glycans are parsed as regular reducing-end glycans with unknown
+anomer configurations.
 }
 \examples{
 iupac <- "Mana1-3(Mana1-6)Manb1-4GlcNAcb"

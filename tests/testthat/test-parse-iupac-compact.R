@@ -79,3 +79,24 @@ test_that("IUPAC-compact converts corpus modifier notation", {
     )
   )
 })
+
+test_that("IUPAC-compact warns and parses alditols as regular reducing ends", {
+  skip_on_old_win()
+
+  simple_alditol <- "Fuca1-3(Galb1-4)Glc+aldi"
+  expect_warning(
+    simple_structure <- parse_iupac_compact(simple_alditol),
+    "regular reducing-end glycans with unknown anomer configurations"
+  )
+  expect_equal(as.character(simple_structure), "Fuc(a1-3)[Gal(b1-4)]Glc(?1-")
+
+  linked_alditol <- "Galb1-3(Gal?1-?GlcNAcb1-3Galb1-4GlcNAcb1-6)GalNAc+aldi"
+  expect_warning(
+    linked_structure <- parse_iupac_compact(linked_alditol),
+    "regular reducing-end glycans with unknown anomer configurations"
+  )
+  expect_equal(
+    as.character(linked_structure),
+    "Gal(?1-?)GlcNAc(b1-3)Gal(b1-4)GlcNAc(b1-6)[Gal(b1-3)]GalNAc(?1-"
+  )
+})
