@@ -87,8 +87,12 @@ parse_kcf_record <- function(x) {
   nodes <- purrr::compact(nodes)
   names(nodes) <- purrr::map_chr(nodes, ~ as.character(.x$id))
 
-  edges <- purrr::map(edge_lines, parse_kcf_edge_line)
-  edges <- purrr::compact(edges)
+  parsed_edges <- purrr::map(edge_lines, parse_kcf_edge_line)
+  invalid_edge_lines <- edge_lines[purrr::map_lgl(parsed_edges, is.null)]
+  if (length(invalid_edge_lines) > 0) {
+    cli::cli_abort("Malformed KCF EDGE lines: {.val {invalid_edge_lines}}")
+  }
+  edges <- parsed_edges
 
   list(nodes = nodes, edges = edges)
 }
@@ -219,7 +223,7 @@ build_kcf_graph <- function(nodes, edges) {
   for (edge in edges) {
     parsed <- classify_kcf_edge(edge, nodes)
     if (is.null(parsed)) {
-      next
+      cli::cli_abort("Unsupported KCF EDGE row: {.val {edge$id}}")
     }
 
     if (identical(parsed$type, "glycosidic")) {

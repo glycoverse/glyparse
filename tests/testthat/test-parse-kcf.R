@@ -189,3 +189,29 @@ test_that("KCF parser does not silently drop unsupported nodes", {
   expect_true(is.na(result))
   expect_error(parse_kcf(kcf), "Can't parse")
 })
+
+test_that("KCF parser does not silently drop unclassified edges", {
+  kcf <- paste0(
+    "ENTRY       G00066                      Glycan\n",
+    "NODE        6\n",
+    "            1   Cer        18     0\n",
+    "            2   Glc        12     0\n",
+    "            3   Gal         6     0\n",
+    "            4   GlcNAc     -2     0\n",
+    "            5   Gal       -10     0\n",
+    "            6   GlcNAc    -18     0\n",
+    "EDGE        6\n",
+    "            1     2:b1    1:1\n",
+    "            2     3:b1    2:4\n",
+    "            3     4:b1    3:3\n",
+    "            4     5:b1    4:4\n",
+    "            5     6:b1    5:3\n",
+    "            6     7:b1    6:2\n",
+    "///"
+  )
+
+  result <- parse_kcf(kcf, on_failure = "na")
+
+  expect_true(is.na(result))
+  expect_error(parse_kcf(kcf), "Can't parse")
+})
