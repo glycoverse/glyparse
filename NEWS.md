@@ -2,6 +2,8 @@
 
 ## New features
 
+* Add `parse_kcf()` to parse KCF structures.
+* `auto_parse()` now detects KCF structures and routes them to `parse_kcf()`.
 * Add a `progress` argument to parser functions for opt-in progress bars while parsing. (#29)
 * Add `parse_iupac_compact()` to parse IUPAC-compact structures. (#28)
 * Add `parse_glycam_iupac()` to parse GlyCAM IUPAC structures. (#25, #27)

@@ -16,6 +16,7 @@
 #' 8. Linear Code
 #' 9. pGlyco
 #' 10. StrucGP
+#' 11. KCF
 #'
 #' @param x A character vector of structure strings. NA values are allowed and will be returned as NA structures.
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
@@ -52,7 +53,9 @@ do_auto_parse <- function(x) {
 }
 
 choose_parser <- function(x) {
-  if (stringr::str_detect(x, "RES")) {
+  if (is_kcf_string(x)) {
+    return(do_parse_kcf)
+  } else if (stringr::str_detect(x, "RES")) {
     return(do_parse_glycoct)
   } else if (stringr::str_detect(x, "WURCS")) {
     return(do_parse_wurcs)

@@ -68,6 +68,29 @@ test_that("auto_parse correctly identifies and parses IUPAC-compact format with 
   expect_equal(as.character(result), as.character(expected))
 })
 
+test_that("auto_parse correctly identifies and parses KCF format", {
+  input <- paste0(
+    "ENTRY       G00066                      Glycan\n",
+    "NODE        6\n",
+    "            1   Cer        18     0\n",
+    "            2   Glc        12     0\n",
+    "            3   Gal         6     0\n",
+    "            4   GlcNAc     -2     0\n",
+    "            5   Gal       -10     0\n",
+    "            6   GlcNAc    -18     0\n",
+    "EDGE        5\n",
+    "            1     2:b1    1:1\n",
+    "            2     3:b1    2:4\n",
+    "            3     4:b1    3:3\n",
+    "            4     5:b1    4:4\n",
+    "            5     6:b1    5:3\n",
+    "///"
+  )
+  result <- auto_parse(input)
+  expected <- parse_kcf(input)
+  expect_equal(as.character(result), as.character(expected))
+})
+
 test_that("auto_parse works with mixed format vector", {
   mixed_input <- c(
     "Gal(b1-3)GlcNAc(b1-4)Glc(a1-", # IUPAC-condensed
