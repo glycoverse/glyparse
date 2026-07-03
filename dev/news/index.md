@@ -8,6 +8,10 @@
   while parsing.
   ([\#29](https://github.com/glycoverse/glyparse/issues/29))
 - Add
+  [`parse_kcf()`](https://glycoverse.github.io/glyparse/dev/reference/parse_kcf.md)
+  to parse KCF structures.
+  ([\#30](https://github.com/glycoverse/glyparse/issues/30))
+- Add
   [`parse_iupac_compact()`](https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_compact.md)
   to parse IUPAC-compact structures.
   ([\#28](https://github.com/glycoverse/glyparse/issues/28))
@@ -16,6 +20,10 @@
   to parse GlyCAM IUPAC structures.
   ([\#25](https://github.com/glycoverse/glyparse/issues/25),
   [\#27](https://github.com/glycoverse/glyparse/issues/27))
+- [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
+  now detects KCF structures and routes them to
+  [`parse_kcf()`](https://glycoverse.github.io/glyparse/dev/reference/parse_kcf.md).
+  ([\#30](https://github.com/glycoverse/glyparse/issues/30))
 - [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
   now detects GlyCAM IUPAC structures and routes them to
   [`parse_glycam_iupac()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycam_iupac.md).

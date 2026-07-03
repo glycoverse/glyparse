@@ -25,6 +25,8 @@ Supported types:
 
 10. StrucGP
 
+11. KCF
+
 ## Usage
 
 ``` r
