@@ -34,6 +34,7 @@ Supported types:
 \item Linear Code
 \item pGlyco
 \item StrucGP
+\item KCF
 }
 }
 \examples{
