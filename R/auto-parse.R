@@ -53,7 +53,7 @@ do_auto_parse <- function(x) {
 }
 
 choose_parser <- function(x) {
-  if (is_kcf_string(x)) {
+  if (stringr::str_detect(x, "ENTRY")) {
     return(do_parse_kcf)
   } else if (stringr::str_detect(x, "RES")) {
     return(do_parse_glycoct)

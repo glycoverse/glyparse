@@ -51,23 +51,6 @@ do_parse_kcf <- function(x) {
   build_kcf_graph(record$nodes, record$edges)
 }
 
-#' Check whether a string looks like KCF
-#'
-#' @param x A character scalar.
-#'
-#' @return A logical scalar.
-#' @noRd
-is_kcf_string <- function(x) {
-  isTRUE(stringr::str_detect(
-    x,
-    stringr::regex("^ENTRY\\s+.+\\bGlycan\\b", multiline = TRUE)
-  )) &&
-    isTRUE(stringr::str_detect(
-      x,
-      stringr::regex("^NODE\\s+\\d+", multiline = TRUE)
-    ))
-}
-
 #' Parse KCF NODE and EDGE sections
 #'
 #' @param x A single KCF string.
