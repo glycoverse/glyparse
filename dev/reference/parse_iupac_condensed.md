@@ -8,7 +8,7 @@ For more information about IUPAC-condensed notation, see
 ## Usage
 
 ``` r
-parse_iupac_condensed(x, on_failure = "error")
+parse_iupac_condensed(x, on_failure = "error", progress = FALSE)
 ```
 
 ## Arguments
@@ -22,6 +22,10 @@ parse_iupac_condensed(x, on_failure = "error")
 
   How to handle parsing failures. `"error"` aborts when a structure
   cannot be parsed. `"na"` returns `NA` at invalid positions.
+
+- progress:
+
+  Whether to show a progress bar while parsing.
 
 ## Value
 

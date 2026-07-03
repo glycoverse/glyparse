@@ -4,6 +4,9 @@
 
 ### New features
 
+- Add a `progress` argument to parser functions for opt-in progress bars
+  while parsing.
+  ([\#29](https://github.com/glycoverse/glyparse/issues/29))
 - Add
   [`parse_iupac_compact()`](https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_compact.md)
   to parse IUPAC-compact structures.

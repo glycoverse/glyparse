@@ -28,7 +28,7 @@ Supported types:
 ## Usage
 
 ``` r
-auto_parse(x, on_failure = "error")
+auto_parse(x, on_failure = "error", progress = FALSE)
 ```
 
 ## Arguments
@@ -42,6 +42,10 @@ auto_parse(x, on_failure = "error")
 
   How to handle parsing failures. `"error"` aborts when a structure
   cannot be parsed. `"na"` returns `NA` at invalid positions.
+
+- progress:
+
+  Whether to show a progress bar while parsing.
 
 ## Value
 
