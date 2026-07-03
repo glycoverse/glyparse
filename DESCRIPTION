@@ -26,7 +26,7 @@ Imports:
     dplyr,
     glyrepr (>= 0.12.0),
     igraph,
-    purrr,
+    purrr (>= 1.0.0),
     rlang,
     rstackdeque,
     stringr,

@@ -20,6 +20,7 @@
 #' @param x A character vector of structure strings. NA values are allowed and will be returned as NA structures.
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
 #'   structure cannot be parsed. `"na"` returns `NA` at invalid positions.
+#' @param progress Whether to show a progress bar while parsing.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
@@ -36,8 +37,13 @@
 #' auto_parse(x)
 #'
 #' @export
-auto_parse <- function(x, on_failure = "error") {
-  struc_parser_wrapper(x, do_auto_parse, on_failure = on_failure)
+auto_parse <- function(x, on_failure = "error", progress = FALSE) {
+  struc_parser_wrapper(
+    x,
+    do_auto_parse,
+    on_failure = on_failure,
+    progress = progress
+  )
 }
 
 do_auto_parse <- function(x) {
@@ -50,7 +56,7 @@ choose_parser <- function(x) {
     return(do_parse_glycoct)
   } else if (stringr::str_detect(x, "WURCS")) {
     return(do_parse_wurcs)
-  } else if (stringr::str_starts(x,"\\([HNAGFSap]")) {
+  } else if (stringr::str_starts(x, "\\([HNAGFSap]")) {
     return(do_parse_pglyco_struc)
   } else if (stringr::str_starts(x, "A") && stringr::str_ends(x, "a")) {
     return(do_parse_strucgp_struc)
