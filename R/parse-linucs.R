@@ -495,10 +495,11 @@ build_linucs_graph <- function(root) {
   state$edges <- list()
 
   add_linucs_mono_node(root, state)
-  vertex_df <- tibble::tibble(
+  vertex_df <- data.frame(
     name = purrr::map_chr(state$vertices, "name"),
     mono = purrr::map_chr(state$vertices, "mono"),
-    sub = purrr::map_chr(state$vertices, "sub")
+    sub = purrr::map_chr(state$vertices, "sub"),
+    stringsAsFactors = FALSE
   )
   edge_df <- if (length(state$edges) == 0) {
     data.frame(
