@@ -86,6 +86,15 @@ test_that("parse_linear_code handles NA", {
   expect_true(is.na(result[2]))
 })
 
+test_that("parse_linucs handles NA", {
+  skip_if_not_installed("glyrepr", minimum_version = "0.10.0")
+  input <- c("[][Hexp]{}", NA)
+  result <- parse_linucs(input)
+  expect_equal(length(result), 2)
+  expect_false(is.na(result[1]))
+  expect_true(is.na(result[2]))
+})
+
 test_that("parse_glycoct handles NA", {
   skip_if_not_installed("glyrepr", minimum_version = "0.10.0")
   input <- c("RES\n1b:b-dglc-HEX-1:5\nLIN\n1:1d(2+1)2n", NA)
@@ -137,6 +146,10 @@ parser_failure_cases <- list(
   parse_linear_code = list(
     valid = "Ma3(Ma6)Mb4GNb4GNb",
     invalid = "Zz"
+  ),
+  parse_linucs = list(
+    valid = "[][Hexp]{}",
+    invalid = "not a LINUCS structure"
   ),
   parse_glycoct = list(
     valid = "RES\n1b:b-dglc-HEX-1:5\nLIN\n1:1d(2+1)2n",

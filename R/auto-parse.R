@@ -17,6 +17,7 @@
 #' 9. pGlyco
 #' 10. StrucGP
 #' 11. KCF
+#' 12. LINUCS
 #'
 #' @param x A character vector of structure strings. NA values are allowed and will be returned as NA structures.
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
@@ -73,6 +74,8 @@ choose_parser <- function(x) {
     return(do_parse_iupac_extended)
   } else if (stringr::str_detect(x, "\\w+\\([ab\\?][\\d\\?]-")) {
     return(do_parse_iupac_condensed)
+  } else if (is_linucs_string(x)) {
+    return(do_parse_linucs)
   } else if (is_iupac_compact_string(x)) {
     return(do_parse_iupac_compact)
   } else if (stringr::str_ends(x, "-")) {
