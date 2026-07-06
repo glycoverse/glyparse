@@ -36,6 +36,28 @@ test_that("struc_parser_wrapper parses each unique non-NA input once", {
   expect_equal(parser_calls, c("A", "B", "C"))
 })
 
+test_that("struc_parser_wrapper constructs each unique non-NA graph once", {
+  constructor_sizes <- integer()
+  original_glycan_structure <- glyrepr::glycan_structure
+  testthat::local_mocked_bindings(
+    glycan_structure = function(...) {
+      constructor_sizes <<- c(constructor_sizes, length(list(...)))
+      original_glycan_structure(...)
+    },
+    .package = "glyrepr"
+  )
+
+  input <- c("(N)", "(H)", NA, "(N)", "(H)", "(N)")
+
+  result <- parse_pglyco_struc(input)
+
+  expect_identical(
+    as.character(result),
+    c("HexNAc(??-", "Hex(??-", NA, "HexNAc(??-", "Hex(??-", "HexNAc(??-")
+  )
+  expect_lte(max(constructor_sizes), length(unique(input[!is.na(input)])))
+})
+
 test_that("struc_parser_wrapper preserves order with duplicates", {
   input <- c("(N)", "(H)", "(N)", "(F)", "(H)", "(N)")
   result <- parse_pglyco_struc(input)

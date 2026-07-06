@@ -148,11 +148,14 @@ abort_on_invalid_parse <- function(invalid_unique_x, on_failure, call) {
 #' @return A [glyrepr::glycan_structure()] object.
 #' @noRd
 build_wrapped_structure <- function(wrapper_input, parsed_unique) {
-  result_graphs <- build_wrapped_structure_graphs(
-    wrapper_input = wrapper_input,
-    parsed_unique = parsed_unique
+  unique_result <- build_unique_wrapped_structure(
+    parsed_unique$valid_unique_structures
   )
-  result <- do.call(glyrepr::glycan_structure, result_graphs)
+  result_indices <- build_wrapped_structure_indices(
+    wrapper_input,
+    parsed_unique
+  )
+  result <- unique_result[result_indices]
   if (!is.null(wrapper_input$names)) {
     attr(result, "names") <- wrapper_input$names
   }
@@ -160,32 +163,42 @@ build_wrapped_structure <- function(wrapper_input, parsed_unique) {
 }
 
 
-#' Build final graph arguments for wrapped parser output.
+#' Build a glycan structure vector for unique parsed structures.
+#'
+#' @param valid_unique_structures A list of length-1 glycan structures.
+#'
+#' @return A [glyrepr::glycan_structure()] object.
+#' @noRd
+build_unique_wrapped_structure <- function(valid_unique_structures) {
+  valid_graphs <- purrr::map(
+    valid_unique_structures,
+    glyrepr::get_structure_graphs,
+    return_list = FALSE
+  )
+  do.call(glyrepr::glycan_structure, valid_graphs)
+}
+
+
+#' Build indices that map unique parser output back to input order.
 #'
 #' @param wrapper_input Prepared input metadata.
 #' @param parsed_unique Parsed valid unique structures.
 #'
-#' @return A list of igraph objects and `NA` values in original input order.
+#' @return An integer vector of indices into the unique result.
 #' @noRd
-build_wrapped_structure_graphs <- function(wrapper_input, parsed_unique) {
-  valid_graphs <- purrr::map(
-    parsed_unique$valid_unique_structures,
-    glyrepr::get_structure_graphs,
-    return_list = FALSE
-  )
+build_wrapped_structure_indices <- function(wrapper_input, parsed_unique) {
   non_na_match_indices <- match(
     wrapper_input$non_na_x,
     parsed_unique$valid_unique_x
   )
 
-  result_graphs <- rep(list(NA_character_), wrapper_input$size)
-  non_na_graphs <- rep(list(NA_character_), length(wrapper_input$non_na_x))
+  result_indices <- rep(NA_integer_, wrapper_input$size)
+  non_na_indices <- rep(NA_integer_, length(wrapper_input$non_na_x))
   valid_non_na <- !is.na(non_na_match_indices)
-  non_na_graphs[valid_non_na] <-
-    valid_graphs[non_na_match_indices[valid_non_na]]
-  result_graphs[!wrapper_input$na_mask] <- non_na_graphs
+  non_na_indices[valid_non_na] <- non_na_match_indices[valid_non_na]
+  result_indices[!wrapper_input$na_mask] <- non_na_indices
 
-  result_graphs
+  result_indices
 }
 
 
