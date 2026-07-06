@@ -6,6 +6,7 @@ parser_progress_examples <- list(
   parse_iupac_condensed = "Gal(b1-3)GlcNAc(b1-4)Glc(a1-",
   parse_iupac_extended = "beta-D-Galp-(1->3)-alpha-D-GalpNAc-(1->",
   parse_iupac_short = "Neu5Aca3Gala3(Fuca6)GlcNAcb-",
+  parse_linucs = "[][Hexp]{}",
   parse_linear_code = "Ma3(Ma6)Mb4GNb4GNb",
   parse_pglyco_struc = "(N)",
   parse_strucgp_struc = "A2B2C1D1E1F1fedD1E1F1feE1F1fedcba",

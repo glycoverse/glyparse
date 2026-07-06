@@ -47,6 +47,13 @@ test_that("auto_parse correctly identifies and parses Linear Code format", {
   expect_equal(as.character(result), as.character(expected))
 })
 
+test_that("auto_parse correctly identifies and parses LINUCS format", {
+  input <- "[][b-D-Glcp]{[(4+1)][b-D-Galp]{}}"
+  result <- auto_parse(input)
+  expected <- parse_linucs(input)
+  expect_equal(as.character(result), as.character(expected))
+})
+
 test_that("auto_parse correctly identifies and parses GlyCAM IUPAC format", {
   input <- "DManpa1-3[DManpa1-6]DManpb1-4DGlcpNAcb1-4DGlcpNAcb1-OH"
   result <- auto_parse(input)

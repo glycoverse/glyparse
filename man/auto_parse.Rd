@@ -35,6 +35,7 @@ Supported types:
 \item pGlyco
 \item StrucGP
 \item KCF
+\item LINUCS
 }
 }
 \examples{
