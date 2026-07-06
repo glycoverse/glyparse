@@ -2,26 +2,20 @@
 
 ## New features
 
-* Add a `progress` argument to parser functions for opt-in progress bars while parsing. (#29)
-* Add `parse_linucs()` to parse LINUCS structures. (#31)
-* Add `parse_kcf()` to parse KCF structures. (#30)
-* Add `parse_iupac_compact()` to parse IUPAC-compact structures. (#28)
-* Add `parse_glycam_iupac()` to parse GlyCAM IUPAC structures. (#25, #27)
-* `auto_parse()` now detects LINUCS structures and routes them to `parse_linucs()`. (#31)
-* `auto_parse()` now detects KCF structures and routes them to `parse_kcf()`. (#30)
-* `auto_parse()` now detects GlyCAM IUPAC structures and routes them to `parse_glycam_iupac()`. (#26)
-* `auto_parse()` now detects IUPAC-compact structures and routes them to `parse_iupac_compact()`. (#28)
+* `auto_parse()` now detects GlyCAM IUPAC, IUPAC-compact, KCF, and LINUCS structures and routes them to the corresponding parser (#26, #28, #30, #31).
+* Parser functions gain a `progress` argument for opt-in progress bars when parsing large inputs (#29).
+* New `parse_glycam_iupac()` parses GlyCAM IUPAC structures (#25, #27).
+* New `parse_iupac_compact()` parses IUPAC-compact structures (#28).
+* New `parse_kcf()` parses KCF structures (#30).
+* New `parse_linucs()` parses LINUCS structures (#31).
 
 ## Minor improvements and bug fixes
 
-* `parse_wurcs()` now supports additional generic WURCS residue descriptors. (#23)
-* `parse_wurcs()` now supports ambiguous WURCS sialic acid descriptors. (#23)
-* `parse_wurcs()` now supports uppercase WURCS residue IDs for large structures. (#23)
-* `parse_glycoct()` now accepts space-separated GlycoCT records, such as records stored in CSV exports. (#24)
-* `parse_glycoct()` now supports generic GlycoCT `HEX`, N-acetylated `HEX`, deoxy-`HEX`, and sialic acid descriptors. (#24)
-* `parse_glycoct()` now maps direct GlycoCT `n-sulfate` substituents to N-sulfated amino sugars. (#24)
-* `parse_wurcs()` now parses WURCS alditol residues as regular reducing-end glycans with unknown anomer configurations. (#21)
-* `parse_glycoct()` now parses GlycoCT alditol residues as regular reducing-end glycans with unknown anomer configurations. (#22)
+* `parse_glycoct()` now accepts space-separated GlycoCT records, such as records stored in CSV exports (#24).
+* `parse_glycoct()` now parses GlycoCT alditol residues as regular reducing-end glycans with unknown anomer configurations (#22).
+* `parse_glycoct()` now supports generic GlycoCT `HEX`, N-acetylated `HEX`, deoxy-`HEX`, and sialic acid descriptors, including direct `n-sulfate` substituents on amino sugars (#24).
+* `parse_wurcs()` now parses WURCS alditol residues as regular reducing-end glycans with unknown anomer configurations (#21).
+* `parse_wurcs()` now supports additional generic residue descriptors, ambiguous sialic acid descriptors, and uppercase residue IDs for large structures (#23).
 
 # glyparse 0.6.1
 
