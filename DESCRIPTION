@@ -29,8 +29,7 @@ Imports:
     purrr (>= 1.0.0),
     rlang,
     rstackdeque,
-    stringr,
-    vctrs
+    stringr
 Depends: 
     R (>= 4.1)
 VignetteBuilder: knitr

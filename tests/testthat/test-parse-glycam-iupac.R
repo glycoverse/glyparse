@@ -21,11 +21,18 @@ test_that("GlyCAM IUPAC converts simple and branched glycans", {
   )
 })
 
+test_that("GlyCAM IUPAC parses generic monosaccharides alone", {
+  skip_on_old_win()
+
+  parsed <- parse_glycam_iupac(c(Hex = "Hexpb1-OH"))
+
+  expect_identical(as.character(parsed), c(Hex = "Hex(b1-"))
+})
+
 test_that("GlyCAM IUPAC parses checklist monosaccharide names", {
   skip_on_old_win()
 
   to_parse <- c(
-    Hex = "Hexpb1-OH",
     Glc = "DGlcpb1-OH",
     Man = "DManpb1-OH",
     Gal = "DGalpb1-OH",
@@ -101,7 +108,6 @@ test_that("GlyCAM IUPAC parses checklist monosaccharide names", {
   expect_identical(
     as.character(parsed),
     c(
-      Hex = "Hex(b1-",
       Glc = "Glc(b1-",
       Man = "Man(b1-",
       Gal = "Gal(b1-",

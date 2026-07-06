@@ -1,5 +1,9 @@
 # glyparse (development version)
 
+## Minor improvements and bug fixes
+
+* Parser output now uses `glyrepr`'s public structure constructor, preventing tidyverse joins on parsed structures from failing with `glyrepr` 0.13.0. (#33)
+
 # glyparse 0.7.0
 
 ## New features
