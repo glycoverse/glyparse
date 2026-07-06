@@ -148,24 +148,11 @@ abort_on_invalid_parse <- function(invalid_unique_x, on_failure, call) {
 #' @return A [glyrepr::glycan_structure()] object.
 #' @noRd
 build_wrapped_structure <- function(wrapper_input, parsed_unique) {
-  structure_payload <- extract_structure_payload(
-    parsed_unique$valid_unique_structures
+  result_graphs <- build_wrapped_structure_graphs(
+    wrapper_input = wrapper_input,
+    parsed_unique = parsed_unique
   )
-  non_na_match_indices <- match(
-    wrapper_input$non_na_x,
-    parsed_unique$valid_unique_x
-  )
-
-  result_iupacs <- character(wrapper_input$size)
-  result_iupacs[wrapper_input$na_mask] <- NA_character_
-  result_iupacs[!wrapper_input$na_mask] <-
-    structure_payload$iupacs[non_na_match_indices]
-
-  result <- vctrs::new_vctr(
-    result_iupacs,
-    graphs = structure_payload$graphs,
-    class = class(parsed_unique$valid_unique_structures[[1]])
-  )
+  result <- do.call(glyrepr::glycan_structure, result_graphs)
   if (!is.null(wrapper_input$names)) {
     attr(result, "names") <- wrapper_input$names
   }
@@ -173,28 +160,32 @@ build_wrapped_structure <- function(wrapper_input, parsed_unique) {
 }
 
 
-#' Extract IUPAC codes and graph lookup payload from parsed structures.
+#' Build final graph arguments for wrapped parser output.
 #'
-#' @param valid_unique_structures A list of length-1 glycan structures.
+#' @param wrapper_input Prepared input metadata.
+#' @param parsed_unique Parsed valid unique structures.
 #'
-#' @return A list with `iupacs` and named `graphs`.
+#' @return A list of igraph objects and `NA` values in original input order.
 #' @noRd
-extract_structure_payload <- function(valid_unique_structures) {
-  valid_unique_iupacs <- purrr::map_chr(
-    valid_unique_structures,
-    glyrepr::structure_to_iupac
-  )
-  graph_keep_mask <- !duplicated(valid_unique_iupacs)
+build_wrapped_structure_graphs <- function(wrapper_input, parsed_unique) {
   valid_graphs <- purrr::map(
-    valid_unique_structures[graph_keep_mask],
+    parsed_unique$valid_unique_structures,
     glyrepr::get_structure_graphs,
     return_list = FALSE
   )
-  names(valid_graphs) <- valid_unique_iupacs[graph_keep_mask]
-  list(
-    iupacs = valid_unique_iupacs,
-    graphs = valid_graphs
+  non_na_match_indices <- match(
+    wrapper_input$non_na_x,
+    parsed_unique$valid_unique_x
   )
+
+  result_graphs <- rep(list(NA_character_), wrapper_input$size)
+  non_na_graphs <- rep(list(NA_character_), length(wrapper_input$non_na_x))
+  valid_non_na <- !is.na(non_na_match_indices)
+  non_na_graphs[valid_non_na] <-
+    valid_graphs[non_na_match_indices[valid_non_na]]
+  result_graphs[!wrapper_input$na_mask] <- non_na_graphs
+
+  result_graphs
 }
 
 
