@@ -2,6 +2,8 @@
 
 ## glyparse (development version)
 
+## glyparse 0.7.0
+
 ### New features
 
 - [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
