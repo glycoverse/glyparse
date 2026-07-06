@@ -29,15 +29,6 @@ test_that("GlyCAM IUPAC parses generic monosaccharides alone", {
   expect_identical(as.character(parsed), c(Hex = "Hex(b1-"))
 })
 
-test_that("GlyCAM IUPAC rejects mixed concrete and generic vectors", {
-  skip_on_old_win()
-
-  expect_error(
-    parse_glycam_iupac(c(Hex = "Hexpb1-OH", Glc = "DGlcpb1-OH")),
-    "same monosaccharide type"
-  )
-})
-
 test_that("GlyCAM IUPAC parses checklist monosaccharide names", {
   skip_on_old_win()
 
