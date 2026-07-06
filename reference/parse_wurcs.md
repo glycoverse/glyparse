@@ -3,12 +3,14 @@
 This function parses WURCS strings into a
 [`glyrepr::glycan_structure()`](https://glycoverse.github.io/glyrepr/reference/glycan_structure.html).
 Currently, only WURCS 2.0 is supported. For more information about
-WURCS, see [WURCS](https://github.com/glycoinfo/WURCS/wiki).
+WURCS, see [WURCS](https://github.com/glycoinfo/WURCS/wiki). Alditol
+residues are parsed as regular reducing-end glycans with unknown anomer
+configurations.
 
 ## Usage
 
 ``` r
-parse_wurcs(x, on_failure = "error")
+parse_wurcs(x, on_failure = "error", progress = FALSE)
 ```
 
 ## Arguments
@@ -22,6 +24,10 @@ parse_wurcs(x, on_failure = "error")
 
   How to handle parsing failures. `"error"` aborts when a structure
   cannot be parsed. `"na"` returns `NA` at invalid positions.
+
+- progress:
+
+  Whether to show a progress bar while parsing.
 
 ## Value
 

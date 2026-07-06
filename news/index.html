@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">glyparse</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.6.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,32 @@
       <small>Source: <a href="https://github.com/glycoverse/glyparse/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.7.0" id="glyparse-070">glyparse 0.7.0<a class="anchor" aria-label="anchor" href="#glyparse-070"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-7-0">New features<a class="anchor" aria-label="anchor" href="#new-features-0-7-0"></a></h3>
+<ul><li>
+<code><a href="../reference/auto_parse.html">auto_parse()</a></code> now detects GlyCAM IUPAC, IUPAC-compact, KCF, and LINUCS structures and routes them to the corresponding parser (<a href="https://github.com/glycoverse/glyparse/issues/26" class="external-link">#26</a>, <a href="https://github.com/glycoverse/glyparse/issues/28" class="external-link">#28</a>, <a href="https://github.com/glycoverse/glyparse/issues/30" class="external-link">#30</a>, <a href="https://github.com/glycoverse/glyparse/issues/31" class="external-link">#31</a>).</li>
+<li>Parser functions gain a <code>progress</code> argument for opt-in progress bars when parsing large inputs (<a href="https://github.com/glycoverse/glyparse/issues/29" class="external-link">#29</a>).</li>
+<li>New <code><a href="../reference/parse_glycam_iupac.html">parse_glycam_iupac()</a></code> parses GlyCAM IUPAC structures (<a href="https://github.com/glycoverse/glyparse/issues/25" class="external-link">#25</a>, <a href="https://github.com/glycoverse/glyparse/issues/27" class="external-link">#27</a>).</li>
+<li>New <code><a href="../reference/parse_iupac_compact.html">parse_iupac_compact()</a></code> parses IUPAC-compact structures (<a href="https://github.com/glycoverse/glyparse/issues/28" class="external-link">#28</a>).</li>
+<li>New <code><a href="../reference/parse_kcf.html">parse_kcf()</a></code> parses KCF structures (<a href="https://github.com/glycoverse/glyparse/issues/30" class="external-link">#30</a>).</li>
+<li>New <code><a href="../reference/parse_linucs.html">parse_linucs()</a></code> parses LINUCS structures (<a href="https://github.com/glycoverse/glyparse/issues/31" class="external-link">#31</a>).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="minor-improvements-and-bug-fixes-0-7-0">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-0-7-0"></a></h3>
+<ul><li>
+<code><a href="../reference/parse_glycoct.html">parse_glycoct()</a></code> now accepts space-separated GlycoCT records, such as records stored in CSV exports (<a href="https://github.com/glycoverse/glyparse/issues/24" class="external-link">#24</a>).</li>
+<li>
+<code><a href="../reference/parse_glycoct.html">parse_glycoct()</a></code> now parses GlycoCT alditol residues as regular reducing-end glycans with unknown anomer configurations (<a href="https://github.com/glycoverse/glyparse/issues/22" class="external-link">#22</a>).</li>
+<li>
+<code><a href="../reference/parse_glycoct.html">parse_glycoct()</a></code> now supports generic GlycoCT <code>HEX</code>, N-acetylated <code>HEX</code>, deoxy-<code>HEX</code>, and sialic acid descriptors, including direct <code>n-sulfate</code> substituents on amino sugars (<a href="https://github.com/glycoverse/glyparse/issues/24" class="external-link">#24</a>).</li>
+<li>
+<code><a href="../reference/parse_wurcs.html">parse_wurcs()</a></code> now parses WURCS alditol residues as regular reducing-end glycans with unknown anomer configurations (<a href="https://github.com/glycoverse/glyparse/issues/21" class="external-link">#21</a>).</li>
+<li>
+<code><a href="../reference/parse_wurcs.html">parse_wurcs()</a></code> now supports additional generic residue descriptors, ambiguous sialic acid descriptors, and uppercase residue IDs for large structures (<a href="https://github.com/glycoverse/glyparse/issues/23" class="external-link">#23</a>).</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.6.1" id="glyparse-061">glyparse 0.6.1<a class="anchor" aria-label="anchor" href="#glyparse-061"></a></h2><p class="text-muted">CRAN release: 2026-06-20</p>
 <div class="section level3">

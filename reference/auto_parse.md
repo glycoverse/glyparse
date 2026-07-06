@@ -13,18 +13,26 @@ Supported types:
 
 4.  IUPAC-short
 
-5.  WURCS
+5.  GlyCAM IUPAC
 
-6.  Linear Code
+6.  IUPAC-compact
 
-7.  pGlyco
+7.  WURCS
 
-8.  StrucGP
+8.  Linear Code
+
+9.  pGlyco
+
+10. StrucGP
+
+11. KCF
+
+12. LINUCS
 
 ## Usage
 
 ``` r
-auto_parse(x, on_failure = "error")
+auto_parse(x, on_failure = "error", progress = FALSE)
 ```
 
 ## Arguments
@@ -38,6 +46,10 @@ auto_parse(x, on_failure = "error")
 
   How to handle parsing failures. `"error"` aborts when a structure
   cannot be parsed. `"na"` returns `NA` at invalid positions.
+
+- progress:
+
+  Whether to show a progress bar while parsing.
 
 ## Value
 

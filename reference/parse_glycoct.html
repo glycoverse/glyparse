@@ -9,7 +9,7 @@ GlycoCT is a format used by databases like GlyTouCan and GlyGen."><meta property
 
     <a class="navbar-brand me-2" href="../index.html">glyparse</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.6.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.7.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,7 +42,7 @@ GlycoCT is a format used by databases like GlyTouCan and GlyGen.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">parse_glycoct</span><span class="op">(</span><span class="va">x</span>, on_failure <span class="op">=</span> <span class="st">"error"</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">parse_glycoct</span><span class="op">(</span><span class="va">x</span>, on_failure <span class="op">=</span> <span class="st">"error"</span>, progress <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -57,6 +57,10 @@ GlycoCT is a format used by databases like GlyTouCan and GlyGen.</p>
 <dd><p>How to handle parsing failures. <code>"error"</code> aborts when a
 structure cannot be parsed. <code>"na"</code> returns <code>NA</code> at invalid positions.</p></dd>
 
+
+<dt id="arg-progress">progress<a class="anchor" aria-label="anchor" href="#arg-progress"></a></dt>
+<dd><p>Whether to show a progress bar while parsing.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -66,7 +70,9 @@ structure cannot be parsed. <code>"na"</code> returns <code>NA</code> at invalid
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>GlycoCT format consists of two parts:</p><ul><li><p>RES: Contains monosaccharides (lines starting with 'b:') and substituents (lines starting with 's:')</p></li>
 <li><p>LIN: Contains linkage information between residues</p></li>
-</ul><p>For more information about GlycoCT format, see the glycoct.md documentation.</p>
+</ul><p>Alditol residues are parsed as regular reducing-end glycans with unknown
+anomer configurations.</p>
+<p>For more information about GlycoCT format, see the glycoct.md documentation.</p>
     </div>
 
     <div class="section level2">

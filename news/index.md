@@ -1,5 +1,61 @@
 # Changelog
 
+## glyparse 0.7.0
+
+### New features
+
+- [`auto_parse()`](https://glycoverse.github.io/glyparse/reference/auto_parse.md)
+  now detects GlyCAM IUPAC, IUPAC-compact, KCF, and LINUCS structures
+  and routes them to the corresponding parser
+  ([\#26](https://github.com/glycoverse/glyparse/issues/26),
+  [\#28](https://github.com/glycoverse/glyparse/issues/28),
+  [\#30](https://github.com/glycoverse/glyparse/issues/30),
+  [\#31](https://github.com/glycoverse/glyparse/issues/31)).
+- Parser functions gain a `progress` argument for opt-in progress bars
+  when parsing large inputs
+  ([\#29](https://github.com/glycoverse/glyparse/issues/29)).
+- New
+  [`parse_glycam_iupac()`](https://glycoverse.github.io/glyparse/reference/parse_glycam_iupac.md)
+  parses GlyCAM IUPAC structures
+  ([\#25](https://github.com/glycoverse/glyparse/issues/25),
+  [\#27](https://github.com/glycoverse/glyparse/issues/27)).
+- New
+  [`parse_iupac_compact()`](https://glycoverse.github.io/glyparse/reference/parse_iupac_compact.md)
+  parses IUPAC-compact structures
+  ([\#28](https://github.com/glycoverse/glyparse/issues/28)).
+- New
+  [`parse_kcf()`](https://glycoverse.github.io/glyparse/reference/parse_kcf.md)
+  parses KCF structures
+  ([\#30](https://github.com/glycoverse/glyparse/issues/30)).
+- New
+  [`parse_linucs()`](https://glycoverse.github.io/glyparse/reference/parse_linucs.md)
+  parses LINUCS structures
+  ([\#31](https://github.com/glycoverse/glyparse/issues/31)).
+
+### Minor improvements and bug fixes
+
+- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/reference/parse_glycoct.md)
+  now accepts space-separated GlycoCT records, such as records stored in
+  CSV exports
+  ([\#24](https://github.com/glycoverse/glyparse/issues/24)).
+- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/reference/parse_glycoct.md)
+  now parses GlycoCT alditol residues as regular reducing-end glycans
+  with unknown anomer configurations
+  ([\#22](https://github.com/glycoverse/glyparse/issues/22)).
+- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/reference/parse_glycoct.md)
+  now supports generic GlycoCT `HEX`, N-acetylated `HEX`, deoxy-`HEX`,
+  and sialic acid descriptors, including direct `n-sulfate` substituents
+  on amino sugars
+  ([\#24](https://github.com/glycoverse/glyparse/issues/24)).
+- [`parse_wurcs()`](https://glycoverse.github.io/glyparse/reference/parse_wurcs.md)
+  now parses WURCS alditol residues as regular reducing-end glycans with
+  unknown anomer configurations
+  ([\#21](https://github.com/glycoverse/glyparse/issues/21)).
+- [`parse_wurcs()`](https://glycoverse.github.io/glyparse/reference/parse_wurcs.md)
+  now supports additional generic residue descriptors, ambiguous sialic
+  acid descriptors, and uppercase residue IDs for large structures
+  ([\#23](https://github.com/glycoverse/glyparse/issues/23)).
+
 ## glyparse 0.6.1
 
 CRAN release: 2026-06-20
