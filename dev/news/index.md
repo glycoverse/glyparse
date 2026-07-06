@@ -4,73 +4,57 @@
 
 ### New features
 
-- Add a `progress` argument to parser functions for opt-in progress bars
-  while parsing.
-  ([\#29](https://github.com/glycoverse/glyparse/issues/29))
-- Add
-  [`parse_linucs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_linucs.md)
-  to parse LINUCS structures.
-  ([\#31](https://github.com/glycoverse/glyparse/issues/31))
-- Add
-  [`parse_kcf()`](https://glycoverse.github.io/glyparse/dev/reference/parse_kcf.md)
-  to parse KCF structures.
-  ([\#30](https://github.com/glycoverse/glyparse/issues/30))
-- Add
-  [`parse_iupac_compact()`](https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_compact.md)
-  to parse IUPAC-compact structures.
-  ([\#28](https://github.com/glycoverse/glyparse/issues/28))
-- Add
+- [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
+  now detects GlyCAM IUPAC, IUPAC-compact, KCF, and LINUCS structures
+  and routes them to the corresponding parser
+  ([\#26](https://github.com/glycoverse/glyparse/issues/26),
+  [\#28](https://github.com/glycoverse/glyparse/issues/28),
+  [\#30](https://github.com/glycoverse/glyparse/issues/30),
+  [\#31](https://github.com/glycoverse/glyparse/issues/31)).
+- Parser functions gain a `progress` argument for opt-in progress bars
+  when parsing large inputs
+  ([\#29](https://github.com/glycoverse/glyparse/issues/29)).
+- New
   [`parse_glycam_iupac()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycam_iupac.md)
-  to parse GlyCAM IUPAC structures.
+  parses GlyCAM IUPAC structures
   ([\#25](https://github.com/glycoverse/glyparse/issues/25),
-  [\#27](https://github.com/glycoverse/glyparse/issues/27))
-- [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
-  now detects LINUCS structures and routes them to
-  [`parse_linucs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_linucs.md).
-  ([\#31](https://github.com/glycoverse/glyparse/issues/31))
-- [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
-  now detects KCF structures and routes them to
-  [`parse_kcf()`](https://glycoverse.github.io/glyparse/dev/reference/parse_kcf.md).
-  ([\#30](https://github.com/glycoverse/glyparse/issues/30))
-- [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
-  now detects GlyCAM IUPAC structures and routes them to
-  [`parse_glycam_iupac()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycam_iupac.md).
-  ([\#26](https://github.com/glycoverse/glyparse/issues/26))
-- [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
-  now detects IUPAC-compact structures and routes them to
-  [`parse_iupac_compact()`](https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_compact.md).
-  ([\#28](https://github.com/glycoverse/glyparse/issues/28))
+  [\#27](https://github.com/glycoverse/glyparse/issues/27)).
+- New
+  [`parse_iupac_compact()`](https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_compact.md)
+  parses IUPAC-compact structures
+  ([\#28](https://github.com/glycoverse/glyparse/issues/28)).
+- New
+  [`parse_kcf()`](https://glycoverse.github.io/glyparse/dev/reference/parse_kcf.md)
+  parses KCF structures
+  ([\#30](https://github.com/glycoverse/glyparse/issues/30)).
+- New
+  [`parse_linucs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_linucs.md)
+  parses LINUCS structures
+  ([\#31](https://github.com/glycoverse/glyparse/issues/31)).
 
 ### Minor improvements and bug fixes
 
-- [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
-  now supports additional generic WURCS residue descriptors.
-  ([\#23](https://github.com/glycoverse/glyparse/issues/23))
-- [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
-  now supports ambiguous WURCS sialic acid descriptors.
-  ([\#23](https://github.com/glycoverse/glyparse/issues/23))
-- [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
-  now supports uppercase WURCS residue IDs for large structures.
-  ([\#23](https://github.com/glycoverse/glyparse/issues/23))
 - [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
   now accepts space-separated GlycoCT records, such as records stored in
-  CSV exports.
-  ([\#24](https://github.com/glycoverse/glyparse/issues/24))
-- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
-  now supports generic GlycoCT `HEX`, N-acetylated `HEX`, deoxy-`HEX`,
-  and sialic acid descriptors.
-  ([\#24](https://github.com/glycoverse/glyparse/issues/24))
-- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
-  now maps direct GlycoCT `n-sulfate` substituents to N-sulfated amino
-  sugars. ([\#24](https://github.com/glycoverse/glyparse/issues/24))
-- [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
-  now parses WURCS alditol residues as regular reducing-end glycans with
-  unknown anomer configurations.
-  ([\#21](https://github.com/glycoverse/glyparse/issues/21))
+  CSV exports
+  ([\#24](https://github.com/glycoverse/glyparse/issues/24)).
 - [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
   now parses GlycoCT alditol residues as regular reducing-end glycans
-  with unknown anomer configurations.
-  ([\#22](https://github.com/glycoverse/glyparse/issues/22))
+  with unknown anomer configurations
+  ([\#22](https://github.com/glycoverse/glyparse/issues/22)).
+- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
+  now supports generic GlycoCT `HEX`, N-acetylated `HEX`, deoxy-`HEX`,
+  and sialic acid descriptors, including direct `n-sulfate` substituents
+  on amino sugars
+  ([\#24](https://github.com/glycoverse/glyparse/issues/24)).
+- [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
+  now parses WURCS alditol residues as regular reducing-end glycans with
+  unknown anomer configurations
+  ([\#21](https://github.com/glycoverse/glyparse/issues/21)).
+- [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
+  now supports additional generic residue descriptors, ambiguous sialic
+  acid descriptors, and uppercase residue IDs for large structures
+  ([\#23](https://github.com/glycoverse/glyparse/issues/23)).
 
 ## glyparse 0.6.1
 
