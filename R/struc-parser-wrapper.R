@@ -161,9 +161,10 @@ build_wrapped_structure <- function(wrapper_input, parsed_unique) {
   result_iupacs[!wrapper_input$na_mask] <-
     structure_payload$iupacs[non_na_match_indices]
 
-  result <- glyrepr:::new_glycan_structure(
+  result <- vctrs::new_vctr(
     result_iupacs,
-    structure_payload$graphs
+    graphs = structure_payload$graphs,
+    class = class(parsed_unique$valid_unique_structures[[1]])
   )
   if (!is.null(wrapper_input$names)) {
     attr(result, "names") <- wrapper_input$names
@@ -181,12 +182,13 @@ build_wrapped_structure <- function(wrapper_input, parsed_unique) {
 extract_structure_payload <- function(valid_unique_structures) {
   valid_unique_iupacs <- purrr::map_chr(
     valid_unique_structures,
-    ~ vctrs::vec_data(.x)[[1]]
+    glyrepr::structure_to_iupac
   )
   graph_keep_mask <- !duplicated(valid_unique_iupacs)
   valid_graphs <- purrr::map(
     valid_unique_structures[graph_keep_mask],
-    ~ attr(.x, "graphs")[[1]]
+    glyrepr::get_structure_graphs,
+    return_list = FALSE
   )
   names(valid_graphs) <- valid_unique_iupacs[graph_keep_mask]
   list(
