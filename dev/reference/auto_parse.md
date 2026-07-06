@@ -27,6 +27,8 @@ Supported types:
 
 11. KCF
 
+12. LINUCS
+
 ## Usage
 
 ``` r

@@ -20,6 +20,8 @@
   : Parse KCF Structures
 - [`parse_linear_code()`](https://glycoverse.github.io/glyparse/dev/reference/parse_linear_code.md)
   : Parse Linear Code Structures
+- [`parse_linucs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_linucs.md)
+  : Parse LINUCS Structures
 - [`parse_pglyco_struc()`](https://glycoverse.github.io/glyparse/dev/reference/parse_pglyco_struc.md)
   : Parse pGlyco Structures
 - [`parse_strucgp_struc()`](https://glycoverse.github.io/glyparse/dev/reference/parse_strucgp_struc.md)

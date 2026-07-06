@@ -8,6 +8,10 @@
   while parsing.
   ([\#29](https://github.com/glycoverse/glyparse/issues/29))
 - Add
+  [`parse_linucs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_linucs.md)
+  to parse LINUCS structures.
+  ([\#31](https://github.com/glycoverse/glyparse/issues/31))
+- Add
   [`parse_kcf()`](https://glycoverse.github.io/glyparse/dev/reference/parse_kcf.md)
   to parse KCF structures.
   ([\#30](https://github.com/glycoverse/glyparse/issues/30))
@@ -20,6 +24,10 @@
   to parse GlyCAM IUPAC structures.
   ([\#25](https://github.com/glycoverse/glyparse/issues/25),
   [\#27](https://github.com/glycoverse/glyparse/issues/27))
+- [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
+  now detects LINUCS structures and routes them to
+  [`parse_linucs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_linucs.md).
+  ([\#31](https://github.com/glycoverse/glyparse/issues/31))
 - [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
   now detects KCF structures and routes them to
   [`parse_kcf()`](https://glycoverse.github.io/glyparse/dev/reference/parse_kcf.md).
