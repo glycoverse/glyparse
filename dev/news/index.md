@@ -2,6 +2,10 @@
 
 ## glyparse (development version)
 
+## glyparse 0.7.1
+
+CRAN release: 2026-07-08
+
 ### Minor improvements and bug fixes
 
 - Parser output now uses `glyrepr`’s public structure constructor,
