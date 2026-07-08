@@ -87,7 +87,7 @@ x <- c(
   "WURCS=2.0/3,3,2/[a2122h-1b_1-5][a1122h-1b_1-5][a1122h-1a_1-5]/1-2-3/a4-b1_b3-c1"
 )
 auto_parse(x)
-#> Error in `validate_glycan_structure_vector()` at glyrepr/R/structure.R:168:3:
+#> Error in `validate_glycan_structure_vector()`:
 #> ! All structures must have the same monosaccharide type.
 #> ✖ Found 2 concrete and 1 generic structure(s) in the same vector.
 #> ℹ Use `convert_to_generic()` to convert concrete structures to generic type.
