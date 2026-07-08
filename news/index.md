@@ -1,6 +1,19 @@
 # Changelog
 
+## glyparse 0.7.1
+
+CRAN release: 2026-07-08
+
+### Minor improvements and bug fixes
+
+- Parser output now uses `glyrepr`’s public structure constructor,
+  preventing tidyverse joins on parsed structures from failing with
+  `glyrepr` 0.13.0.
+  ([\#33](https://github.com/glycoverse/glyparse/issues/33))
+
 ## glyparse 0.7.0
+
+CRAN release: 2026-07-06
 
 ### New features
 
