@@ -2,6 +2,15 @@
 
 ## glyparse (development version)
 
+- Parser functions now construct structure vectors through `glyrepr`’s
+  low-level graph APIs, avoiding repeated scalar construction for
+  distinct inputs.
+- Parsers that normalize to IUPAC-condensed notation now normalize
+  complete unique vectors and construct them in one call.
+- Graph-based parsers gain `validate` to skip graph validation for
+  trusted inputs
+  ([\#36](https://github.com/glycoverse/glyparse/issues/36)).
+
 ## glyparse 0.7.1
 
 CRAN release: 2026-07-08

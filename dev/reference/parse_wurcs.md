@@ -10,7 +10,7 @@ configurations.
 ## Usage
 
 ``` r
-parse_wurcs(x, on_failure = "error", progress = FALSE)
+parse_wurcs(x, on_failure = "error", progress = FALSE, validate = TRUE)
 ```
 
 ## Arguments
@@ -28,6 +28,11 @@ parse_wurcs(x, on_failure = "error", progress = FALSE)
 - progress:
 
   Whether to show a progress bar while parsing.
+
+- validate:
+
+  Whether to validate parsed glycan graphs before constructing the
+  result.
 
 ## Value
 

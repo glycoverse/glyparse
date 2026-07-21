@@ -9,7 +9,7 @@ linkage token, a residue token, and a braced child list, for example
 ## Usage
 
 ``` r
-parse_linucs(x, on_failure = "error", progress = FALSE)
+parse_linucs(x, on_failure = "error", progress = FALSE, validate = TRUE)
 ```
 
 ## Arguments
@@ -27,6 +27,11 @@ parse_linucs(x, on_failure = "error", progress = FALSE)
 - progress:
 
   Whether to show a progress bar while parsing.
+
+- validate:
+
+  Whether to validate parsed glycan graphs before constructing the
+  result.
 
 ## Value
 

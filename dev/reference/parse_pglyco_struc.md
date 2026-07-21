@@ -7,7 +7,7 @@ See example below for the structure format.
 ## Usage
 
 ``` r
-parse_pglyco_struc(x, on_failure = "error", progress = FALSE)
+parse_pglyco_struc(x, on_failure = "error", progress = FALSE, validate = TRUE)
 ```
 
 ## Arguments
@@ -25,6 +25,11 @@ parse_pglyco_struc(x, on_failure = "error", progress = FALSE)
 - progress:
 
   Whether to show a progress bar while parsing.
+
+- validate:
+
+  Whether to validate parsed glycan graphs before constructing the
+  result.
 
 ## Value
 

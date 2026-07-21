@@ -34,7 +34,10 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="glyparse-development-version">glyparse (development version)<a class="anchor" aria-label="anchor" href="#glyparse-development-version"></a></h2>
-</div>
+<ul><li>Parser functions now construct structure vectors through <code>glyrepr</code>’s low-level graph APIs, avoiding repeated scalar construction for distinct inputs.</li>
+<li>Parsers that normalize to IUPAC-condensed notation now normalize complete unique vectors and construct them in one call.</li>
+<li>Graph-based parsers gain <code>validate</code> to skip graph validation for trusted inputs (<a href="https://github.com/glycoverse/glyparse/issues/36" class="external-link">#36</a>).</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.1" id="glyparse-071">glyparse 0.7.1<a class="anchor" aria-label="anchor" href="#glyparse-071"></a></h2><p class="text-muted">CRAN release: 2026-07-08</p>
 <div class="section level3">
