@@ -376,18 +376,18 @@ iupac_compact_monosaccharide_pattern <- local({
 
 #' Get the default reducing-end anomer position for a monosaccharide
 #'
-#' @param mono A monosaccharide name.
+#' @param mono A character vector of monosaccharide names.
 #'
-#' @return A character scalar.
+#' @return A character vector of default anomer positions.
 #' @noRd
 iupac_compact_default_anomer_pos <- function(mono) {
-  if (glyrepr::get_mono_type(mono) != "concrete") {
-    # TODO: Remove this fallback when glyrepr::get_mono_type() and
-    # glyrepr::get_anomer_pos() support generic glycans.
-    return("1")
+  anomer_pos <- rep("1", length(mono))
+  concrete <- glyrepr::get_mono_type(mono) == "concrete"
+  if (any(concrete)) {
+    anomer_pos[concrete] <- glyrepr::get_anomer_pos(mono[concrete])
   }
 
-  glyrepr::get_anomer_pos(mono)
+  anomer_pos
 }
 
 
