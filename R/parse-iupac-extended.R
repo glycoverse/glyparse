@@ -25,10 +25,14 @@
 #' @seealso [parse_iupac_condensed()], [parse_iupac_short()]
 #'
 #' @export
-parse_iupac_extended <- function(x, on_failure = "error", progress = FALSE) {
-  struc_parser_wrapper(
+parse_iupac_extended <- function(
+  x,
+  on_failure = "error",
+  progress = FALSE
+) {
+  normalized_struc_parser_wrapper(
     x,
-    do_parse_iupac_extended,
+    function(x) convert_ext_to_con(normalize_iupac_extended(x)),
     on_failure = on_failure,
     progress = progress
   )
@@ -91,9 +95,11 @@ convert_ext_to_con <- function(x) {
     "\\]",
     sep = "|"
   )
-  tokens <- stringr::str_extract_all(x, token_pattern)[[1]]
-  new_tokens <- purrr::map_chr(tokens, convert_token)
-  paste(new_tokens, collapse = "")
+  tokens <- stringr::str_extract_all(x, token_pattern)
+  purrr::map_chr(tokens, function(tokens) {
+    new_tokens <- purrr::map_chr(tokens, convert_token)
+    paste0(new_tokens, collapse = "")
+  })
 }
 
 

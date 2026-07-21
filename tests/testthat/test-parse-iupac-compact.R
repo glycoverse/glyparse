@@ -41,6 +41,16 @@ test_that("IUPAC-compact preserves NA and name semantics", {
   )
 })
 
+test_that("IUPAC-compact vectorizes terminal anomer positions", {
+  expect_identical(
+    iupac_compact_default_anomer_pos(c("Glc", "Neu5Ac", "Hex")),
+    c("1", "2", "1")
+  )
+
+  parsed <- parse_iupac_compact(c("Glcb", "Neu5Aca"))
+  expect_identical(as.character(parsed), c("Glc(b1-", "Neu5Ac(a2-"))
+})
+
 test_that("IUPAC-compact supports on_failure handling", {
   skip_on_old_win()
 

@@ -18,3 +18,28 @@ test_that("struc_parser_wrapper returns glyrepr-compatible vectors", {
     NA
   )
 })
+
+test_that("struc_parser_wrapper treats invalid parsed graphs as failures", {
+  parser <- function(x) {
+    graph <- igraph::make_empty_graph(n = 1, directed = TRUE)
+    igraph::V(graph)$name <- "1"
+    igraph::V(graph)$mono <- "Hex"
+    igraph::V(graph)$sub <- ""
+    igraph::E(graph)$linkage <- character()
+    graph$anomer <- "??"
+
+    if (x == "invalid") {
+      graph <- igraph::as_undirected(graph)
+    }
+
+    graph
+  }
+
+  result <- struc_parser_wrapper(
+    c("valid", "invalid"),
+    parser,
+    on_failure = "na"
+  )
+
+  expect_identical(as.character(result), c("Hex(??-", NA_character_))
+})

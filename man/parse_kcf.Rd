@@ -4,7 +4,7 @@
 \alias{parse_kcf}
 \title{Parse KCF Structures}
 \usage{
-parse_kcf(x, on_failure = "error", progress = FALSE)
+parse_kcf(x, on_failure = "error", progress = FALSE, validate = TRUE)
 }
 \arguments{
 \item{x}{A character vector of KCF strings. NA values are allowed and will be returned as NA structures.}
@@ -13,6 +13,9 @@ parse_kcf(x, on_failure = "error", progress = FALSE)
 structure cannot be parsed. \code{"na"} returns \code{NA} at invalid positions.}
 
 \item{progress}{Whether to show a progress bar while parsing.}
+
+\item{validate}{Whether to validate parsed glycan graphs before constructing
+the result.}
 }
 \value{
 A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.

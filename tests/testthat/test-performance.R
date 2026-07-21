@@ -36,13 +36,19 @@ test_that("struc_parser_wrapper parses each unique non-NA input once", {
   expect_equal(parser_calls, c("A", "B", "C"))
 })
 
-test_that("struc_parser_wrapper constructs each unique non-NA graph once", {
-  constructor_sizes <- integer()
-  original_glycan_structure <- glyrepr::glycan_structure
+test_that("struc_parser_wrapper checks each unique non-NA graph once", {
+  validation_calls <- 0L
+  canonicalization_calls <- 0L
+  original_validate <- glyrepr::validate_glycan_graph
+  original_canonicalize <- glyrepr::canonicalize_glycan_graph
   testthat::local_mocked_bindings(
-    glycan_structure = function(...) {
-      constructor_sizes <<- c(constructor_sizes, length(list(...)))
-      original_glycan_structure(...)
+    validate_glycan_graph = function(graph) {
+      validation_calls <<- validation_calls + 1L
+      original_validate(graph)
+    },
+    canonicalize_glycan_graph = function(graph) {
+      canonicalization_calls <<- canonicalization_calls + 1L
+      original_canonicalize(graph)
     },
     .package = "glyrepr"
   )
@@ -55,7 +61,135 @@ test_that("struc_parser_wrapper constructs each unique non-NA graph once", {
     as.character(result),
     c("HexNAc(??-", "Hex(??-", NA, "HexNAc(??-", "Hex(??-", "HexNAc(??-")
   )
-  expect_lte(max(constructor_sizes), length(unique(input[!is.na(input)])))
+  expect_equal(validation_calls, 2L)
+  expect_equal(canonicalization_calls, 2L)
+  expect_length(attr(result, "graphs"), 2L)
+})
+
+test_that("struc_parser_wrapper skips validation but canonicalizes trusted graphs", {
+  validation_calls <- 0L
+  canonicalization_calls <- 0L
+  original_canonicalize <- glyrepr::canonicalize_glycan_graph
+  testthat::local_mocked_bindings(
+    validate_glycan_graph = function(graph) {
+      validation_calls <<- validation_calls + 1L
+      graph
+    },
+    canonicalize_glycan_graph = function(graph) {
+      canonicalization_calls <<- canonicalization_calls + 1L
+      original_canonicalize(graph)
+    },
+    .package = "glyrepr"
+  )
+
+  result <- parse_pglyco_struc(c("(N)", "(H)", "(N)"), validate = FALSE)
+
+  expect_identical(
+    as.character(result),
+    c("HexNAc(??-", "Hex(??-", "HexNAc(??-")
+  )
+  expect_equal(validation_calls, 0L)
+  expect_equal(canonicalization_calls, 2L)
+})
+
+test_that("graph parsers expose validate", {
+  parsers <- c(
+    "parse_glycoct",
+    "parse_kcf",
+    "parse_linucs",
+    "parse_pglyco_struc",
+    "parse_strucgp_struc",
+    "parse_wurcs"
+  )
+
+  for (parser in parsers) {
+    expect_identical(formals(get(parser))$validate, TRUE, info = parser)
+  }
+})
+
+test_that("struc_parser_wrapper avoids high-level structure constructors", {
+  testthat::local_mocked_bindings(
+    as_glycan_structure = function(...) {
+      stop("Unexpected high-level construction")
+    },
+    glycan_structure = function(...) {
+      stop("Unexpected high-level construction")
+    },
+    .package = "glyrepr"
+  )
+
+  result <- parse_pglyco_struc(c("(N)", "(H)"))
+
+  expect_identical(as.character(result), c("HexNAc(??-", "Hex(??-"))
+})
+
+test_that("struc_parser_wrapper deduplicates equivalent parsed graphs", {
+  parser <- function(x) {
+    graph <- igraph::make_empty_graph(n = 1, directed = TRUE)
+    igraph::V(graph)$name <- "1"
+    igraph::V(graph)$mono <- "Hex"
+    igraph::V(graph)$sub <- ""
+    igraph::E(graph)$linkage <- character()
+    graph$anomer <- "??"
+    graph
+  }
+
+  result <- struc_parser_wrapper(c("first", "second"), parser)
+
+  expect_identical(as.character(result), rep("Hex(??-", 2))
+  expect_length(attr(result, "graphs"), 1L)
+})
+
+test_that("normalized parsers pass one complete unique vector to glyrepr", {
+  constructor_inputs <- list()
+  original_constructor <- glyrepr::as_glycan_structure
+  testthat::local_mocked_bindings(
+    as_glycan_structure = function(x, ...) {
+      constructor_inputs[[length(constructor_inputs) + 1L]] <<- x
+      original_constructor(x, ...)
+    },
+    .package = "glyrepr"
+  )
+
+  input <- c(
+    first = "Gal(b1-3)Glc(a1-",
+    second = "Glc(a1-",
+    duplicate = "Gal(b1-3)Glc(a1-",
+    missing = NA_character_
+  )
+  result <- parse_iupac_condensed(input)
+
+  expect_length(constructor_inputs, 1L)
+  expect_identical(
+    constructor_inputs[[1]],
+    c("Gal(b1-3)Glc(a1-", "Glc(a1-")
+  )
+  expect_identical(names(result), names(input))
+  expect_identical(
+    unname(as.character(result)),
+    c("Gal(b1-3)Glc(a1-", "Glc(a1-", "Gal(b1-3)Glc(a1-", NA_character_)
+  )
+})
+
+test_that("normalization wrapper vectorizes unique inputs", {
+  normalizer_inputs <- list()
+  normalizer <- function(x) {
+    normalizer_inputs[[length(normalizer_inputs) + 1L]] <<- x
+    dplyr::recode_values(
+      x,
+      "A" ~ "Gal(b1-3)Glc(a1-",
+      "B" ~ "Glc(a1-"
+    )
+  }
+
+  result <- normalized_struc_parser_wrapper(c("A", "B", "A"), normalizer)
+
+  expect_length(normalizer_inputs, 1L)
+  expect_identical(normalizer_inputs[[1]], c("A", "B"))
+  expect_identical(
+    as.character(result),
+    c("Gal(b1-3)Glc(a1-", "Glc(a1-", "Gal(b1-3)Glc(a1-")
+  )
 })
 
 test_that("struc_parser_wrapper preserves order with duplicates", {

@@ -16,6 +16,8 @@
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
 #'   structure cannot be parsed. `"na"` returns `NA` at invalid positions.
 #' @param progress Whether to show a progress bar while parsing.
+#' @param validate Whether to validate parsed glycan graphs before constructing
+#'   the result.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
@@ -24,12 +26,18 @@
 #' parse_linucs(linucs)
 #'
 #' @export
-parse_linucs <- function(x, on_failure = "error", progress = FALSE) {
+parse_linucs <- function(
+  x,
+  on_failure = "error",
+  progress = FALSE,
+  validate = TRUE
+) {
   struc_parser_wrapper(
     x,
     do_parse_linucs,
     on_failure = on_failure,
-    progress = progress
+    progress = progress,
+    validate = validate
   )
 }
 

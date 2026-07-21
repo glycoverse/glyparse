@@ -30,10 +30,14 @@
 #' @seealso [parse_iupac_condensed()]
 #'
 #' @export
-parse_glycam_iupac <- function(x, on_failure = "error", progress = FALSE) {
-  struc_parser_wrapper(
+parse_glycam_iupac <- function(
+  x,
+  on_failure = "error",
+  progress = FALSE
+) {
+  normalized_struc_parser_wrapper(
     x,
-    do_parse_glycam_iupac,
+    convert_glycam_iupac_to_condensed,
     on_failure = on_failure,
     progress = progress
   )
@@ -53,9 +57,9 @@ do_parse_glycam_iupac <- function(x) {
 
 #' Convert GlyCAM IUPAC to IUPAC-condensed notation
 #'
-#' @param x A single GlyCAM IUPAC string.
+#' @param x A character vector of GlyCAM IUPAC strings.
 #'
-#' @return A character scalar containing IUPAC-condensed notation.
+#' @return A character vector containing IUPAC-condensed notation.
 #' @noRd
 convert_glycam_iupac_to_condensed <- function(x) {
   token_pattern <- paste(
@@ -64,13 +68,16 @@ convert_glycam_iupac_to_condensed <- function(x) {
     "\\]",
     sep = "|"
   )
-  tokens <- stringr::str_extract_all(x, token_pattern)[[1]]
+  tokens <- stringr::str_extract_all(x, token_pattern)
 
-  if (length(tokens) == 0 || paste0(tokens, collapse = "") != x) {
+  reconstructed <- purrr::map_chr(tokens, ~ paste0(.x, collapse = ""))
+  if (any(lengths(tokens) == 0 | reconstructed != x)) {
     cli::cli_abort("Failed to parse the GlyCAM IUPAC string.")
   }
 
-  paste0(purrr::map_chr(tokens, convert_glycam_iupac_token), collapse = "")
+  purrr::map_chr(tokens, function(tokens) {
+    paste0(purrr::map_chr(tokens, convert_glycam_iupac_token), collapse = "")
+  })
 }
 
 
