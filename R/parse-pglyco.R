@@ -38,21 +38,26 @@ do_parse_pglyco_struc <- function(x) {
     stringr::str_replace_all(x, "[^()]", ""),
     ""
   )
-  current_node <- 1
+  edge_count <- sum(parentheses == "(") - 1L
+  edges <- integer(edge_count * 2L)
+  edge_index <- 0L
+  current_node <- 1L
   node_stack <- rstackdeque::rstack()
-  node_stack <- rstackdeque::insert_top(node_stack, 1)
+  node_stack <- rstackdeque::insert_top(node_stack, 1L)
   for (i in 2:length(parentheses)) {
     if (parentheses[[i]] == "(") {
-      current_node <- current_node + 1
-      g <- igraph::add_edges(
-        g,
-        c(rstackdeque::peek_top(node_stack), current_node)
-      )
+      current_node <- current_node + 1L
+      edge_index <- edge_index + 1L
+      edges[[2L * edge_index - 1L]] <- rstackdeque::peek_top(node_stack)
+      edges[[2L * edge_index]] <- current_node
       node_stack <- rstackdeque::insert_top(node_stack, current_node)
     } else {
       # must be ")"
       node_stack <- rstackdeque::without_top(node_stack)
     }
+  }
+  if (length(edges) > 0L) {
+    g <- igraph::add_edges(g, edges)
   }
 
   # Map pGlyco monosaccharide codes to standard names
