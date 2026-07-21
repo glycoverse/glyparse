@@ -1,5 +1,7 @@
 # glyparse (development version)
 
+* Parser functions now construct structure vectors through `glyrepr`'s low-level graph APIs, avoiding repeated scalar construction for distinct inputs.
+
 # glyparse 0.7.1
 
 ## Minor improvements and bug fixes

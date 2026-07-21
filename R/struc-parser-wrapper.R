@@ -31,7 +31,7 @@ struc_parser_wrapper <- function(
     ))
   }
 
-  parsed_unique <- parse_unique_structures(
+  parsed_unique <- parse_unique_graphs(
     wrapper_input$unique_x,
     parser,
     progress = progress
@@ -96,7 +96,7 @@ prepare_struc_parser_input <- function(x) {
 }
 
 
-#' Parse unique input structures and separate failures.
+#' Parse, validate, and canonicalize unique input graphs.
 #'
 #' @param unique_x A character vector of unique, non-`NA` structure strings.
 #' @param parser A parser function that returns one glycan graph per string.
@@ -104,22 +104,22 @@ prepare_struc_parser_input <- function(x) {
 #'
 #' @return A list containing valid and invalid unique parse results.
 #' @noRd
-parse_unique_structures <- function(unique_x, parser, progress = FALSE) {
-  safe_parse_one_structure <- purrr::possibly(
-    parse_one_structure,
+parse_unique_graphs <- function(unique_x, parser, progress = FALSE) {
+  safe_parse_one_graph <- purrr::possibly(
+    parse_one_graph,
     otherwise = NA
   )
-  parsed_unique_structures <- purrr::map(
+  parsed_unique_graphs <- purrr::map(
     unique_x,
-    safe_parse_one_structure,
+    safe_parse_one_graph,
     parser = parser,
     .progress = progress
   )
-  invalid_mask <- purrr::map_lgl(parsed_unique_structures, ~ identical(.x, NA))
+  invalid_mask <- purrr::map_lgl(parsed_unique_graphs, ~ identical(.x, NA))
   list(
     invalid_unique_x = unique_x[invalid_mask],
     valid_unique_x = unique_x[!invalid_mask],
-    valid_unique_structures = parsed_unique_structures[!invalid_mask]
+    valid_unique_graphs = parsed_unique_graphs[!invalid_mask]
   )
 }
 
@@ -149,7 +149,7 @@ abort_on_invalid_parse <- function(invalid_unique_x, on_failure, call) {
 #' @noRd
 build_wrapped_structure <- function(wrapper_input, parsed_unique) {
   unique_result <- build_unique_wrapped_structure(
-    parsed_unique$valid_unique_structures
+    parsed_unique$valid_unique_graphs
   )
   result_indices <- build_wrapped_structure_indices(
     wrapper_input,
@@ -165,17 +165,19 @@ build_wrapped_structure <- function(wrapper_input, parsed_unique) {
 
 #' Build a glycan structure vector for unique parsed structures.
 #'
-#' @param valid_unique_structures A list of length-1 glycan structures.
+#' @param valid_unique_graphs A list of valid, canonical glycan graphs.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #' @noRd
-build_unique_wrapped_structure <- function(valid_unique_structures) {
-  valid_graphs <- purrr::map(
-    valid_unique_structures,
-    glyrepr::get_structure_graphs,
-    return_list = FALSE
-  )
-  do.call(glyrepr::glycan_structure, valid_graphs)
+build_unique_wrapped_structure <- function(valid_unique_graphs) {
+  glyrepr::validate_glycan_graph_vector(valid_unique_graphs)
+  iupacs <- purrr::map_chr(valid_unique_graphs, glyrepr::graph_to_iupac)
+
+  unique_iupac <- !duplicated(unname(iupacs))
+  unique_graphs <- valid_unique_graphs[unique_iupac]
+  names(unique_graphs) <- unname(iupacs[unique_iupac])
+
+  glyrepr::new_glycan_structure(iupacs, unique_graphs)
 }
 
 
@@ -202,15 +204,17 @@ build_wrapped_structure_indices <- function(wrapper_input, parsed_unique) {
 }
 
 
-#' Parse a single structure string into a validated glycan structure.
+#' Parse a single structure string into a valid, canonical graph.
 #'
 #' @param x A single structure string.
 #' @param parser A parser function that returns a glycan graph.
 #'
-#' @return A length-1 [glyrepr::glycan_structure()] object.
+#' @return A valid, canonical glycan graph.
 #' @noRd
-parse_one_structure <- function(x, parser) {
-  glyrepr::as_glycan_structure(list(parser(x)))
+parse_one_graph <- function(x, parser) {
+  graph <- parser(x)
+  graph <- glyrepr::validate_glycan_graph(graph)
+  glyrepr::canonicalize_glycan_graph(graph)
 }
 
 
@@ -222,10 +226,7 @@ parse_one_structure <- function(x, parser) {
 #' @return A [glyrepr::glycan_structure()] object filled with `NA`.
 #' @noRd
 make_na_glycan_structure <- function(n, names = NULL) {
-  result <- glyrepr::glycan_structure(NA)
-  result <- result[rep(1, n)]
-  if (!is.null(names)) {
-    attr(result, "names") <- names
-  }
-  result
+  iupacs <- rep(NA_character_, n)
+  attr(iupacs, "names") <- names
+  glyrepr::new_glycan_structure(iupacs)
 }

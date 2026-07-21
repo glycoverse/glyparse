@@ -36,13 +36,19 @@ test_that("struc_parser_wrapper parses each unique non-NA input once", {
   expect_equal(parser_calls, c("A", "B", "C"))
 })
 
-test_that("struc_parser_wrapper constructs each unique non-NA graph once", {
-  constructor_sizes <- integer()
-  original_glycan_structure <- glyrepr::glycan_structure
+test_that("struc_parser_wrapper checks each unique non-NA graph once", {
+  validation_calls <- 0L
+  canonicalization_calls <- 0L
+  original_validate <- glyrepr::validate_glycan_graph
+  original_canonicalize <- glyrepr::canonicalize_glycan_graph
   testthat::local_mocked_bindings(
-    glycan_structure = function(...) {
-      constructor_sizes <<- c(constructor_sizes, length(list(...)))
-      original_glycan_structure(...)
+    validate_glycan_graph = function(graph) {
+      validation_calls <<- validation_calls + 1L
+      original_validate(graph)
+    },
+    canonicalize_glycan_graph = function(graph) {
+      canonicalization_calls <<- canonicalization_calls + 1L
+      original_canonicalize(graph)
     },
     .package = "glyrepr"
   )
@@ -55,7 +61,42 @@ test_that("struc_parser_wrapper constructs each unique non-NA graph once", {
     as.character(result),
     c("HexNAc(??-", "Hex(??-", NA, "HexNAc(??-", "Hex(??-", "HexNAc(??-")
   )
-  expect_lte(max(constructor_sizes), length(unique(input[!is.na(input)])))
+  expect_equal(validation_calls, 2L)
+  expect_equal(canonicalization_calls, 2L)
+  expect_length(attr(result, "graphs"), 2L)
+})
+
+test_that("struc_parser_wrapper avoids high-level structure constructors", {
+  testthat::local_mocked_bindings(
+    as_glycan_structure = function(...) {
+      stop("Unexpected high-level construction")
+    },
+    glycan_structure = function(...) {
+      stop("Unexpected high-level construction")
+    },
+    .package = "glyrepr"
+  )
+
+  result <- parse_pglyco_struc(c("(N)", "(H)"))
+
+  expect_identical(as.character(result), c("HexNAc(??-", "Hex(??-"))
+})
+
+test_that("struc_parser_wrapper deduplicates equivalent parsed graphs", {
+  parser <- function(x) {
+    graph <- igraph::make_empty_graph(n = 1, directed = TRUE)
+    igraph::V(graph)$name <- "1"
+    igraph::V(graph)$mono <- "Hex"
+    igraph::V(graph)$sub <- ""
+    igraph::E(graph)$linkage <- character()
+    graph$anomer <- "??"
+    graph
+  }
+
+  result <- struc_parser_wrapper(c("first", "second"), parser)
+
+  expect_identical(as.character(result), rep("Hex(??-", 2))
+  expect_length(attr(result, "graphs"), 1L)
 })
 
 test_that("struc_parser_wrapper preserves order with duplicates", {
