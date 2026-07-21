@@ -5,6 +5,8 @@
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
 #'   structure cannot be parsed. `"na"` returns `NA` at invalid positions.
 #' @param progress Whether to show a progress bar while parsing.
+#' @param validate Whether to validate parsed glycan graphs before constructing
+#'   the result.
 #' @param call The call to report in user-facing errors.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
@@ -14,12 +16,14 @@ struc_parser_wrapper <- function(
   parser,
   on_failure = "error",
   progress = FALSE,
+  validate = TRUE,
   call = rlang::caller_env()
 ) {
   on_failure <- validate_struc_parser_wrapper_args(
     x,
     on_failure,
     progress,
+    validate,
     call = call
   )
   wrapper_input <- prepare_struc_parser_input(x)
@@ -34,7 +38,8 @@ struc_parser_wrapper <- function(
   parsed_unique <- parse_unique_graphs(
     wrapper_input$unique_x,
     parser,
-    progress = progress
+    progress = progress,
+    validate = validate
   )
   abort_on_invalid_parse(
     parsed_unique$invalid_unique_x,
@@ -51,7 +56,8 @@ struc_parser_wrapper <- function(
 
   build_wrapped_structure(
     wrapper_input = wrapper_input,
-    parsed_unique = parsed_unique
+    parsed_unique = parsed_unique,
+    validate = validate
   )
 }
 
@@ -159,9 +165,16 @@ build_normalized_structure_indices <- function(wrapper_input) {
 #'
 #' @return The validated `on_failure` value.
 #' @noRd
-validate_struc_parser_wrapper_args <- function(x, on_failure, progress, call) {
+validate_struc_parser_wrapper_args <- function(
+  x,
+  on_failure,
+  progress,
+  validate = TRUE,
+  call
+) {
   checkmate::assert_character(x)
   checkmate::assert_flag(progress)
+  checkmate::assert_flag(validate)
   rlang::arg_match(
     on_failure,
     values = c("error", "na"),
@@ -198,7 +211,12 @@ prepare_struc_parser_input <- function(x) {
 #'
 #' @return A list containing valid and invalid unique parse results.
 #' @noRd
-parse_unique_graphs <- function(unique_x, parser, progress = FALSE) {
+parse_unique_graphs <- function(
+  unique_x,
+  parser,
+  progress = FALSE,
+  validate = TRUE
+) {
   safe_parse_one_graph <- purrr::possibly(
     parse_one_graph,
     otherwise = NA
@@ -207,6 +225,7 @@ parse_unique_graphs <- function(unique_x, parser, progress = FALSE) {
     unique_x,
     safe_parse_one_graph,
     parser = parser,
+    validate = validate,
     .progress = progress
   )
   invalid_mask <- purrr::map_lgl(parsed_unique_graphs, ~ identical(.x, NA))
@@ -241,9 +260,10 @@ abort_on_invalid_parse <- function(invalid_unique_x, on_failure, call) {
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #' @noRd
-build_wrapped_structure <- function(wrapper_input, parsed_unique) {
+build_wrapped_structure <- function(wrapper_input, parsed_unique, validate) {
   unique_result <- build_unique_wrapped_structure(
-    parsed_unique$valid_unique_graphs
+    parsed_unique$valid_unique_graphs,
+    validate = validate
   )
   result_indices <- build_wrapped_structure_indices(
     wrapper_input,
@@ -263,8 +283,13 @@ build_wrapped_structure <- function(wrapper_input, parsed_unique) {
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #' @noRd
-build_unique_wrapped_structure <- function(valid_unique_graphs) {
-  glyrepr::validate_glycan_graph_vector(valid_unique_graphs)
+build_unique_wrapped_structure <- function(
+  valid_unique_graphs,
+  validate = TRUE
+) {
+  if (validate) {
+    glyrepr::validate_glycan_graph_vector(valid_unique_graphs)
+  }
   iupacs <- purrr::map_chr(valid_unique_graphs, glyrepr::graph_to_iupac)
 
   unique_iupac <- !duplicated(unname(iupacs))
@@ -305,9 +330,11 @@ build_wrapped_structure_indices <- function(wrapper_input, parsed_unique) {
 #'
 #' @return A valid, canonical glycan graph.
 #' @noRd
-parse_one_graph <- function(x, parser) {
+parse_one_graph <- function(x, parser, validate = TRUE) {
   graph <- parser(x)
-  graph <- glyrepr::validate_glycan_graph(graph)
+  if (validate) {
+    graph <- glyrepr::validate_glycan_graph(graph)
+  }
   glyrepr::canonicalize_glycan_graph(graph)
 }
 

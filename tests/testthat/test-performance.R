@@ -66,6 +66,47 @@ test_that("struc_parser_wrapper checks each unique non-NA graph once", {
   expect_length(attr(result, "graphs"), 2L)
 })
 
+test_that("struc_parser_wrapper skips validation but canonicalizes trusted graphs", {
+  validation_calls <- 0L
+  canonicalization_calls <- 0L
+  original_canonicalize <- glyrepr::canonicalize_glycan_graph
+  testthat::local_mocked_bindings(
+    validate_glycan_graph = function(graph) {
+      validation_calls <<- validation_calls + 1L
+      graph
+    },
+    canonicalize_glycan_graph = function(graph) {
+      canonicalization_calls <<- canonicalization_calls + 1L
+      original_canonicalize(graph)
+    },
+    .package = "glyrepr"
+  )
+
+  result <- parse_pglyco_struc(c("(N)", "(H)", "(N)"), validate = FALSE)
+
+  expect_identical(
+    as.character(result),
+    c("HexNAc(??-", "Hex(??-", "HexNAc(??-")
+  )
+  expect_equal(validation_calls, 0L)
+  expect_equal(canonicalization_calls, 2L)
+})
+
+test_that("graph parsers expose validate", {
+  parsers <- c(
+    "parse_glycoct",
+    "parse_kcf",
+    "parse_linucs",
+    "parse_pglyco_struc",
+    "parse_strucgp_struc",
+    "parse_wurcs"
+  )
+
+  for (parser in parsers) {
+    expect_identical(formals(get(parser))$validate, TRUE, info = parser)
+  }
+})
+
 test_that("struc_parser_wrapper avoids high-level structure constructors", {
   testthat::local_mocked_bindings(
     as_glycan_structure = function(...) {

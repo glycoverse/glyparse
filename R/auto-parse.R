@@ -39,7 +39,11 @@
 #' auto_parse(x)
 #'
 #' @export
-auto_parse <- function(x, on_failure = "error", progress = FALSE) {
+auto_parse <- function(
+  x,
+  on_failure = "error",
+  progress = FALSE
+) {
   struc_parser_wrapper(
     x,
     do_auto_parse,

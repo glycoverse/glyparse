@@ -30,7 +30,11 @@
 #' @seealso [parse_iupac_condensed()]
 #'
 #' @export
-parse_glycam_iupac <- function(x, on_failure = "error", progress = FALSE) {
+parse_glycam_iupac <- function(
+  x,
+  on_failure = "error",
+  progress = FALSE
+) {
   normalized_struc_parser_wrapper(
     x,
     convert_glycam_iupac_to_condensed,

@@ -15,7 +15,11 @@
 #' parse_linear_code(linear_code)
 #'
 #' @export
-parse_linear_code <- function(x, on_failure = "error", progress = FALSE) {
+parse_linear_code <- function(
+  x,
+  on_failure = "error",
+  progress = FALSE
+) {
   normalized_struc_parser_wrapper(
     x,
     convert_linear_to_iupac,

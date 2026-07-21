@@ -28,7 +28,11 @@
 #' @seealso [parse_iupac_condensed()], [parse_iupac_extended()]
 #'
 #' @export
-parse_iupac_short <- function(x, on_failure = "error", progress = FALSE) {
+parse_iupac_short <- function(
+  x,
+  on_failure = "error",
+  progress = FALSE
+) {
   normalized_struc_parser_wrapper(
     x,
     convert_short_to_condensed,
