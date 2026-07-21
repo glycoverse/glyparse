@@ -27,8 +27,20 @@ parse_strucgp_struc <- function(x, on_failure = "error", progress = FALSE) {
 
 # Parsing logic of `parse_strucgp_struc()`
 do_parse_strucgp_struc <- function(x) {
-  graph_env <- list(graph = igraph::make_empty_graph())
-  graph <- recur_parse_strucgp(x, graph_env, 0)$graph
+  node_capacity <- stringr::str_count(x, "[A-Z]")
+  state <- new.env(parent = emptyenv())
+  state$count <- 0L
+  state$monos <- character(node_capacity)
+  state$parents <- integer(node_capacity)
+  recur_parse_strucgp(x, state, 0L)
+
+  graph <- igraph::make_empty_graph(n = state$count, directed = TRUE)
+  if (state$count > 1L) {
+    child <- seq.int(2L, state$count)
+    edges <- as.vector(rbind(state$parents[child], child))
+    graph <- igraph::add_edges(graph, edges)
+  }
+
   mono_map <- c(
     "1" = "Hex",
     "2" = "HexNAc",
@@ -36,7 +48,8 @@ do_parse_strucgp_struc <- function(x) {
     "4" = "NeuGc",
     "5" = "dHex"
   )
-  igraph::V(graph)$mono <- mono_map[igraph::V(graph)$mono]
+  igraph::V(graph)$name <- as.character(seq_len(state$count))
+  igraph::V(graph)$mono <- mono_map[state$monos[seq_len(state$count)]]
   igraph::V(graph)$sub <- ""
   igraph::E(graph)$linkage <- "??-?"
   graph$anomer <- "??"
@@ -45,20 +58,20 @@ do_parse_strucgp_struc <- function(x) {
 }
 
 
-recur_parse_strucgp <- function(x, graph_env, last_node) {
+recur_parse_strucgp <- function(x, state, last_node) {
   # Base condition: `x` is "".
   if (x == "") {
-    return(graph_env)
+    return(invisible(NULL))
   }
 
   start <- stringr::str_sub(x, 1, 1)
 
   # If last_node is 0, this is the first layer.
   if (last_node == 0) {
-    mono <- stringr::str_sub(x, 2, 2)
-    graph <- igraph::add_vertices(graph_env$graph, 1, mono = mono, name = "1")
-    graph_env$graph <- graph
-    return(recur_parse_strucgp(stringr::str_sub(x, 3, -2), graph_env, "1"))
+    state$count <- 1L
+    state$monos[[1L]] <- stringr::str_sub(x, 2, 2)
+    recur_parse_strucgp(stringr::str_sub(x, 3, -2), state, 1L)
+    return(invisible(NULL))
   }
 
   # If a branch appears, split `x` and dispatch to the next level.
@@ -66,18 +79,15 @@ recur_parse_strucgp <- function(x, graph_env, last_node) {
     end <- stringr::str_to_lower(start)
     pattern <- stringr::str_glue("{start}.*?{end}")
     for (sub_x in stringr::str_extract_all(x, pattern)[[1]]) {
-      graph_env <- recur_parse_strucgp(sub_x, graph_env, last_node)
+      recur_parse_strucgp(sub_x, state, last_node)
     }
-    return(graph_env)
+    return(invisible(NULL))
   } else {
-    # For layer with no branch, add a node.
-    # Build new graph
-    mono <- stringr::str_sub(x, 2, 2)
-    name = as.character(igraph::vcount(graph_env$graph) + 1)
-    graph <- igraph::add_vertices(graph_env$graph, 1, mono = mono, name = name)
-    graph <- igraph::add_edges(graph, c(last_node, name))
-    graph_env$graph <- graph
-    # Dispatch to the next level
-    return(recur_parse_strucgp(stringr::str_sub(x, 3, -2), graph_env, name))
+    node <- state$count + 1L
+    state$count <- node
+    state$monos[[node]] <- stringr::str_sub(x, 2, 2)
+    state$parents[[node]] <- last_node
+    recur_parse_strucgp(stringr::str_sub(x, 3, -2), state, node)
+    return(invisible(NULL))
   }
 }
