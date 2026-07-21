@@ -1,6 +1,7 @@
 # glyparse (development version)
 
 * Parser functions now construct structure vectors through `glyrepr`'s low-level graph APIs, avoiding repeated scalar construction for distinct inputs.
+* Parsers that normalize to IUPAC-condensed notation now normalize complete unique vectors and construct them in one call.
 
 # glyparse 0.7.1
 

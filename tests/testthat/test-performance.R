@@ -99,6 +99,58 @@ test_that("struc_parser_wrapper deduplicates equivalent parsed graphs", {
   expect_length(attr(result, "graphs"), 1L)
 })
 
+test_that("normalized parsers pass one complete unique vector to glyrepr", {
+  constructor_inputs <- list()
+  original_constructor <- glyrepr::as_glycan_structure
+  testthat::local_mocked_bindings(
+    as_glycan_structure = function(x, ...) {
+      constructor_inputs[[length(constructor_inputs) + 1L]] <<- x
+      original_constructor(x, ...)
+    },
+    .package = "glyrepr"
+  )
+
+  input <- c(
+    first = "Gal(b1-3)Glc(a1-",
+    second = "Glc(a1-",
+    duplicate = "Gal(b1-3)Glc(a1-",
+    missing = NA_character_
+  )
+  result <- parse_iupac_condensed(input)
+
+  expect_length(constructor_inputs, 1L)
+  expect_identical(
+    constructor_inputs[[1]],
+    c("Gal(b1-3)Glc(a1-", "Glc(a1-")
+  )
+  expect_identical(names(result), names(input))
+  expect_identical(
+    unname(as.character(result)),
+    c("Gal(b1-3)Glc(a1-", "Glc(a1-", "Gal(b1-3)Glc(a1-", NA_character_)
+  )
+})
+
+test_that("normalization wrapper vectorizes unique inputs", {
+  normalizer_inputs <- list()
+  normalizer <- function(x) {
+    normalizer_inputs[[length(normalizer_inputs) + 1L]] <<- x
+    dplyr::recode_values(
+      x,
+      "A" ~ "Gal(b1-3)Glc(a1-",
+      "B" ~ "Glc(a1-"
+    )
+  }
+
+  result <- normalized_struc_parser_wrapper(c("A", "B", "A"), normalizer)
+
+  expect_length(normalizer_inputs, 1L)
+  expect_identical(normalizer_inputs[[1]], c("A", "B"))
+  expect_identical(
+    as.character(result),
+    c("Gal(b1-3)Glc(a1-", "Glc(a1-", "Gal(b1-3)Glc(a1-")
+  )
+})
+
 test_that("struc_parser_wrapper preserves order with duplicates", {
   input <- c("(N)", "(H)", "(N)", "(F)", "(H)", "(N)")
   result <- parse_pglyco_struc(input)

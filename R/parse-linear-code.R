@@ -16,9 +16,9 @@
 #'
 #' @export
 parse_linear_code <- function(x, on_failure = "error", progress = FALSE) {
-  struc_parser_wrapper(
+  normalized_struc_parser_wrapper(
     x,
-    do_parse_linear_code,
+    convert_linear_to_iupac,
     on_failure = on_failure,
     progress = progress
   )

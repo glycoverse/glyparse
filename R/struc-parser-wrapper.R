@@ -56,6 +56,100 @@ struc_parser_wrapper <- function(
 }
 
 
+#' Normalize structure strings and parse their unique IUPAC-condensed forms.
+#'
+#' @param x A character vector of structure strings.
+#' @param normalizer A vectorized function that converts strings to
+#'   IUPAC-condensed notation.
+#' @inheritParams struc_parser_wrapper
+#'
+#' @return A [glyrepr::glycan_structure()] object.
+#' @noRd
+normalized_struc_parser_wrapper <- function(
+  x,
+  normalizer = identity,
+  on_failure = "error",
+  progress = FALSE,
+  call = rlang::caller_env()
+) {
+  on_failure <- validate_struc_parser_wrapper_args(
+    x,
+    on_failure,
+    progress,
+    call = call
+  )
+  wrapper_input <- prepare_struc_parser_input(x)
+
+  if (wrapper_input$all_na) {
+    return(make_na_glycan_structure(
+      wrapper_input$size,
+      names = wrapper_input$names
+    ))
+  }
+
+  normalized_unique <- normalize_unique_structures(
+    wrapper_input$unique_x,
+    normalizer,
+    progress = progress
+  )
+  unique_result <- suppressWarnings(glyrepr::as_glycan_structure(
+    normalized_unique,
+    on_failure = "na"
+  ))
+  invalid_mask <- is.na(unique_result)
+  abort_on_invalid_parse(
+    wrapper_input$unique_x[invalid_mask],
+    on_failure,
+    call = call
+  )
+
+  result <- unique_result[build_normalized_structure_indices(wrapper_input)]
+  if (!is.null(wrapper_input$names)) {
+    attr(result, "names") <- wrapper_input$names
+  }
+  result
+}
+
+
+#' Normalize all unique inputs together, with scalar failure recovery.
+#'
+#' @param unique_x A character vector of unique structure strings.
+#' @param normalizer A vectorized normalization function.
+#' @param progress Whether to show a progress bar during scalar recovery.
+#'
+#' @return A character vector of IUPAC-condensed strings.
+#' @noRd
+normalize_unique_structures <- function(
+  unique_x,
+  normalizer,
+  progress = FALSE
+) {
+  normalized <- tryCatch(normalizer(unique_x), error = identity)
+  if (!inherits(normalized, "error")) {
+    return(normalized)
+  }
+
+  safe_normalize <- purrr::possibly(normalizer, otherwise = NA_character_)
+  purrr::map_chr(unique_x, safe_normalize, .progress = progress)
+}
+
+
+#' Build indices for restoring normalized unique structures to input order.
+#'
+#' @param wrapper_input Prepared input metadata.
+#'
+#' @return An integer vector indexing a non-missing result vector.
+#' @noRd
+build_normalized_structure_indices <- function(wrapper_input) {
+  indices <- rep(NA_integer_, wrapper_input$size)
+  indices[!wrapper_input$na_mask] <- match(
+    wrapper_input$non_na_x,
+    wrapper_input$unique_x
+  )
+  indices
+}
+
+
 #' Validate wrapper arguments.
 #'
 #' @param x A character vector of structure strings.

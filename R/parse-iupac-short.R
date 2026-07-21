@@ -29,9 +29,9 @@
 #'
 #' @export
 parse_iupac_short <- function(x, on_failure = "error", progress = FALSE) {
-  struc_parser_wrapper(
+  normalized_struc_parser_wrapper(
     x,
-    do_parse_iupac_short,
+    convert_short_to_condensed,
     on_failure = on_failure,
     progress = progress
   )
@@ -63,14 +63,17 @@ convert_short_to_condensed <- function(x) {
     "({full_mono_pattern})([ab\\?])-?(\\d+(?:/\\d+)*|\\?)"
   )
   token_pattern <- paste(residue_pattern, "\\(", "\\)", sep = "|")
-  tokens <- stringr::str_extract_all(x, token_pattern)[[1]]
+  tokens <- stringr::str_extract_all(x, token_pattern)
 
   # The last residue is special because it doesn't have pos 2, e.g. "Mana-"
   last_residue_pattern <- stringr::str_glue("({full_mono_pattern})([ab\\?])-$")
-  last_token <- stringr::str_extract(x, last_residue_pattern)
+  last_tokens <- stringr::str_extract(x, last_residue_pattern)
 
   # Validate if x has been thoroughly parsed into tokens.
-  if (paste0(c(tokens, last_token), collapse = "") != x) {
+  reconstructed <- purrr::map2_chr(tokens, last_tokens, function(tokens, last) {
+    paste0(c(tokens, last), collapse = "")
+  })
+  if (any(reconstructed != x)) {
     rlang::abort("Failed to parse the IUPAC-short string.")
   }
 
@@ -96,16 +99,20 @@ convert_short_to_condensed <- function(x) {
       })
     )
   }
-  processed_tokens <- purrr::map_chr(tokens, process_token)
+  processed_tokens <- purrr::map(tokens, ~ purrr::map_chr(.x, process_token))
 
   # Now handle the last residue.
-  last_processed_token <- local({
-    match <- stringr::str_match(last_token, last_residue_pattern)
+  last_processed_tokens <- local({
+    match <- stringr::str_match(last_tokens, last_residue_pattern)
     mono <- match[, 2]
     anomer <- match[, 3]
     pos1 <- decide_anomer_pos(mono)
     paste0(mono, "(", anomer, pos1, "-")
   })
 
-  paste0(c(processed_tokens, last_processed_token), collapse = "")
+  purrr::map2_chr(
+    processed_tokens,
+    last_processed_tokens,
+    ~ paste0(c(.x, .y), collapse = "")
+  )
 }
