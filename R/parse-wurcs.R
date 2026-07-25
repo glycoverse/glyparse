@@ -30,9 +30,17 @@ parse_wurcs <- function(
   progress = FALSE,
   validate = TRUE
 ) {
+  residue_cache <- NULL
+  parser <- function(value) {
+    if (is.null(residue_cache)) {
+      residue_cache <<- build_wurcs_residue_cache(x)
+    }
+    do_parse_wurcs(value, residue_cache = residue_cache)
+  }
+
   struc_parser_wrapper(
     x,
-    do_parse_wurcs,
+    parser,
     on_failure = on_failure,
     progress = progress,
     validate = validate
@@ -407,6 +415,43 @@ WURCS_SUB_REGEX <- c(
   "N" = "N"
 )
 
+wurcs_regex_prefixes <- function(patterns) {
+  patterns <- sub("^\\^", "", patterns)
+  prefixes <- regmatches(
+    patterns,
+    regexpr("^[A-Za-z0-9_-]+", patterns)
+  )
+  prefixes[prefixes == ""] <- NA_character_
+  prefixes
+}
+
+WURCS_MONO_PREFIXES <- wurcs_regex_prefixes(WURCS_MONO_REGEX)
+WURCS_UNKNOWN_RING_MONO_PREFIXES <- wurcs_regex_prefixes(
+  WURCS_UNKNOWN_RING_MONO_REGEX
+)
+WURCS_ALDITOL_MONO_PREFIXES <- wurcs_regex_prefixes(
+  WURCS_ALDITOL_MONO_REGEX
+)
+WURCS_AMBIGUOUS_MONO_PREFIXES <- wurcs_regex_prefixes(
+  WURCS_AMBIGUOUS_MONO_REGEX
+)
+
+detect_wurcs_pattern <- function(residue, patterns, prefixes) {
+  candidates <- which(
+    is.na(prefixes) |
+      startsWith(residue, prefixes)
+  )
+  if (length(candidates) == 0L) {
+    candidates <- seq_along(patterns)
+  }
+
+  matched <- which(stringr::str_detect(residue, patterns[candidates]))
+  if (length(matched) == 0L) {
+    return(0L)
+  }
+  candidates[[matched[[1L]]]]
+}
+
 
 #' Detect whether a WURCS residue is an alditol descriptor.
 #'
@@ -415,11 +460,12 @@ WURCS_SUB_REGEX <- c(
 #' @return A logical scalar.
 #' @noRd
 is_wurcs_alditol_residue <- function(residue) {
-  purrr::detect_index(
+  detect_wurcs_pattern(
+    residue,
     WURCS_ALDITOL_MONO_REGEX,
-    ~ stringr::str_detect(residue, .x)
+    WURCS_ALDITOL_MONO_PREFIXES
   ) >
-    0
+    0L
 }
 
 
@@ -490,7 +536,7 @@ wurcs_anomer_pos <- function(mono) {
 }
 
 
-parse_residue <- function(residue) {
+parse_residue_details <- function(residue) {
   # This function accepts a WURCS residue (something in "[]"),
   # and returns a named vector of c(mono, anomer, sub)
   # `mono`: the IUPAC monosaccharide name
@@ -501,14 +547,16 @@ parse_residue <- function(residue) {
   is_alditol <- FALSE
 
   # Get monosaacharide name
-  mono_idx <- purrr::detect_index(
+  mono_idx <- detect_wurcs_pattern(
+    residue,
     WURCS_MONO_REGEX,
-    ~ stringr::str_detect(residue, .x)
+    WURCS_MONO_PREFIXES
   )
   if (mono_idx == 0) {
-    unknown_ring_mono_idx <- purrr::detect_index(
+    unknown_ring_mono_idx <- detect_wurcs_pattern(
+      residue,
       WURCS_UNKNOWN_RING_MONO_REGEX,
-      ~ stringr::str_detect(residue, .x)
+      WURCS_UNKNOWN_RING_MONO_PREFIXES
     )
     if (unknown_ring_mono_idx > 0) {
       mono <- names(WURCS_UNKNOWN_RING_MONO_REGEX)[[unknown_ring_mono_idx]]
@@ -520,9 +568,10 @@ parse_residue <- function(residue) {
         stringr::str_sub(anomer, 1, 1)
       )
     } else {
-      alditol_mono_idx <- purrr::detect_index(
+      alditol_mono_idx <- detect_wurcs_pattern(
+        residue,
         WURCS_ALDITOL_MONO_REGEX,
-        ~ stringr::str_detect(residue, .x)
+        WURCS_ALDITOL_MONO_PREFIXES
       )
       if (alditol_mono_idx > 0) {
         mono <- names(WURCS_ALDITOL_MONO_REGEX)[[alditol_mono_idx]]
@@ -530,9 +579,10 @@ parse_residue <- function(residue) {
         anomer <- paste0("?", wurcs_anomer_pos(mono))
         is_alditol <- TRUE
       } else {
-        ambiguous_mono_idx <- purrr::detect_index(
+        ambiguous_mono_idx <- detect_wurcs_pattern(
+          residue,
           WURCS_AMBIGUOUS_MONO_REGEX,
-          ~ stringr::str_detect(residue, .x)
+          WURCS_AMBIGUOUS_MONO_PREFIXES
         )
         if (ambiguous_mono_idx == 0) {
           cli::cli_abort("Unable to parse residue: {.str {residue}}")
@@ -632,7 +682,14 @@ parse_residue <- function(residue) {
     sub <- paste(substituents, collapse = ",")
   }
 
-  c(mono = mono, anomer = anomer, sub = sub)
+  list(
+    value = c(mono = mono, anomer = anomer, sub = sub),
+    alditol = is_alditol
+  )
+}
+
+parse_residue <- function(residue) {
+  parse_residue_details(residue)$value
 }
 
 
@@ -648,11 +705,56 @@ extract_wurcs_residues <- function(x) {
 }
 
 
-parse_unique_residues <- function(x) {
+build_wurcs_residue_cache <- function(x) {
+  descriptors <- stringr::str_extract_all(
+    x[!is.na(x)],
+    "\\[.*?\\]"
+  )
+  descriptors <- unique(unlist(descriptors, use.names = FALSE))
+  descriptors <- stringr::str_sub(descriptors, 2, -2)
+  details <- lapply(descriptors, function(descriptor) {
+    tryCatch(
+      parse_residue_details(descriptor),
+      error = identity
+    )
+  })
+  list(descriptors = descriptors, details = details)
+}
+
+get_wurcs_residue_details <- function(descriptor, residue_cache = NULL) {
+  if (is.null(residue_cache)) {
+    return(parse_residue_details(descriptor))
+  }
+
+  index <- match(descriptor, residue_cache$descriptors)
+  if (is.na(index)) {
+    return(parse_residue_details(descriptor))
+  }
+
+  details <- residue_cache$details[[index]]
+  if (inherits(details, "error")) {
+    stop(details)
+  }
+  details
+}
+
+parse_unique_residue_details <- function(x, residue_cache = NULL) {
+  residues <- extract_wurcs_residues(x)
+  details <- lapply(
+    residues,
+    get_wurcs_residue_details,
+    residue_cache = residue_cache
+  )
+  list(
+    values = lapply(details, `[[`, "value"),
+    has_alditol = any(vapply(details, `[[`, logical(1), "alditol"))
+  )
+}
+
+parse_unique_residues <- function(x, residue_cache = NULL) {
   # Input: a string of WURCS unique residues part
   # Output: a list of named vectors, each vector contains `mono`, `anomer`, and `sub`
-  residues <- extract_wurcs_residues(x)
-  purrr::map(residues, parse_residue)
+  parse_unique_residue_details(x, residue_cache)$values
 }
 
 
@@ -768,7 +870,7 @@ build_glycan_graph <- function(edgelist_df, vertex_df) {
 }
 
 
-do_parse_wurcs <- function(x) {
+do_parse_wurcs <- function(x, residue_cache = NULL) {
   wurcs_regex <- stringr::regex(
     "
     ^WURCS=2\\.0         # WURCS version
@@ -788,11 +890,12 @@ do_parse_wurcs <- function(x) {
   # unique_residues: a list of named character vectors,
   # each vector contains `mono` ("GlcNAc"), `anomer` ("b1"), and `sub` ("3Me")
   unique_residue_part <- stringr::str_extract(x, wurcs_regex, group = 1)
-  unique_residue_descriptors <- extract_wurcs_residues(unique_residue_part)
-  unique_residues <- parse_unique_residues(unique_residue_part)
-  if (
-    any(purrr::map_lgl(unique_residue_descriptors, is_wurcs_alditol_residue))
-  ) {
+  residue_details <- parse_unique_residue_details(
+    unique_residue_part,
+    residue_cache = residue_cache
+  )
+  unique_residues <- residue_details$values
+  if (residue_details$has_alditol) {
     warn_wurcs_alditol()
   }
 
