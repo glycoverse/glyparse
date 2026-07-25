@@ -282,11 +282,14 @@ parse_lin_section <- function(lin_lines) {
 }
 
 build_glycoct_graph <- function(residues, linkages) {
-  # Load monosaccharide mappings
-  mono_mappings <- load_mono_mappings()
+  mono_mapping_index <- glycoct_mapping_index()
 
   # Consolidate monosaccharides with their substituents
-  consolidated <- consolidate_residues(residues, linkages, mono_mappings)
+  consolidated <- consolidate_residues(
+    residues,
+    linkages,
+    mono_mapping_index
+  )
 
   # Build igraph
   if (length(consolidated$vertices) == 0) {
@@ -937,12 +940,189 @@ load_alditol_mono_mappings <- function() {
   return(GLYCOCT_ALDITOL_MAP)
 }
 
-consolidate_residues <- function(residues, linkages, mono_mappings) {
-  has_alditol <- has_glycoct_alditol_residue(residues)
-  alditol_mappings <- if (has_alditol) {
-    load_alditol_mono_mappings()
+compile_glycoct_mapping <- function(name, mapping) {
+  mono_lines <- mapping$res[grepl("^\\d+b:", mapping$res)]
+  pattern_mono <- NULL
+  if (length(mono_lines) > 0) {
+    pattern_mono <- sub("^\\d+b:[abxo]-", "", mono_lines[[1]])
+  }
+
+  sub_lines <- mapping$res[grepl("^\\d+s:", mapping$res)]
+  pattern_subs <- sort(sub("^\\d+s:", "", sub_lines))
+
+  pattern_linkages <- character()
+  if (!is.null(mapping$lin)) {
+    linkage_matches <- regexec(
+      "\\d+:(\\d+)[do]?\\((\\d+)\\+(\\d+)\\)(\\d+)[dn]?",
+      mapping$lin
+    )
+    linkage_parts <- regmatches(mapping$lin, linkage_matches)
+    pattern_linkages <- sort(vapply(
+      linkage_parts,
+      function(parts) {
+        if (length(parts) == 0) {
+          return(NA_character_)
+        }
+        paste0(parts[[3]], "+", parts[[4]])
+      },
+      character(1)
+    ))
+    pattern_linkages <- pattern_linkages[!is.na(pattern_linkages)]
+  }
+
+  c(
+    list(name = name),
+    glycoct_mono_signature(pattern_mono),
+    list(
+      subs = pattern_subs,
+      linkages = pattern_linkages,
+      single = length(mapping$res) == 1L
+    )
+  )
+}
+
+glycoct_mono_signature <- function(content) {
+  bounds <- extract_glycoct_ring_bounds(content)
+  list(
+    mono = content,
+    core = remove_glycoct_ring_bounds(content),
+    bounds = bounds,
+    wildcard_bounds = !is.na(bounds) && grepl("x", bounds, fixed = TRUE),
+    alditol = is_glycoct_alditol_mono(content)
+  )
+}
+
+glycoct_signature_mono_matches <- function(signature, entry) {
+  if (!identical(signature$alditol, entry$alditol)) {
+    return(FALSE)
+  }
+  if (is.na(signature$bounds) || is.na(entry$bounds)) {
+    return(identical(signature$bounds, entry$bounds))
+  }
+  identical(signature$bounds, entry$bounds) ||
+    signature$wildcard_bounds ||
+    entry$wildcard_bounds
+}
+
+glycoct_signature_key <- function(core, subs, linkages) {
+  paste(
+    core,
+    paste(subs, collapse = "\r"),
+    paste(linkages, collapse = "\r"),
+    sep = "\n"
+  )
+}
+
+compile_glycoct_mapping_index <- function(mappings) {
+  entries <- Map(
+    compile_glycoct_mapping,
+    names(mappings),
+    unname(mappings)
+  )
+  cores <- vapply(entries, `[[`, character(1), "core")
+  keys <- vapply(
+    entries,
+    function(entry) {
+      glycoct_signature_key(
+        entry$core,
+        entry$subs,
+        entry$linkages
+      )
+    },
+    character(1)
+  )
+
+  list(
+    entries = entries,
+    exact = split(seq_along(entries), keys),
+    by_core = split(seq_along(entries), cores)
+  )
+}
+
+glycoct_mapping_index <- local({
+  regular <- NULL
+  alditol_index <- NULL
+
+  function(alditol = FALSE) {
+    if (alditol) {
+      if (is.null(alditol_index)) {
+        alditol_index <<- compile_glycoct_mapping_index(
+          load_alditol_mono_mappings()
+        )
+      }
+      return(alditol_index)
+    }
+
+    if (is.null(regular)) {
+      regular <<- compile_glycoct_mapping_index(load_mono_mappings())
+    }
+    regular
+  }
+})
+
+glycoct_group_signature <- function(group, residues, linkages) {
+  group_mono <- NULL
+  group_subs <- character()
+  group_linkages <- character()
+
+  for (id in group) {
+    res <- residues[[as.character(id)]]
+    if (is.null(res)) {
+      next
+    }
+    if (res$type == "mono") {
+      group_mono <- res$content
+    } else if (res$type == "sub") {
+      group_subs <- c(group_subs, res$content)
+    }
+  }
+
+  for (linkage in linkages) {
+    if (!(linkage$from_res %in% group && linkage$to_res %in% group)) {
+      next
+    }
+    from_res <- residues[[as.character(linkage$from_res)]]
+    to_res <- residues[[as.character(linkage$to_res)]]
+    if (
+      !is.null(from_res) &&
+        !is.null(to_res) &&
+        from_res$type == "mono" &&
+        to_res$type == "sub"
+    ) {
+      group_linkages <- c(
+        group_linkages,
+        paste0(linkage$from_pos, "+", linkage$to_pos)
+      )
+    }
+  }
+
+  mono_signature <- if (is.null(group_mono)) {
+    list(
+      mono = NULL,
+      core = NULL,
+      bounds = NA_character_,
+      wildcard_bounds = FALSE,
+      alditol = FALSE
+    )
   } else {
-    list()
+    glycoct_mono_signature(group_mono)
+  }
+
+  c(
+    mono_signature,
+    list(
+      subs = sort(group_subs),
+      linkages = sort(group_linkages)
+    )
+  )
+}
+
+consolidate_residues <- function(residues, linkages, mono_mapping_index) {
+  has_alditol <- has_glycoct_alditol_residue(residues)
+  alditol_mapping_index <- if (has_alditol) {
+    glycoct_mapping_index(alditol = TRUE)
+  } else {
+    NULL
   }
 
   # Group residues by their linkage relationships to identify composite structures
@@ -970,19 +1150,21 @@ consolidate_residues <- function(residues, linkages, mono_mappings) {
         )
       }
     } else {
-      # Composite structure - try to match with known patterns
-      matched <- match_composite_structure(
+      group_signature <- glycoct_group_signature(
         group,
         residues,
-        linkages,
-        alditol_mappings
+        linkages
+      )
+
+      # Composite structure - try to match with known patterns
+      matched <- match_composite_structure(
+        group_signature,
+        alditol_mapping_index
       )
       if (is.null(matched)) {
         matched <- match_composite_structure(
-          group,
-          residues,
-          linkages,
-          mono_mappings
+          group_signature,
+          mono_mapping_index
         )
       }
 
@@ -1014,16 +1196,17 @@ consolidate_residues <- function(residues, linkages, mono_mappings) {
           )
         } else {
           # No exact match - try partial matching with extra substituents
-          partial_mappings <- if (isTRUE(main_mono$is_alditol)) {
-            alditol_mappings
+          partial_mapping_index <- if (isTRUE(main_mono$is_alditol)) {
+            alditol_mapping_index
           } else {
-            mono_mappings
+            mono_mapping_index
           }
           partial_result <- match_partial_composite_structure(
             group,
             residues,
             linkages,
-            partial_mappings
+            group_signature,
+            partial_mapping_index
           )
           vertices <- append(
             vertices,
@@ -1090,28 +1273,39 @@ find_composite_groups <- function(residues, linkages) {
 }
 
 match_composite_structure <- function(
-  group,
-  residues,
-  linkages,
-  mono_mappings
+  group_signature,
+  mapping_index
 ) {
-  # Try to match the composite structure with known monosaccharides
-  for (idx in seq_along(mono_mappings)) {
-    mono_name <- names(mono_mappings)[[idx]]
-    mapping <- mono_mappings[[idx]]
-    if (matches_glycoct_pattern(group, residues, linkages, mapping)) {
-      return(mono_name)
+  if (is.null(mapping_index) || is.null(group_signature$core)) {
+    return(NULL)
+  }
+
+  key <- glycoct_signature_key(
+    group_signature$core,
+    group_signature$subs,
+    group_signature$linkages
+  )
+  candidates <- mapping_index$exact[[key]]
+  if (is.null(candidates)) {
+    return(NULL)
+  }
+
+  for (idx in candidates) {
+    entry <- mapping_index$entries[[idx]]
+    if (glycoct_signature_mono_matches(group_signature, entry)) {
+      return(entry$name)
     }
   }
 
-  return(NULL)
+  NULL
 }
 
 match_partial_composite_structure <- function(
   group,
   residues,
   linkages,
-  mono_mappings
+  group_signature,
+  mapping_index
 ) {
   generic_result <- match_generic_glycoct_composite(group, residues, linkages)
   if (!is.null(generic_result)) {
@@ -1121,75 +1315,47 @@ match_partial_composite_structure <- function(
   # Try to find the best partial match and identify extra substituents
   best_match <- NULL
   best_extra_subs <- c()
+  group_subs <- group_signature$subs
+  group_mono <- group_signature$mono
 
-  # Get all substituents in this group
-  group_subs <- c()
-  group_mono <- NULL
-
-  for (id in group) {
-    res <- residues[[as.character(id)]]
-    if (!is.null(res)) {
-      if (res$type == "mono") {
-        group_mono <- res
-      } else if (res$type == "sub") {
-        group_subs <- c(group_subs, res$content)
-      }
-    }
+  candidate_indices <- if (
+    is.null(mapping_index) || is.null(group_signature$core)
+  ) {
+    integer()
+  } else {
+    mapping_index$by_core[[group_signature$core]]
   }
 
   # Try to find a known composite that uses a subset of our substituents
-  for (idx in seq_along(mono_mappings)) {
-    mono_name <- names(mono_mappings)[[idx]]
-    mapping <- mono_mappings[[idx]]
-
-    # Get the pattern's substituents
-    pattern_subs <- c()
-    for (res_line in mapping$res) {
-      if (stringr::str_detect(res_line, "^\\d+s:")) {
-        sub_content <- stringr::str_remove(res_line, "^\\d+s:")
-        pattern_subs <- c(pattern_subs, sub_content)
-      }
-    }
+  for (idx in candidate_indices) {
+    entry <- mapping_index$entries[[idx]]
+    pattern_subs <- entry$subs
 
     # Check if pattern substituents are a subset of group substituents
     if (length(pattern_subs) > 0 && all(pattern_subs %in% group_subs)) {
-      # Get the pattern's monosaccharide
-      mono_lines <- mapping$res[stringr::str_detect(mapping$res, "^\\d+b:")]
-      if (length(mono_lines) > 0) {
-        pattern_mono_content <- stringr::str_remove(
-          mono_lines[1],
-          "^\\d+b:[abxo]-"
-        )
+      if (
+        !is.null(group_mono) &&
+          glycoct_signature_mono_matches(group_signature, entry)
+      ) {
+        exact_match <- identical(pattern_subs, group_signature$subs) &&
+          identical(entry$linkages, group_signature$linkages)
+        if (exact_match) {
+          next
+        }
 
-        # Check if monosaccharide matches
-        if (
-          !is.null(group_mono) &&
-            glycoct_mono_content_matches(
-              group_mono$content,
-              pattern_mono_content
+        # For partial matching, only consider if there are extra substituents
+        if (length(pattern_subs) < length(group_subs)) {
+          extra_subs <- setdiff(group_subs, pattern_subs)
+
+          if (
+            is.null(best_match) ||
+              length(pattern_subs) > length(best_match$pattern_subs)
+          ) {
+            best_match <- list(
+              mono_name = entry$name,
+              pattern_subs = pattern_subs
             )
-        ) {
-          # Verify that the pattern substituents actually match with correct linkages
-          # by using the full pattern matching function
-          if (matches_glycoct_pattern(group, residues, linkages, mapping)) {
-            # Exact match - shouldn't be in partial matching function
-            next
-          }
-
-          # For partial matching, only consider if there are extra substituents
-          if (length(pattern_subs) < length(group_subs)) {
-            extra_subs <- setdiff(group_subs, pattern_subs)
-
-            if (
-              is.null(best_match) ||
-                length(pattern_subs) > length(best_match$pattern_subs)
-            ) {
-              best_match <- list(
-                mono_name = mono_name,
-                pattern_subs = pattern_subs
-              )
-              best_extra_subs <- extra_subs
-            }
+            best_extra_subs <- extra_subs
           }
         }
       }
@@ -1212,7 +1378,7 @@ match_partial_composite_structure <- function(
   } else {
     # No partial match found, return base monosaccharide with all substituents
     if (!is.null(group_mono)) {
-      base_mono <- map_single_mono(group_mono$content)
+      base_mono <- map_single_mono(group_mono)
       formatted_subs <- format_extra_substituents(
         group_subs,
         group,
@@ -1562,22 +1728,18 @@ map_single_mono <- function(content) {
   # Extract monosaccharide name from content like "dglc-HEX-1:5" or "lgal-HEX-1:5|6:d"
 
   is_alditol <- is_glycoct_alditol_mono(content)
-  mono_mappings <- if (is_alditol) {
-    load_alditol_mono_mappings()
-  } else {
-    load_mono_mappings()
-  }
-  for (idx in seq_along(mono_mappings)) {
-    mono_name <- names(mono_mappings)[[idx]]
-    mapping <- mono_mappings[[idx]]
-    if (length(mapping$res) == 1) {
-      # Single monosaccharide without substituents
-      mono_line <- mapping$res[[1]]
-      if (stringr::str_detect(mono_line, "^\\d+b:")) {
-        pattern_content <- stringr::str_remove(mono_line, "^\\d+b:[abxo]-")
-        if (glycoct_mono_content_matches(content, pattern_content)) {
-          return(mono_name)
-        }
+  mapping_index <- glycoct_mapping_index(alditol = is_alditol)
+  mono_signature <- glycoct_mono_signature(content)
+  candidates <- mapping_index$by_core[[mono_signature$core]]
+  if (!is.null(candidates)) {
+    for (idx in candidates) {
+      entry <- mapping_index$entries[[idx]]
+      if (
+        entry$single &&
+          length(entry$subs) == 0L &&
+          glycoct_signature_mono_matches(mono_signature, entry)
+      ) {
+        return(entry$name)
       }
     }
   }
