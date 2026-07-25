@@ -10,6 +10,12 @@
 - Graph-based parsers gain `validate` to skip graph validation for
   trusted inputs
   ([\#36](https://github.com/glycoverse/glyparse/issues/36)).
+- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
+  and
+  [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
+  now reuse indexed residue matching and cached classification to
+  improve parsing performance
+  ([\#37](https://github.com/glycoverse/glyparse/issues/37)).
 
 ## glyparse 0.7.1
 
