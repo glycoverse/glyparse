@@ -14,28 +14,30 @@ You can install the latest release of glyparse from
 
 ``` r
 
-install.packages("glyparse")
+pak::pkg_install("glyparse")
 ```
 
 Or from [r-universe](https://glycoverse.r-universe.dev/glyparse):
 
 ``` r
 
-install.packages('glyparse', repos = c('https://glycoverse.r-universe.dev', 'https://cloud.r-project.org'))
+pak::repo_add(glycoverse = "https://glycoverse.r-universe.dev")
+pak::pkg_install("glyparse")
 ```
 
-Or from [GitHub](https://github.com/glycoverse/glyparse):
+Or install the latest GitHub release:
 
 ``` r
 
-remotes::install_github("glycoverse/glyparse@*release")
+pak::pkg_install("glycoverse/glyparse@*release")
 ```
 
-Or install the development version:
+Or install the development version from
+[GitHub](https://github.com/glycoverse/glyparse):
 
 ``` r
 
-remotes::install_github("glycoverse/glyparse")
+pak::pkg_install("glycoverse/glyparse")
 ```
 
 ## Documentation
