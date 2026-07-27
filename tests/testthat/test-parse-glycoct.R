@@ -640,3 +640,34 @@ test_that("single-parent GlycoCT UND sections become ordinary edges", {
   expect_identical(unname(as.character(result)), "Neu5Ac(a2-3)Gal(a1-")
   expect_identical(unname(glyrepr::has_floating_parts(result)), FALSE)
 })
+
+test_that("GlycoCT UND candidate parents exclude occupied acceptor slots", {
+  glycoct <- paste(
+    "RES",
+    "1b:a-dgal-HEX-1:5",
+    "2b:b-dglc-HEX-1:5",
+    "LIN",
+    "1:1o(3+1)2d",
+    "UND",
+    "UND1:100.0:100.0",
+    "ParentIDs:1|2",
+    "SubtreeLinkageID1:o(3+1)d",
+    "RES",
+    "3b:a-lgal-HEX-1:5|6:d"
+  )
+
+  result <- parse_glycoct(glycoct)
+
+  expect_identical(
+    unname(as.character(result)),
+    "Fuc(a1-3)Glc(b1-3)Gal(a1-"
+  )
+  expect_identical(unname(glyrepr::has_floating_parts(result)), FALSE)
+})
+
+test_that("GlycoCT UND parts require a feasible candidate parent", {
+  expect_snapshot(
+    error = TRUE,
+    filter_glycoct_und_parents(1L, "b1-3", "1\r3")
+  )
+})
