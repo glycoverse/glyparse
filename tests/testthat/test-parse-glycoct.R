@@ -29,38 +29,6 @@ test_that("GlycoCT accepts space-separated records", {
   expect_equal(result, "Gal(b1-3)GalNAc(a1-")
 })
 
-test_that("GlycoCT rejects unsupported UND sections without losing residues", {
-  core <- paste0(
-    "RES\n",
-    "1b:b-dglc-HEX-1:5\n",
-    "2s:n-acetyl\n",
-    "LIN\n",
-    "1:1d(2+1)2n"
-  )
-  with_und <- paste0(
-    core,
-    "\nUND\n",
-    "UND1:100.0:100.0\n",
-    "ParentIDs:1\n",
-    "SubtreeLinkageID1:x(-1+1)x\n",
-    "RES\n",
-    "3b:a-lgal-HEX-1:5|6:d"
-  )
-
-  expect_snapshot(error = TRUE, parse_glycoct(with_und))
-
-  result <- parse_glycoct(
-    c(core = core, underdetermined = with_und),
-    on_failure = "na"
-  )
-  expect_equal(
-    as.character(result),
-    c(core = "GlcNAc(b1-", underdetermined = NA)
-  )
-
-  expect_identical(is.na(auto_parse(with_und, on_failure = "na")), TRUE)
-})
-
 test_that("GlycoCT maps generic HEX descriptors", {
   expect_equal(as.character(parse_glycoct("RES\n1b:x-HEX-x:x")), "Hex(??-")
   expect_equal(as.character(parse_glycoct("RES\n1b:x-HEX-1:x|6:d")), "dHex(?1-")
@@ -613,4 +581,62 @@ test_that("GlycoCT: a complex N-glycan example", {
   result <- as.character(parse_glycoct(glycoct))
   expected <- "Neu5Ac(a2-3/6)Gal(b1-4)GlcNAc(b1-2)Man(a1-3)[Gal(b1-4)GlcNAc(b1-2)Man(a1-6)]Man(b1-4)GlcNAc(b1-4)GlcNAc(b1-"
   expect_equal(result, expected)
+})
+
+test_that("GlycoCT UND sections become floating glycan parts", {
+  glycoct <- paste(
+    "RES",
+    "1b:a-dgal-HEX-1:5",
+    "2b:b-dglc-HEX-1:5",
+    "LIN",
+    "1:1o(3+1)2d",
+    "UND",
+    "UND1:100.0:100.0",
+    "ParentIDs:1|2",
+    "SubtreeLinkageID1:o(6+1)d",
+    "RES",
+    "3b:b-dglc-HEX-1:5",
+    "4s:n-acetyl",
+    "5b:b-dgal-HEX-1:5",
+    "LIN",
+    "2:3d(2+1)4n",
+    "3:3o(4+1)5d",
+    "UND2:100.0:100.0",
+    "ParentIDs:1|2",
+    "SubtreeLinkageID1:o(2+1)d",
+    "RES",
+    "6b:a-lgal-HEX-1:5|6:d"
+  )
+
+  result <- parse_glycoct(glycoct)
+  floating <- glyrepr::structure_floating_parts(result)
+
+  expect_identical(
+    unname(as.character(result)),
+    "{Fuc(a1-2)|1,2}{Gal(b1-4)GlcNAc(b1-6)|1,2}Glc(b1-3)Gal(a1-"
+  )
+  expect_identical(floating$linkage, c("a1-2", "b1-6"))
+  expect_equal(floating$nodes, list(1L, c(2L, 3L)))
+  expect_equal(floating$parents, list(c(4L, 5L), c(4L, 5L)))
+})
+
+test_that("single-parent GlycoCT UND sections become ordinary edges", {
+  glycoct <- paste(
+    "RES",
+    "1b:a-dgal-HEX-1:5",
+    "UND",
+    "UND1:100.0:100.0",
+    "ParentIDs:1",
+    "SubtreeLinkageID1:o(3+2)d",
+    "RES",
+    "2b:a-dgro-dgal-NON-2:6|1:a|2:keto|3:d",
+    "3s:n-acetyl",
+    "LIN",
+    "7:2d(5+1)3n"
+  )
+
+  result <- parse_glycoct(glycoct)
+
+  expect_identical(unname(as.character(result)), "Neu5Ac(a2-3)Gal(a1-")
+  expect_identical(unname(glyrepr::has_floating_parts(result)), FALSE)
 })

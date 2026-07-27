@@ -35,18 +35,16 @@ This function parses GlycoCT strings into a \code{\link[glyrepr:glycan_structure
 GlycoCT is a format used by databases like GlyTouCan and GlyGen.
 }
 \details{
-GlycoCT format consists of two parts:
+GlycoCT format consists of:
 \itemize{
 \item RES: Contains monosaccharides (lines starting with 'b:') and substituents (lines starting with 's:')
 \item LIN: Contains linkage information between residues
+\item UND: Contains floating substructures whose attachment to the main glycan
+is unresolved
 }
 
 Alditol residues are parsed as regular reducing-end glycans with unknown
 anomer configurations.
-
-GlycoCT \code{UND} sections are not currently supported. Inputs containing an
-underdetermined subgraph fail according to \code{on_failure} instead of returning
-an incomplete connected core.
 
 For more information about GlycoCT format, see the glycoct.md documentation.
 }

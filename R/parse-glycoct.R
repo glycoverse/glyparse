@@ -4,16 +4,14 @@
 #' GlycoCT is a format used by databases like GlyTouCan and GlyGen.
 #'
 #' @details
-#' GlycoCT format consists of two parts:
+#' GlycoCT format consists of:
 #' - RES: Contains monosaccharides (lines starting with 'b:') and substituents (lines starting with 's:')
 #' - LIN: Contains linkage information between residues
+#' - UND: Contains floating substructures whose attachment to the main glycan
+#'   is unresolved
 #'
 #' Alditol residues are parsed as regular reducing-end glycans with unknown
 #' anomer configurations.
-#'
-#' GlycoCT `UND` sections are not currently supported. Inputs containing an
-#' underdetermined subgraph fail according to `on_failure` instead of returning
-#' an incomplete connected core.
 #'
 #' For more information about GlycoCT format, see the glycoct.md documentation.
 #'
@@ -57,18 +55,6 @@ parse_glycoct <- function(
     drop_generic,
     call = rlang::caller_env()
   )
-  has_und <- purrr::map_lgl(
-    x,
-    \(value) !is.na(value) && has_glycoct_und_section(value)
-  )
-  if (any(has_und) && on_failure == "error") {
-    cli::cli_abort(c(
-      "Can't parse GlycoCT with unsupported {.code UND} sections.",
-      "i" = "Returning only the connected {.code RES}/{.code LIN} core would lose underdetermined residues."
-    ))
-  }
-  x[has_und] <- NA_character_
-
   struc_parser_wrapper(
     x,
     do_parse_glycoct,
@@ -79,55 +65,140 @@ parse_glycoct <- function(
   )
 }
 
-#' Detect underdetermined GlycoCT subgraphs
-#'
-#' @param x A non-missing GlycoCT string.
-#'
-#' @return A logical scalar.
-#' @noRd
-has_glycoct_und_section <- function(x) {
-  any(stringr::str_detect(split_glycoct_lines(x), "^UND(?:\\d+)?$"))
-}
-
 do_parse_glycoct <- function(x) {
   lines <- split_glycoct_lines(x)
-  if (any(stringr::str_detect(lines, "^UND(?:\\d+)?$"))) {
-    cli::cli_abort("GlycoCT {.code UND} sections are not supported")
+  blocks <- split_glycoct_blocks(lines)
+
+  main <- parse_glycoct_block(blocks$main)
+  if (has_glycoct_alditol_residue(main$residues)) {
+    warn_glycoct_alditol()
+  }
+  main_graph <- build_glycoct_graph_data(main$residues, main$linkages)
+
+  if (length(blocks$floating) == 0) {
+    return(main_graph$graph)
   }
 
-  # Find RES and LIN sections
+  floating <- purrr::map(blocks$floating, parse_glycoct_und_block)
+  floating_graphs <- purrr::map(
+    floating,
+    ~ build_glycoct_graph_data(.x$residues, .x$linkages)
+  )
+
+  build_glycoct_floating_graph(main_graph, floating_graphs, floating)
+}
+
+#' Split a GlycoCT record into its main and UND blocks
+#'
+#' @param lines Tokenized GlycoCT lines.
+#'
+#' @return A list containing the main block and zero or more floating blocks.
+#' @noRd
+split_glycoct_blocks <- function(lines) {
+  und_marker <- which(lines == "UND")
+  if (length(und_marker) == 0) {
+    return(list(main = lines, floating = list()))
+  }
+
+  first_und <- und_marker[[1]]
+  main <- lines[seq_len(first_und - 1L)]
+  und_lines <- lines[(first_und + 1L):length(lines)]
+  starts <- which(stringr::str_detect(und_lines, "^UND\\d+:"))
+  if (length(starts) == 0) {
+    cli::cli_abort("No UND block found after the GlycoCT UND section")
+  }
+
+  ends <- c(starts[-1] - 1L, length(und_lines))
+  floating <- purrr::map2(
+    starts,
+    ends,
+    ~ und_lines[.x:.y]
+  )
+
+  list(main = main, floating = floating)
+}
+
+#' Parse the structural sections of one GlycoCT block
+#'
+#' @param lines Lines containing one RES section and an optional LIN section.
+#'
+#' @return Parsed residues and linkages.
+#' @noRd
+parse_glycoct_block <- function(lines) {
   res_start <- which(lines == "RES")
   lin_start <- which(lines == "LIN")
 
-  if (length(res_start) == 0) {
-    cli::cli_abort("No RES section found in GlycoCT string")
+  if (length(res_start) != 1) {
+    cli::cli_abort("A GlycoCT block must contain exactly one RES section")
+  }
+  if (length(lin_start) > 1) {
+    cli::cli_abort("A GlycoCT block can contain at most one LIN section")
   }
 
-  # Parse RES section
-  if (length(lin_start) == 0) {
-    res_lines <- lines[(res_start + 1):length(lines)]
+  res_end <- if (length(lin_start) == 0) {
+    length(lines)
   } else {
-    res_lines <- lines[(res_start + 1):(lin_start - 1)]
+    lin_start - 1L
   }
-
-  # Parse LIN section (if exists)
-  if (length(lin_start) > 0) {
-    lin_lines <- lines[(lin_start + 1):length(lines)]
+  res_lines <- lines[(res_start + 1L):res_end]
+  lin_lines <- if (length(lin_start) == 0) {
+    character()
   } else {
-    lin_lines <- character(0)
+    lines[(lin_start + 1L):length(lines)]
   }
 
-  # Parse residues (monosaccharides and substituents)
-  residues <- parse_res_section(res_lines)
-  if (has_glycoct_alditol_residue(residues)) {
-    warn_glycoct_alditol()
+  list(
+    residues = parse_res_section(res_lines),
+    linkages = parse_lin_section(lin_lines)
+  )
+}
+
+#' Parse a GlycoCT UND block
+#'
+#' @param lines One UND block, beginning with its UND identifier.
+#'
+#' @return Parsed structural data and virtual attachment metadata.
+#' @noRd
+parse_glycoct_und_block <- function(lines) {
+  parent_line <- lines[stringr::str_detect(lines, "^ParentIDs:")]
+  linkage_line <- lines[
+    stringr::str_detect(lines, "^SubtreeLinkageID\\d+:")
+  ]
+  if (length(parent_line) != 1 || length(linkage_line) != 1) {
+    cli::cli_abort(
+      "A GlycoCT UND block must contain one ParentIDs and one SubtreeLinkageID field"
+    )
   }
 
-  # Parse linkages
-  linkages <- parse_lin_section(lin_lines)
+  parent_text <- stringr::str_remove(parent_line, "^ParentIDs:")
+  parent_ids <- as.integer(stringr::str_split(parent_text, "\\|")[[1]])
+  if (length(parent_ids) == 0 || anyNA(parent_ids)) {
+    cli::cli_abort("GlycoCT UND ParentIDs must contain residue identifiers")
+  }
 
-  # Build the graph
-  build_glycoct_graph(residues, linkages)
+  attachment <- stringr::str_remove(
+    linkage_line,
+    "^SubtreeLinkageID\\d+:"
+  )
+  matches <- stringr::str_match(
+    attachment,
+    "^[a-z]?\\((-?\\d+(?:\\|\\d+)*)\\+(-?\\d+(?:\\|\\d+)*)\\)[a-z]?$"
+  )
+  if (is.na(matches[1])) {
+    cli::cli_abort(
+      "Can't parse GlycoCT UND subtree linkage {.val {attachment}}"
+    )
+  }
+
+  block <- parse_glycoct_block(lines)
+  c(
+    block,
+    list(
+      parent_ids = parent_ids,
+      parent_pos = matches[2],
+      child_pos = matches[3]
+    )
+  )
 }
 
 #' Split a GlycoCT record into parser lines
@@ -311,7 +382,7 @@ parse_lin_section <- function(lin_lines) {
       to_res <- as.integer(matches[6])
       to_pos <- matches[5]
 
-      linkages[[link_id]] <- list(
+      linkages[[as.character(link_id)]] <- list(
         from_res = from_res,
         from_pos = from_pos,
         to_res = to_res,
@@ -324,6 +395,10 @@ parse_lin_section <- function(lin_lines) {
 }
 
 build_glycoct_graph <- function(residues, linkages) {
+  build_glycoct_graph_data(residues, linkages)$graph
+}
+
+build_glycoct_graph_data <- function(residues, linkages) {
   mono_mapping_index <- glycoct_mapping_index()
 
   # Consolidate monosaccharides with their substituents
@@ -356,31 +431,15 @@ build_glycoct_graph <- function(residues, linkages) {
     if (length(from_idx) == 1 && length(to_idx) == 1) {
       edges <- c(edges, from_idx, to_idx)
 
-      # Build linkage string: anomer + to_pos + "-" + from_pos
       to_vertex <- consolidated$vertices[[to_idx]]
-
-      # Handle unknown anomer and positions
-      anomer_char <- if (to_vertex$anomer %in% c("x", "o")) {
-        "?"
-      } else {
-        to_vertex$anomer
-      }
-      to_pos_str <- if (edge$to_pos == "-1") "?" else as.character(edge$to_pos)
-      from_pos_str <- if (edge$from_pos == "-1") {
-        "?"
-      } else {
-        as.character(edge$from_pos)
-      }
-      if (stringr::str_detect(from_pos_str, stringr::fixed("|"))) {
-        from_pos_str <- stringr::str_replace_all(
-          from_pos_str,
-          stringr::fixed("|"),
-          stringr::fixed("/")
+      edge_attrs$linkage <- c(
+        edge_attrs$linkage,
+        format_glycoct_linkage(
+          edge$from_pos,
+          edge$to_pos,
+          to_vertex$anomer
         )
-      }
-
-      linkage_str <- paste0(anomer_char, to_pos_str, "-", from_pos_str)
-      edge_attrs$linkage <- c(edge_attrs$linkage, linkage_str)
+      )
     }
   }
 
@@ -416,7 +475,132 @@ build_glycoct_graph <- function(residues, linkages) {
   }
   g$alditol <- FALSE
 
-  g
+  list(
+    graph = g,
+    original_ids = purrr::map_int(
+      consolidated$vertices,
+      "original_id"
+    ),
+    vertices = consolidated$vertices
+  )
+}
+
+#' Format a GlycoCT linkage as IUPAC-condensed linkage text
+#'
+#' @param parent_pos Acceptor position on the parent residue.
+#' @param child_pos Donor position on the child residue.
+#' @param child_anomer Anomer configuration of the child residue.
+#'
+#' @return A linkage string such as `"a2-3"` or `"?1-?"`.
+#' @noRd
+format_glycoct_linkage <- function(parent_pos, child_pos, child_anomer) {
+  anomer <- if (child_anomer %in% c("x", "o")) "?" else child_anomer
+  donor <- if (child_pos == "-1") "?" else child_pos
+  acceptor <- if (parent_pos == "-1") "?" else parent_pos
+  acceptor <- stringr::str_replace_all(
+    acceptor,
+    stringr::fixed("|"),
+    stringr::fixed("/")
+  )
+
+  paste0(anomer, donor, "-", acceptor)
+}
+
+#' Combine a main GlycoCT tree with parsed UND subtree graphs
+#'
+#' @param main Main-tree graph data.
+#' @param floating_graphs Graph data for each floating subtree.
+#' @param floating Parsed UND metadata.
+#'
+#' @return An annotated glycan forest understood by `glyrepr`.
+#' @noRd
+build_glycoct_floating_graph <- function(main, floating_graphs, floating) {
+  graph_data <- c(list(main), floating_graphs)
+  sizes <- purrr::map_int(graph_data, ~ igraph::vcount(.x$graph))
+  offsets <- c(0L, utils::head(cumsum(sizes), -1L))
+
+  forest <- igraph::make_empty_graph(sum(sizes), directed = TRUE)
+  edge_endpoints <- purrr::map2(
+    graph_data,
+    offsets,
+    function(data, offset) {
+      endpoints <- igraph::as_edgelist(data$graph, names = FALSE)
+      if (length(endpoints) == 0) {
+        return(integer())
+      }
+      as.integer(t(endpoints + offset))
+    }
+  )
+  edge_endpoints <- unlist(edge_endpoints, use.names = FALSE)
+  edge_linkages <- unlist(
+    purrr::map(
+      graph_data,
+      ~ igraph::edge_attr(.x$graph, "linkage")
+    ),
+    use.names = FALSE
+  )
+  if (length(edge_endpoints) > 0) {
+    forest <- igraph::add_edges(
+      forest,
+      edge_endpoints,
+      linkage = edge_linkages
+    )
+  } else {
+    forest <- igraph::set_edge_attr(
+      forest,
+      "linkage",
+      value = character()
+    )
+  }
+
+  igraph::V(forest)$name <- as.character(seq_len(sum(sizes)))
+  igraph::V(forest)$mono <- unlist(
+    purrr::map(graph_data, ~ igraph::V(.x$graph)$mono),
+    use.names = FALSE
+  )
+  igraph::V(forest)$sub <- unlist(
+    purrr::map(graph_data, ~ igraph::V(.x$graph)$sub),
+    use.names = FALSE
+  )
+  forest$anomer <- main$graph$anomer
+  forest$alditol <- FALSE
+
+  main_parent_indices <- stats::setNames(
+    seq_along(main$original_ids),
+    main$original_ids
+  )
+  forest$floating_parts <- purrr::map2(
+    seq_along(floating_graphs),
+    floating,
+    function(part_id, metadata) {
+      data <- floating_graphs[[part_id]]
+      offset <- offsets[[part_id + 1L]]
+      root <- which(igraph::degree(data$graph, mode = "in") == 0)
+      parents <- unname(
+        main_parent_indices[as.character(metadata$parent_ids)]
+      )
+      if (anyNA(parents)) {
+        missing_ids <- metadata$parent_ids[is.na(parents)]
+        cli::cli_abort(c(
+          "GlycoCT UND candidate parents must be main-tree monosaccharides.",
+          "x" = "Can't find main-tree residue ID{?s} {.val {missing_ids}}."
+        ))
+      }
+
+      list(
+        root = as.integer(offset + root),
+        nodes = as.integer(offset + seq_len(sizes[[part_id + 1L]])),
+        linkage = format_glycoct_linkage(
+          metadata$parent_pos,
+          metadata$child_pos,
+          data$vertices[[root]]$anomer
+        ),
+        parents = as.integer(parents)
+      )
+    }
+  )
+
+  forest
 }
 
 #' Format the reducing-end anomer stored in a GlycoCT graph
