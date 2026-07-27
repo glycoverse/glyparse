@@ -5,6 +5,9 @@
   `UND` sections, uses implicit floating parts when every main-tree node is a
   candidate parent, and excludes explicit candidates whose acceptor positions
   are already occupied.
+* `parse_wurcs()` now supports floating monosaccharides and subtrees, including
+  implicit all-main attachment domains and filtered explicit candidate
+  parents. It also recognizes furanose ring closures for pentose residues.
 * Parser functions now construct structure vectors through `glyrepr`'s low-level graph APIs, avoiding repeated scalar construction for distinct inputs.
 * Parsers that normalize to IUPAC-condensed notation now normalize complete unique vectors and construct them in one call.
 * Graph-based parsers gain `validate` to skip graph validation for trusted inputs (#36).

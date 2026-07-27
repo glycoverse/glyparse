@@ -569,7 +569,10 @@ build_glycoct_floating_graph <- function(main, floating_graphs, floating) {
     seq_along(main$original_ids),
     main$original_ids
   )
-  occupied_slots <- glycoct_definitely_occupied_slots(main$graph)
+  occupied_slots <- definitely_occupied_acceptor_slots(
+    main$graph,
+    seq_along(main$original_ids)
+  )
   forest$floating_parts <- purrr::map2(
     seq_along(floating_graphs),
     floating,
@@ -593,11 +596,12 @@ build_glycoct_floating_graph <- function(main, floating_graphs, floating) {
         metadata$child_pos,
         data$vertices[[root]]$anomer
       )
-      parents <- normalize_glycoct_und_parents(
+      parents <- normalize_floating_part_parents(
         parents,
         seq_along(main$original_ids),
         linkage,
-        occupied_slots
+        occupied_slots,
+        context = "GlycoCT UND part"
       )
 
       list(
@@ -612,21 +616,27 @@ build_glycoct_floating_graph <- function(main, floating_graphs, floating) {
   forest
 }
 
-#' Find definitely occupied acceptor slots in a GlycoCT main tree
+#' Find definitely occupied acceptor slots in a glycan tree
 #'
-#' @param graph A parsed main-tree graph.
+#' @param graph A parsed glycan graph.
+#' @param vertices Vertices belonging to the tree of interest.
 #'
 #' @return Character keys combining parent vertex and acceptor position.
 #' @noRd
-glycoct_definitely_occupied_slots <- function(graph) {
+definitely_occupied_acceptor_slots <- function(
+  graph,
+  vertices = seq_len(igraph::vcount(graph))
+) {
   if (igraph::ecount(graph) == 0) {
     return(character())
   }
 
   endpoints <- igraph::as_edgelist(graph, names = FALSE)
   linkages <- igraph::edge_attr(graph, "linkage")
-  positions <- purrr::map(linkages, glycoct_acceptor_positions)
-  definite <- lengths(positions) == 1L
+  positions <- purrr::map(linkages, linkage_acceptor_positions)
+  definite <- lengths(positions) == 1L &
+    endpoints[, 1] %in% vertices &
+    endpoints[, 2] %in% vertices
 
   paste(
     endpoints[definite, 1],
@@ -641,7 +651,7 @@ glycoct_definitely_occupied_slots <- function(graph) {
 #'
 #' @return A character vector. Unknown positions return an empty vector.
 #' @noRd
-glycoct_acceptor_positions <- function(linkage) {
+linkage_acceptor_positions <- function(linkage) {
   acceptor <- stringr::str_extract(linkage, "(?<=-).*$")
   if (is.na(acceptor) || acceptor == "?") {
     return(character())
@@ -650,39 +660,52 @@ glycoct_acceptor_positions <- function(linkage) {
   stringr::str_split(acceptor, stringr::fixed("/"))[[1]]
 }
 
-#' Normalize GlycoCT UND candidate parents
+#' Normalize floating-part candidate parents
 #'
-#' @param parents Main-tree vertex indices declared by `ParentIDs`.
+#' @param parents Declared main-tree candidate vertex indices.
 #' @param main_vertices Every main-tree vertex index.
 #' @param linkage The floating part's attachment linkage.
 #' @param occupied_slots Definitely occupied main-tree acceptor slots.
+#' @param context Input-format context for error messages.
 #'
 #' @return An empty vector for an implicit all-main candidate set, otherwise
 #'   the feasible explicit candidate parents.
 #' @noRd
-normalize_glycoct_und_parents <- function(
+normalize_floating_part_parents <- function(
   parents,
   main_vertices,
   linkage,
-  occupied_slots
+  occupied_slots,
+  context
 ) {
   if (setequal(parents, main_vertices)) {
     return(integer())
   }
 
-  filter_glycoct_und_parents(parents, linkage, occupied_slots)
+  filter_floating_part_parents(
+    parents,
+    linkage,
+    occupied_slots,
+    context
+  )
 }
 
-#' Remove infeasible candidate parents from a GlycoCT UND part
+#' Remove infeasible candidate parents from a floating part
 #'
-#' @param parents Main-tree vertex indices declared by `ParentIDs`.
+#' @param parents Declared main-tree candidate vertex indices.
 #' @param linkage The floating part's attachment linkage.
 #' @param occupied_slots Definitely occupied main-tree acceptor slots.
+#' @param context Input-format context for error messages.
 #'
 #' @return Feasible candidate parent indices.
 #' @noRd
-filter_glycoct_und_parents <- function(parents, linkage, occupied_slots) {
-  positions <- glycoct_acceptor_positions(linkage)
+filter_floating_part_parents <- function(
+  parents,
+  linkage,
+  occupied_slots,
+  context
+) {
+  positions <- linkage_acceptor_positions(linkage)
   if (length(positions) == 0) {
     return(parents)
   }
@@ -694,11 +717,22 @@ filter_glycoct_und_parents <- function(parents, linkage, occupied_slots) {
   parents <- parents[feasible]
   if (length(parents) == 0) {
     cli::cli_abort(
-      "No feasible parent remains for a GlycoCT UND part after excluding occupied acceptor positions."
+      "No feasible parent remains for a {context} after excluding occupied acceptor positions.",
+      call = rlang::caller_env()
     )
   }
 
   parents
+}
+
+
+filter_glycoct_und_parents <- function(parents, linkage, occupied_slots) {
+  filter_floating_part_parents(
+    parents,
+    linkage,
+    occupied_slots,
+    context = "GlycoCT UND part"
+  )
 }
 
 #' Format the reducing-end anomer stored in a GlycoCT graph

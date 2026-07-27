@@ -36,6 +36,8 @@ Currently, only WURCS 2.0 is supported.
 For more information about WURCS, see \href{https://github.com/glycoinfo/WURCS/wiki}{WURCS}.
 Alditol residues are parsed as regular reducing-end glycans with unknown
 anomer configurations.
+Ambiguous alternative linkage groups are represented as floating glycan
+parts when their child residue or subtree is not localized to one parent.
 }
 \examples{
 wurcs <- paste0(

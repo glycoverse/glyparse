@@ -5,6 +5,8 @@
 #' For more information about WURCS, see [WURCS](https://github.com/glycoinfo/WURCS/wiki).
 #' Alditol residues are parsed as regular reducing-end glycans with unknown
 #' anomer configurations.
+#' Ambiguous alternative linkage groups are represented as floating glycan
+#' parts when their child residue or subtree is not localized to one parent.
 #'
 #' @param x A character vector of WURCS strings. NA values are allowed and will be returned as NA structures.
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
@@ -130,10 +132,10 @@ WURCS_MONO_REGEX <- c(
   "Par" = "^a2d22m-1[abx]_1-5",
   "Dig" = "^ad222m-1[abx]_1-5",
   "Col" = "^a1d21m-1[abx]_1-5",
-  "Ara" = "^a211h-1[abx]_1-5",
-  "Lyx" = "^a221h-1[abx]_1-5",
-  "Xyl" = "^a212h-1[abx]_1-5",
-  "Rib" = "^a222h-1[abx]_1-5",
+  "Ara" = "^a211h-1[abx]_1-[45]",
+  "Lyx" = "^a221h-1[abx]_1-[45]",
+  "Xyl" = "^a212h-1[abx]_1-[45]",
+  "Rib" = "^a222h-1[abx]_1-[45]",
 
   # Neu5Ac and Neu5Gc - match if contains _5*NCC/3=O or _5*NCCO/3=O anywhere in the string
   # These must come before Kdn since they are more specific
@@ -780,10 +782,78 @@ parse_linkages <- function(x) {
 }
 
 
-parse_one_linkage <- function(x) {
+parse_wurcs_linkages <- function(x, residues) {
+  linkages <- stringr::str_split_1(x, "_")
+  floating <- stringr::str_detect(linkages, stringr::fixed("}"))
+
+  list(
+    ordinary = purrr::map(
+      linkages[!floating],
+      parse_one_linkage,
+      anomers = purrr::map_chr(residues, "anomer")
+    ),
+    floating = purrr::map(linkages[floating], parse_wurcs_floating_linkage)
+  )
+}
+
+
+parse_wurcs_floating_linkage <- function(x) {
+  linkage <- stringr::str_remove(x, stringr::fixed("}"))
+  parts <- stringr::str_split_1(linkage, stringr::fixed("-"))
+  if (length(parts) != 2L) {
+    cli::cli_abort(
+      "Floating WURCS substituents are not supported: {.str {x}}"
+    )
+  }
+
+  child <- parse_wurcs_linkage_endpoint(parts[[1]])
+  candidates <- purrr::map(
+    stringr::str_split_1(parts[[2]], stringr::fixed("|")),
+    parse_wurcs_linkage_endpoint
+  )
+  candidate_nodes <- purrr::map_int(candidates, "node")
+  positions_by_parent <- split(
+    purrr::map_chr(candidates, "position"),
+    candidate_nodes
+  )
+  position_sets <- unique(purrr::map_chr(
+    positions_by_parent,
+    ~ paste(unique(.x), collapse = "/")
+  ))
+  if (length(position_sets) != 1L) {
+    cli::cli_abort(
+      "Floating WURCS linkages with parent-specific acceptor positions are not supported: {.str {x}}"
+    )
+  }
+
+  list(
+    root = child$node,
+    child_position = child$position,
+    parent_positions = unique(purrr::map_chr(candidates, "position")),
+    parents = unique(candidate_nodes)
+  )
+}
+
+
+parse_wurcs_linkage_endpoint <- function(x) {
+  list(
+    node = letter_to_int(stringr::str_sub(x, 1, 1)),
+    position = stringr::str_sub(x, 2, -1)
+  )
+}
+
+
+parse_one_linkage <- function(x, anomers = NULL) {
   # Input: a string of one WURCS linkage, e.g. "a4-b1"
   # Output: a named list of `from`, `to`, and `linkage`
   spl <- stringr::str_split_1(x, "-")
+  if (!is.null(anomers)) {
+    left_donor <- wurcs_endpoint_can_be_donor(spl[[1]], anomers)
+    right_donor <- wurcs_endpoint_can_be_donor(spl[[2]], anomers)
+    if (left_donor && !right_donor) {
+      spl <- rev(spl)
+    }
+  }
 
   handle_parallel_pos <- function(part) {
     if (stringr::str_detect(part, "|")) {
@@ -799,7 +869,10 @@ parse_one_linkage <- function(x) {
 
   from_part <- handle_parallel_pos(spl[[1]])
   to_part <- handle_parallel_pos(spl[[2]])
-  if (stringr::str_detect(to_part, stringr::fixed("/"))) {
+  if (
+    is.null(anomers) &&
+      stringr::str_detect(to_part, stringr::fixed("/"))
+  ) {
     # WURCS has a strange linkage rule:
     # In the normal case, the linkage positions are opposite to the orders of IUPAC.
     # For example, "a4-b1" means "1-4" in IUPAC.
@@ -820,6 +893,16 @@ parse_one_linkage <- function(x) {
     stringr::str_sub(from_part, 2, -1)
   )
   list(from = from_idx, to = to_idx, linkage = linkage)
+}
+
+
+wurcs_endpoint_can_be_donor <- function(endpoint, anomers) {
+  alternatives <- stringr::str_split_1(endpoint, stringr::fixed("|"))
+  node <- letter_to_int(stringr::str_sub(alternatives[[1]], 1, 1))
+  positions <- stringr::str_sub(alternatives, 2, -1)
+  anomer_position <- stringr::str_sub(anomers[[node]], 2, -1)
+
+  any(positions == "?" | positions == anomer_position)
 }
 
 letter_to_int <- function(letter) {
@@ -861,16 +944,78 @@ prepare_graph_dfs <- function(residues, linkages) {
 }
 
 
-build_glycan_graph <- function(edgelist_df, vertex_df) {
+build_glycan_graph <- function(edgelist_df, vertex_df, floating = list()) {
   # For format of input values, see `prepare_graph_dfs`.
   graph <- igraph::graph_from_data_frame(
     edgelist_df,
     vertices = vertex_df[c("name", "mono", "sub")]
   )
-  core_node <- igraph::V(graph)[igraph::degree(graph, mode = "in") == 0]
+  if (length(floating) > 0) {
+    graph <- annotate_wurcs_floating_parts(graph, vertex_df, floating)
+  }
+  floating_roots <- purrr::map_int(floating, "root")
+  core_node <- igraph::V(graph)[
+    igraph::degree(graph, mode = "in") == 0 &
+      !seq_len(igraph::vcount(graph)) %in% floating_roots
+  ]
   core_anomer <- vertex_df$anomer[as.numeric(core_node)]
   graph$anomer <- core_anomer
   graph$alditol <- FALSE # Not implemented yet
+  graph
+}
+
+
+annotate_wurcs_floating_parts <- function(graph, vertex_df, floating) {
+  components <- igraph::components(graph, mode = "weak")$membership
+  floating_components <- components[purrr::map_int(floating, "root")]
+  floating_nodes <- purrr::map(
+    floating_components,
+    ~ as.integer(which(components == .x))
+  )
+  main_vertices <- as.integer(setdiff(
+    seq_len(igraph::vcount(graph)),
+    unlist(floating_nodes, use.names = FALSE)
+  ))
+  occupied_slots <- definitely_occupied_acceptor_slots(
+    graph,
+    main_vertices
+  )
+
+  graph$floating_parts <- purrr::map2(
+    floating,
+    floating_nodes,
+    function(metadata, nodes) {
+      parents <- metadata$parents
+      parents <- intersect(parents, main_vertices)
+      if (length(parents) == 0) {
+        cli::cli_abort(
+          "A WURCS floating part has no candidate parent in the main tree."
+        )
+      }
+
+      linkage <- paste0(
+        stringr::str_sub(vertex_df$anomer[[metadata$root]], 1, 1),
+        metadata$child_position,
+        "-",
+        paste(metadata$parent_positions, collapse = "/")
+      )
+      parents <- normalize_floating_part_parents(
+        parents,
+        main_vertices,
+        linkage,
+        occupied_slots,
+        context = "WURCS floating part"
+      )
+
+      list(
+        root = as.integer(metadata$root),
+        nodes = nodes,
+        linkage = linkage,
+        parents = as.integer(parents)
+      )
+    }
+  )
+
   graph
 }
 
@@ -909,6 +1054,7 @@ do_parse_wurcs <- function(x, residue_cache = NULL) {
   # e.g. c(1, 1, 2, 3, 3)
   residue_sequence_part <- stringr::str_extract(x, wurcs_regex, group = 2)
   residue_sequence <- parse_residue_sequence(residue_sequence_part)
+  residues <- unique_residues[residue_sequence]
 
   # linkages: a list of named lists, each list contains `from`, `to`, and `linkage`.
   # `from` and `to` are the indices of monosaccharides in the sequence.
@@ -916,12 +1062,18 @@ do_parse_wurcs <- function(x, residue_cache = NULL) {
   linkage_part <- stringr::str_extract(x, wurcs_regex, group = 3)
   if (linkage_part == "") {
     linkages <- NULL
+    floating <- list()
   } else {
-    linkages <- parse_linkages(linkage_part)
+    linkage_data <- parse_wurcs_linkages(linkage_part, residues)
+    linkages <- linkage_data$ordinary
+    floating <- linkage_data$floating
   }
 
-  residues <- unique_residues[residue_sequence]
   graph_dfs <- prepare_graph_dfs(residues, linkages)
-  graph <- build_glycan_graph(graph_dfs$edgelist, graph_dfs$vertex)
+  graph <- build_glycan_graph(
+    graph_dfs$edgelist,
+    graph_dfs$vertex,
+    floating = floating
+  )
   graph
 }
