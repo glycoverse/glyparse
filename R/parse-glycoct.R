@@ -593,8 +593,9 @@ build_glycoct_floating_graph <- function(main, floating_graphs, floating) {
         metadata$child_pos,
         data$vertices[[root]]$anomer
       )
-      parents <- filter_glycoct_und_parents(
+      parents <- normalize_glycoct_und_parents(
         parents,
+        seq_along(main$original_ids),
         linkage,
         occupied_slots
       )
@@ -647,6 +648,29 @@ glycoct_acceptor_positions <- function(linkage) {
   }
 
   stringr::str_split(acceptor, stringr::fixed("/"))[[1]]
+}
+
+#' Normalize GlycoCT UND candidate parents
+#'
+#' @param parents Main-tree vertex indices declared by `ParentIDs`.
+#' @param main_vertices Every main-tree vertex index.
+#' @param linkage The floating part's attachment linkage.
+#' @param occupied_slots Definitely occupied main-tree acceptor slots.
+#'
+#' @return An empty vector for an implicit all-main candidate set, otherwise
+#'   the feasible explicit candidate parents.
+#' @noRd
+normalize_glycoct_und_parents <- function(
+  parents,
+  main_vertices,
+  linkage,
+  occupied_slots
+) {
+  if (setequal(parents, main_vertices)) {
+    return(integer())
+  }
+
+  filter_glycoct_und_parents(parents, linkage, occupied_slots)
 }
 
 #' Remove infeasible candidate parents from a GlycoCT UND part

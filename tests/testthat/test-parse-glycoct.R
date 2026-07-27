@@ -613,11 +613,11 @@ test_that("GlycoCT UND sections become floating glycan parts", {
 
   expect_identical(
     unname(as.character(result)),
-    "{Fuc(a1-2)|1,2}{Gal(b1-4)GlcNAc(b1-6)|1,2}Glc(b1-3)Gal(a1-"
+    "{Fuc(a1-2)}{Gal(b1-4)GlcNAc(b1-6)}Glc(b1-3)Gal(a1-"
   )
   expect_identical(floating$linkage, c("a1-2", "b1-6"))
   expect_equal(floating$nodes, list(1L, c(2L, 3L)))
-  expect_equal(floating$parents, list(c(4L, 5L), c(4L, 5L)))
+  expect_equal(floating$parents, list(integer(), integer()))
 })
 
 test_that("single-parent GlycoCT UND sections become ordinary edges", {
@@ -646,23 +646,55 @@ test_that("GlycoCT UND candidate parents exclude occupied acceptor slots", {
     "RES",
     "1b:a-dgal-HEX-1:5",
     "2b:b-dglc-HEX-1:5",
+    "3b:a-dman-HEX-1:5",
     "LIN",
     "1:1o(3+1)2d",
+    "2:1o(4+1)3d",
     "UND",
     "UND1:100.0:100.0",
     "ParentIDs:1|2",
     "SubtreeLinkageID1:o(3+1)d",
     "RES",
-    "3b:a-lgal-HEX-1:5|6:d"
+    "4b:a-lgal-HEX-1:5|6:d"
   )
 
   result <- parse_glycoct(glycoct)
 
   expect_identical(
     unname(as.character(result)),
-    "Fuc(a1-3)Glc(b1-3)Gal(a1-"
+    "Fuc(a1-3)Glc(b1-3)[Man(a1-4)]Gal(a1-"
   )
   expect_identical(unname(glyrepr::has_floating_parts(result)), FALSE)
+})
+
+test_that("all-main GlycoCT UND candidates become implicit", {
+  glycoct <- paste(
+    "RES",
+    "1b:a-dgal-HEX-1:5",
+    "2b:b-dglc-HEX-1:5",
+    "LIN",
+    "1:1o(3+1)2d",
+    "UND",
+    "UND1:100.0:100.0",
+    "ParentIDs:1|2",
+    "SubtreeLinkageID1:o(3+2)d",
+    "RES",
+    "3b:a-dgro-dgal-NON-2:6|1:a|2:keto|3:d",
+    "4s:n-acetyl",
+    "LIN",
+    "2:3d(5+1)4n"
+  )
+
+  result <- parse_glycoct(glycoct)
+
+  expect_identical(
+    unname(as.character(result)),
+    "{Neu5Ac(a2-3)}Glc(b1-3)Gal(a1-"
+  )
+  expect_equal(
+    glyrepr::structure_floating_parts(result)$parents,
+    list(integer())
+  )
 })
 
 test_that("GlycoCT UND parts require a feasible candidate parent", {
