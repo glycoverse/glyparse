@@ -29,6 +29,38 @@ test_that("GlycoCT accepts space-separated records", {
   expect_equal(result, "Gal(b1-3)GalNAc(a1-")
 })
 
+test_that("GlycoCT rejects unsupported UND sections without losing residues", {
+  core <- paste0(
+    "RES\n",
+    "1b:b-dglc-HEX-1:5\n",
+    "2s:n-acetyl\n",
+    "LIN\n",
+    "1:1d(2+1)2n"
+  )
+  with_und <- paste0(
+    core,
+    "\nUND\n",
+    "UND1:100.0:100.0\n",
+    "ParentIDs:1\n",
+    "SubtreeLinkageID1:x(-1+1)x\n",
+    "RES\n",
+    "3b:a-lgal-HEX-1:5|6:d"
+  )
+
+  expect_snapshot(error = TRUE, parse_glycoct(with_und))
+
+  result <- parse_glycoct(
+    c(core = core, underdetermined = with_und),
+    on_failure = "na"
+  )
+  expect_equal(
+    as.character(result),
+    c(core = "GlcNAc(b1-", underdetermined = NA)
+  )
+
+  expect_identical(is.na(auto_parse(with_und, on_failure = "na")), TRUE)
+})
+
 test_that("GlycoCT maps generic HEX descriptors", {
   expect_equal(as.character(parse_glycoct("RES\n1b:x-HEX-x:x")), "Hex(??-")
   expect_equal(as.character(parse_glycoct("RES\n1b:x-HEX-1:x|6:d")), "dHex(?1-")

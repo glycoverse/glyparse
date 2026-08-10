@@ -11,6 +11,10 @@
 #' Alditol residues are parsed as regular reducing-end glycans with unknown
 #' anomer configurations.
 #'
+#' GlycoCT `UND` sections are not currently supported. Inputs containing an
+#' underdetermined subgraph fail according to `on_failure` instead of returning
+#' an incomplete connected core.
+#'
 #' For more information about GlycoCT format, see the glycoct.md documentation.
 #'
 #' @param x A character vector of GlycoCT strings. NA values are allowed and will be returned as NA structures.
@@ -41,6 +45,25 @@ parse_glycoct <- function(
   progress = FALSE,
   validate = TRUE
 ) {
+  on_failure <- validate_struc_parser_wrapper_args(
+    x,
+    on_failure,
+    progress,
+    validate,
+    call = rlang::caller_env()
+  )
+  has_und <- purrr::map_lgl(
+    x,
+    \(value) !is.na(value) && has_glycoct_und_section(value)
+  )
+  if (any(has_und) && on_failure == "error") {
+    cli::cli_abort(c(
+      "Can't parse GlycoCT with unsupported {.code UND} sections.",
+      "i" = "Returning only the connected {.code RES}/{.code LIN} core would lose underdetermined residues."
+    ))
+  }
+  x[has_und] <- NA_character_
+
   struc_parser_wrapper(
     x,
     do_parse_glycoct,
@@ -50,8 +73,21 @@ parse_glycoct <- function(
   )
 }
 
+#' Detect underdetermined GlycoCT subgraphs
+#'
+#' @param x A non-missing GlycoCT string.
+#'
+#' @return A logical scalar.
+#' @noRd
+has_glycoct_und_section <- function(x) {
+  any(stringr::str_detect(split_glycoct_lines(x), "^UND(?:\\d+)?$"))
+}
+
 do_parse_glycoct <- function(x) {
   lines <- split_glycoct_lines(x)
+  if (any(stringr::str_detect(lines, "^UND(?:\\d+)?$"))) {
+    cli::cli_abort("GlycoCT {.code UND} sections are not supported")
+  }
 
   # Find RES and LIN sections
   res_start <- which(lines == "RES")
