@@ -16,6 +16,10 @@
   now reuse indexed residue matching and cached classification to
   improve parsing performance
   ([\#37](https://github.com/glycoverse/glyparse/issues/37)).
+- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
+  now rejects unsupported GlycoCT `UND` sections through `on_failure`
+  instead of silently returning an incomplete connected core
+  ([\#38](https://github.com/glycoverse/glyparse/issues/38)).
 
 ## glyparse 0.7.1
 

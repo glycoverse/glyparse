@@ -39,6 +39,8 @@
 <li>Graph-based parsers gain <code>validate</code> to skip graph validation for trusted inputs (<a href="https://github.com/glycoverse/glyparse/issues/36" class="external-link">#36</a>).</li>
 <li>
 <code><a href="../reference/parse_glycoct.html">parse_glycoct()</a></code> and <code><a href="../reference/parse_wurcs.html">parse_wurcs()</a></code> now reuse indexed residue matching and cached classification to improve parsing performance (<a href="https://github.com/glycoverse/glyparse/issues/37" class="external-link">#37</a>).</li>
+<li>
+<code><a href="../reference/parse_glycoct.html">parse_glycoct()</a></code> now rejects unsupported GlycoCT <code>UND</code> sections through <code>on_failure</code> instead of silently returning an incomplete connected core (<a href="https://github.com/glycoverse/glyparse/issues/38" class="external-link">#38</a>).</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.1" id="glyparse-071">glyparse 0.7.1<a class="anchor" aria-label="anchor" href="#glyparse-071"></a></h2><p class="text-muted">CRAN release: 2026-07-08</p>

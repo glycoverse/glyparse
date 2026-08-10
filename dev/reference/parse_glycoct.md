@@ -49,6 +49,10 @@ GlycoCT format consists of two parts:
 Alditol residues are parsed as regular reducing-end glycans with unknown
 anomer configurations.
 
+GlycoCT `UND` sections are not currently supported. Inputs containing an
+underdetermined subgraph fail according to `on_failure` instead of
+returning an incomplete connected core.
+
 For more information about GlycoCT format, see the glycoct.md
 documentation.
 
