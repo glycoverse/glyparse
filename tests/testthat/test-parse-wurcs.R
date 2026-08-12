@@ -671,6 +671,22 @@ test_that("parse_residue handles generic nonulosonic acids", {
     c(mono = "NeuGc", anomer = "a2", sub = "")
   )
   expect_equal(
+    parse_residue("Aadxxxxxh-2a_2-6_4*OCC/3=O_5*NCC/3=O"),
+    c(mono = "NeuAc", anomer = "a2", sub = "4Ac")
+  )
+  expect_equal(
+    parse_residue("Aadxxxxxh-2x_2-?_4*OCC/3=O_5*NCCO/3=O"),
+    c(mono = "NeuGc", anomer = "?2", sub = "4Ac")
+  )
+  expect_equal(
+    parse_residue("AUdxxxxxh_4*OCC/3=O_5*N"),
+    c(mono = "gNeu", anomer = "??", sub = "4Ac")
+  )
+  expect_equal(
+    parse_residue("hUdxxxxxh_4*OCC/3=O_5*NCC/3=O"),
+    c(mono = "NeuAc", anomer = "?2", sub = "4Ac")
+  )
+  expect_equal(
     parse_residue("AUdxxxxxh_5*N"),
     c(mono = "gNeu", anomer = "??", sub = "")
   )

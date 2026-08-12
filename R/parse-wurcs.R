@@ -138,10 +138,10 @@ WURCS_MONO_REGEX <- c(
   "Rib" = "^a222h-1[abx]_1-[45]",
 
   # Generic nonulosonic acids with unknown stereochemistry.
-  "NeuAc" = "^Aadxxxxxh-2[abx]_2-6_5\\*NCC/3=O",
-  "NeuGc" = "^Aadxxxxxh-2[abx]_2-6_5\\*NCCO/3=O",
-  "gNeu" = "^Aadxxxxxh-2[abx]_2-6_5\\*N(?!CC(O)?/3=O)",
-  "gKdn" = "^Aadxxxxxh-2[abx]_2-6(?!_5\\*N)",
+  "NeuAc" = "^Aadxxxxxh-2[abx]_2-6(?=.*_5\\*NCC/3=O)",
+  "NeuGc" = "^Aadxxxxxh-2[abx]_2-6(?=.*_5\\*NCCO/3=O)",
+  "gNeu" = "^Aadxxxxxh-2[abx]_2-6(?=.*_5\\*N(?!CC(O)?/3=O))",
+  "gKdn" = "^Aadxxxxxh-2[abx]_2-6(?!.*_5\\*N)",
 
   # Neu5Ac and Neu5Gc - match if contains _5*NCC/3=O or _5*NCCO/3=O anywhere in the string
   # These must come before Kdn since they are more specific
@@ -188,10 +188,10 @@ WURCS_UNKNOWN_RING_MONO_REGEX <- c(
   "Neu5Gc" = "^Aad21122h-2[abx]_2-\\?_5\\*NCCO/3=O",
   "Neu" = "^Aad21122h-2[abx]_2-\\?_5\\*N(?!CC(O)?/3=O)",
   "Kdn" = "^Aad21122h-2[abx]_2-\\?(?!_5\\*N)",
-  "NeuAc" = "^Aadxxxxxh-2[abx]_2-\\?_5\\*NCC/3=O",
-  "NeuGc" = "^Aadxxxxxh-2[abx]_2-\\?_5\\*NCCO/3=O",
-  "gNeu" = "^Aadxxxxxh-2[abx]_2-\\?_5\\*N(?!CC(O)?/3=O)",
-  "gKdn" = "^Aadxxxxxh-2[abx]_2-\\?(?!_5\\*N)",
+  "NeuAc" = "^Aadxxxxxh-2[abx]_2-\\?(?=.*_5\\*NCC/3=O)",
+  "NeuGc" = "^Aadxxxxxh-2[abx]_2-\\?(?=.*_5\\*NCCO/3=O)",
+  "gNeu" = "^Aadxxxxxh-2[abx]_2-\\?(?=.*_5\\*N(?!CC(O)?/3=O))",
+  "gKdn" = "^Aadxxxxxh-2[abx]_2-\\?(?!.*_5\\*N)",
 
   "GlcNAc" = "^a2122h-1[abx]_1-\\?_2\\*NCC/3=O",
   "GalNAc" = "^a2112h-1[abx]_1-\\?_2\\*NCC/3=O",
@@ -266,10 +266,10 @@ WURCS_UNKNOWN_RING_MONO_REGEX <- c(
 
 
 WURCS_AMBIGUOUS_MONO_REGEX <- c(
-  "NeuAc" = "^AUdxxxxxh_5\\*NCC/3=O",
-  "NeuGc" = "^AUdxxxxxh_5\\*NCCO/3=O",
-  "gNeu" = "^AUdxxxxxh_5\\*N(?!CC(O)?/3=O)",
-  "gKdn" = "^AUdxxxxxh(?!_5\\*N)",
+  "NeuAc" = "^AUdxxxxxh(?=.*_5\\*NCC/3=O)",
+  "NeuGc" = "^AUdxxxxxh(?=.*_5\\*NCCO/3=O)",
+  "gNeu" = "^AUdxxxxxh(?=.*_5\\*N(?!CC(O)?/3=O))",
+  "gKdn" = "^AUdxxxxxh(?!.*_5\\*N)",
 
   "Neu5Ac" = "^AUd21122h.*_5\\*NCC/3=O",
   "Neu5Gc" = "^AUd21122h.*_5\\*NCCO/3=O",
@@ -403,10 +403,10 @@ WURCS_ALDITOL_MONO_REGEX <- c(
   "Xyl" = "^h212h",
   "Rib" = "^h222h",
 
-  "NeuAc" = "^hUdxxxxxh_5\\*NCC/3=O",
-  "NeuGc" = "^hUdxxxxxh_5\\*NCCO/3=O",
-  "gNeu" = "^hUdxxxxxh_5\\*N(?!CC(O)?/3=O)",
-  "gKdn" = "^hUdxxxxxh(?!_5\\*N)",
+  "NeuAc" = "^hUdxxxxxh(?=.*_5\\*NCC/3=O)",
+  "NeuGc" = "^hUdxxxxxh(?=.*_5\\*NCCO/3=O)",
+  "gNeu" = "^hUdxxxxxh(?=.*_5\\*N(?!CC(O)?/3=O))",
+  "gKdn" = "^hUdxxxxxh(?!.*_5\\*N)",
 
   "Neu5Ac" = "^hUd21122h_5\\*NCC/3=O",
   "Neu5Gc" = "^hUd21122h_5\\*NCCO/3=O",
@@ -673,6 +673,15 @@ parse_residue_details <- function(residue) {
     if (mono == "Neu5Ac") {
       sub_code <- stringr::str_remove(sub_code, "_5\\*NCC/3=O")
     } else if (mono == "Neu5Gc") {
+      sub_code <- stringr::str_remove(sub_code, "_5\\*NCCO/3=O")
+    } else {
+      sub_code <- stringr::str_remove(sub_code, "_5\\*N(?!CC(O)?/3=O)")
+    }
+  } else if (mono %in% c("NeuAc", "NeuGc", "gNeu")) {
+    sub_code <- stringr::str_remove(matching_residue, mono_pattern)
+    if (mono == "NeuAc") {
+      sub_code <- stringr::str_remove(sub_code, "_5\\*NCC/3=O")
+    } else if (mono == "NeuGc") {
       sub_code <- stringr::str_remove(sub_code, "_5\\*NCCO/3=O")
     } else {
       sub_code <- stringr::str_remove(sub_code, "_5\\*N(?!CC(O)?/3=O)")
