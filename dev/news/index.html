@@ -34,12 +34,13 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="glyparse-development-version">glyparse (development version)<a class="anchor" aria-label="anchor" href="#glyparse-development-version"></a></h2>
-<ul><li>
+<ul><li>Parsers now preserve explicit furanose forms as <code>glyrepr</code> monosaccharide names such as <code>Galf</code>, <code>GlcfNAc</code>, and <code>Neuf5Ac</code> across IUPAC, GlyCAM IUPAC, GlycoCT, WURCS, LINUCS, Linear Code, and KCF inputs. (<a href="https://github.com/glycoverse/glyparse/issues/41" class="external-link">#41</a>)</li>
+<li>
 <code><a href="../reference/auto_parse.html">auto_parse()</a></code> and all format-specific parsers gain <code>drop_generic</code> to replace generic glycans with <code>NA</code> when generic and concrete glycans coexist, with a message reporting the number dropped. (<a href="https://github.com/glycoverse/glyparse/issues/39" class="external-link">#39</a>)</li>
 <li>
 <code><a href="../reference/parse_glycoct.html">parse_glycoct()</a></code> now supports floating glycan substructures represented by <code>UND</code> sections, uses implicit floating parts when every main-tree node is a candidate parent, and excludes explicit candidates whose acceptor positions are already occupied. (<a href="https://github.com/glycoverse/glyparse/issues/40" class="external-link">#40</a>)</li>
 <li>
-<code><a href="../reference/parse_wurcs.html">parse_wurcs()</a></code> now supports floating monosaccharides and subtrees, including implicit all-main attachment domains and filtered explicit candidate parents. It also recognizes supported <code>1-4</code> furanose rings, generic nonulosonic acids, and sialic acids with unknown ring closure. (<a href="https://github.com/glycoverse/glyparse/issues/40" class="external-link">#40</a>)</li>
+<code><a href="../reference/parse_wurcs.html">parse_wurcs()</a></code> now supports floating monosaccharides and subtrees, including implicit all-main attachment domains and filtered explicit candidate parents. It also recognizes generic nonulosonic acids and sialic acids with unknown ring closure. (<a href="https://github.com/glycoverse/glyparse/issues/40" class="external-link">#40</a>)</li>
 <li>Parser functions now construct structure vectors through <code>glyrepr</code>’s low-level graph APIs, avoiding repeated scalar construction for distinct inputs.</li>
 <li>Parsers that normalize to IUPAC-condensed notation now normalize complete unique vectors and construct them in one call.</li>
 <li>Graph-based parsers gain <code>validate</code> to skip graph validation for trusted inputs (<a href="https://github.com/glycoverse/glyparse/issues/36" class="external-link">#36</a>).</li>
