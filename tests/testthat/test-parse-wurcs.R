@@ -661,6 +661,35 @@ test_that("parse_residue maps generic WURCS descriptors to generic monosaccharid
 })
 
 
+test_that("parse_residue handles generic nonulosonic acids", {
+  expect_equal(
+    parse_residue("Aadxxxxxh-2x_2-6_5*NCC/3=O"),
+    c(mono = "NeuAc", anomer = "?2", sub = "")
+  )
+  expect_equal(
+    parse_residue("Aadxxxxxh-2a_2-6_5*NCCO/3=O"),
+    c(mono = "NeuGc", anomer = "a2", sub = "")
+  )
+  expect_equal(
+    parse_residue("AUdxxxxxh_5*N"),
+    c(mono = "gNeu", anomer = "??", sub = "")
+  )
+  expect_equal(
+    parse_residue("AUdxxxxxh"),
+    c(mono = "gKdn", anomer = "??", sub = "")
+  )
+  expect_equal(
+    parse_residue("hUdxxxxxh_5*NCC/3=O"),
+    c(mono = "NeuAc", anomer = "?2", sub = "")
+  )
+
+  result <- parse_wurcs(
+    "WURCS=2.0/1,1,0/[AUdxxxxxh_5*NCC/3=O]/1/"
+  )
+  expect_identical(unname(as.character(result)), "NeuAc(??-")
+})
+
+
 test_that("parse_residue handles unknown ring closure", {
   expect_unknown_ring_residue <- function(residue, mono, sub = "") {
     expect_equal(

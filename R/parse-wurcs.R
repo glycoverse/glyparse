@@ -137,6 +137,12 @@ WURCS_MONO_REGEX <- c(
   "Xyl" = "^a212h-1[abx]_1-[45]",
   "Rib" = "^a222h-1[abx]_1-[45]",
 
+  # Generic nonulosonic acids with unknown stereochemistry.
+  "NeuAc" = "^Aadxxxxxh-2[abx]_2-6_5\\*NCC/3=O",
+  "NeuGc" = "^Aadxxxxxh-2[abx]_2-6_5\\*NCCO/3=O",
+  "gNeu" = "^Aadxxxxxh-2[abx]_2-6_5\\*N(?!CC(O)?/3=O)",
+  "gKdn" = "^Aadxxxxxh-2[abx]_2-6(?!_5\\*N)",
+
   # Neu5Ac and Neu5Gc - match if contains _5*NCC/3=O or _5*NCCO/3=O anywhere in the string
   # These must come before Kdn since they are more specific
   "Neu5Ac" = "^Aad21122h-2[abx]_2-6.*_5\\*NCC/3=O",
@@ -178,6 +184,11 @@ WURCS_MONO_REGEX <- c(
 
 
 WURCS_UNKNOWN_RING_MONO_REGEX <- c(
+  "NeuAc" = "^Aadxxxxxh-2[abx]_2-\\?_5\\*NCC/3=O",
+  "NeuGc" = "^Aadxxxxxh-2[abx]_2-\\?_5\\*NCCO/3=O",
+  "gNeu" = "^Aadxxxxxh-2[abx]_2-\\?_5\\*N(?!CC(O)?/3=O)",
+  "gKdn" = "^Aadxxxxxh-2[abx]_2-\\?(?!_5\\*N)",
+
   "GlcNAc" = "^a2122h-1[abx]_1-\\?_2\\*NCC/3=O",
   "GalNAc" = "^a2112h-1[abx]_1-\\?_2\\*NCC/3=O",
   "ManNAc" = "^a1122h-1[abx]_1-\\?_2\\*NCC/3=O",
@@ -251,6 +262,11 @@ WURCS_UNKNOWN_RING_MONO_REGEX <- c(
 
 
 WURCS_AMBIGUOUS_MONO_REGEX <- c(
+  "NeuAc" = "^AUdxxxxxh_5\\*NCC/3=O",
+  "NeuGc" = "^AUdxxxxxh_5\\*NCCO/3=O",
+  "gNeu" = "^AUdxxxxxh_5\\*N(?!CC(O)?/3=O)",
+  "gKdn" = "^AUdxxxxxh(?!_5\\*N)",
+
   "Neu5Ac" = "^AUd21122h.*_5\\*NCC/3=O",
   "Neu5Gc" = "^AUd21122h.*_5\\*NCCO/3=O",
   "Neu" = "^AUd21122h.*_5\\*N",
@@ -382,6 +398,11 @@ WURCS_ALDITOL_MONO_REGEX <- c(
   "Lyx" = "^h221h",
   "Xyl" = "^h212h",
   "Rib" = "^h222h",
+
+  "NeuAc" = "^hUdxxxxxh_5\\*NCC/3=O",
+  "NeuGc" = "^hUdxxxxxh_5\\*NCCO/3=O",
+  "gNeu" = "^hUdxxxxxh_5\\*N(?!CC(O)?/3=O)",
+  "gKdn" = "^hUdxxxxxh(?!_5\\*N)",
 
   "Neu5Ac" = "^hUd21122h_5\\*NCC/3=O",
   "Neu5Gc" = "^hUd21122h_5\\*NCCO/3=O",
