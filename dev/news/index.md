@@ -2,6 +2,11 @@
 
 ## glyparse (development version)
 
+- [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
+  and all format-specific parsers gain `drop_generic` to replace generic
+  glycans with `NA` when generic and concrete glycans coexist, with a
+  message reporting the number dropped.
+  ([\#39](https://github.com/glycoverse/glyparse/issues/39))
 - Parser functions now construct structure vectors through `glyrepr`’s
   low-level graph APIs, avoiding repeated scalar construction for
   distinct inputs.

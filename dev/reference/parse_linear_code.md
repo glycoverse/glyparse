@@ -8,7 +8,12 @@ article](https://www.jstage.jst.go.jp/article/tigg1989/14/77/14_77_127/_article)
 ## Usage
 
 ``` r
-parse_linear_code(x, on_failure = "error", progress = FALSE)
+parse_linear_code(
+  x,
+  on_failure = "error",
+  progress = FALSE,
+  drop_generic = FALSE
+)
 ```
 
 ## Arguments
@@ -26,6 +31,12 @@ parse_linear_code(x, on_failure = "error", progress = FALSE)
 - progress:
 
   Whether to show a progress bar while parsing.
+
+- drop_generic:
+
+  Whether to replace parsed generic glycans with `NA`. A message reports
+  the number replaced. By default, mixing generic and concrete glycans
+  raises an error.
 
 ## Value
 

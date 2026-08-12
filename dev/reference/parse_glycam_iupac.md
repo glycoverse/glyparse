@@ -6,7 +6,12 @@ Parse GlyCAM IUPAC-style structure strings into a
 ## Usage
 
 ``` r
-parse_glycam_iupac(x, on_failure = "error", progress = FALSE)
+parse_glycam_iupac(
+  x,
+  on_failure = "error",
+  progress = FALSE,
+  drop_generic = FALSE
+)
 ```
 
 ## Arguments
@@ -24,6 +29,12 @@ parse_glycam_iupac(x, on_failure = "error", progress = FALSE)
 - progress:
 
   Whether to show a progress bar while parsing.
+
+- drop_generic:
+
+  Whether to replace parsed generic glycans with `NA`. A message reports
+  the number replaced. By default, mixing generic and concrete glycans
+  raises an error.
 
 ## Value
 

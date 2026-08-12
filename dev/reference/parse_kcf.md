@@ -7,7 +7,13 @@ KCF is a graph-oriented format used by KEGG GLYCAN.
 ## Usage
 
 ``` r
-parse_kcf(x, on_failure = "error", progress = FALSE, validate = TRUE)
+parse_kcf(
+  x,
+  on_failure = "error",
+  progress = FALSE,
+  validate = TRUE,
+  drop_generic = FALSE
+)
 ```
 
 ## Arguments
@@ -30,6 +36,12 @@ parse_kcf(x, on_failure = "error", progress = FALSE, validate = TRUE)
 
   Whether to validate parsed glycan graphs before constructing the
   result.
+
+- drop_generic:
+
+  Whether to replace parsed generic glycans with `NA`. A message reports
+  the number replaced. By default, mixing generic and concrete glycans
+  raises an error.
 
 ## Value
 
