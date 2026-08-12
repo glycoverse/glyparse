@@ -13,6 +13,31 @@ test_that("GlycoCT: Gal(b1-3)GalNAc(a1-", {
   expect_equal(result, expected)
 })
 
+test_that("GlycoCT preserves furanose ring bounds", {
+  glcfnac <- paste0(
+    "RES\n",
+    "1b:b-dglc-HEX-1:4\n",
+    "2s:n-acetyl\n",
+    "LIN\n",
+    "1:1d(2+1)2n"
+  )
+  neuf5ac <- paste0(
+    "RES\n",
+    "1b:a-dgro-dgal-NON-2:5|1:a|2:keto|3:d\n",
+    "2s:n-acetyl\n",
+    "LIN\n",
+    "1:1d(5+1)2n"
+  )
+  fruf <- "RES\n1b:b-dara-HEX-2:5|2:keto"
+
+  parsed <- parse_glycoct(c(glcfnac, neuf5ac, fruf))
+
+  expect_identical(
+    as.character(parsed),
+    c("GlcfNAc(b1-", "Neuf5Ac(a2-", "Fruf(b2-")
+  )
+})
+
 test_that("GlycoCT accepts space-separated records", {
   glycoct <- paste(
     "RES",
@@ -51,6 +76,11 @@ test_that("GlycoCT maps generic HEX descriptors", {
   )
   expect_equal(as.character(parse_glycoct(hexnac)), "HexNAc(?1-")
   expect_equal(as.character(parse_glycoct(hexnac_6s)), "HexNAc6S(?1-")
+})
+
+test_that("GlycoCT maps generic PEN descriptors", {
+  expect_equal(as.character(parse_glycoct("RES\n1b:x-PEN-x:x")), "Pen(??-")
+  expect_equal(as.character(parse_glycoct("RES\n1b:x-PEN-1:4")), "Pen(?1-")
 })
 
 test_that("GlycoCT maps generic Neu5Ac descriptors", {

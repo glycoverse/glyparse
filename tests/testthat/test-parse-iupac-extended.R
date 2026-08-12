@@ -16,6 +16,18 @@ test_that("monosaccharides are parsed correctly", {
   expect_mono("D-gro-α-D-manHepp-(1→", "DDmanHep")
 })
 
+test_that("every furanose monosaccharide is parsed correctly", {
+  furanose <- unname(furanose_monosaccharide_map())
+  extended <- names(IUPAC_EXT_TO_CON)[match(furanose, IUPAC_EXT_TO_CON)]
+  anomer_pos <- glyrepr::get_anomer_pos(furanose)
+  input <- paste0("?-D-", extended, "-(", anomer_pos, "→")
+
+  parsed <- parse_iupac_extended(input)
+  graphs <- glyrepr::get_structure_graphs(parsed, return_list = TRUE)
+
+  expect_identical(purrr::map_chr(graphs, ~ igraph::V(.x)$mono), furanose)
+})
+
 
 test_that("plain text format is parsed correctly", {
   expect_mono <- function(iupac_ext, mono) {

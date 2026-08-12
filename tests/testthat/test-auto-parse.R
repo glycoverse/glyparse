@@ -47,6 +47,17 @@ test_that("auto_parse correctly identifies and parses Linear Code format", {
   expect_equal(as.character(result), as.character(expected))
 })
 
+test_that("auto_parse preserves furanose rings", {
+  input <- c("Galf(b1-3)GlcfNAc(b1-", "A^b3G^b")
+
+  result <- auto_parse(input)
+
+  expect_identical(
+    as.character(result),
+    c("Galf(b1-3)GlcfNAc(b1-", "Galf(b1-3)Glcf(b1-")
+  )
+})
+
 test_that("auto_parse correctly identifies and parses LINUCS format", {
   input <- "[][b-D-Glcp]{[(4+1)][b-D-Galp]{}}"
   result <- auto_parse(input)

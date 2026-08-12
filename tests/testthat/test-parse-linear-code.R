@@ -42,6 +42,19 @@ test_that("Linear Code mono names are parsed correctly", {
   expect_equal(as.character(parse_linear_code("Ea")), "Fru(a2-")
 })
 
+test_that("Linear Code caret modifiers preserve furanose rings", {
+  parsed <- parse_linear_code(c("A^b3G^b", "NN^a", "E^b"))
+
+  expect_identical(
+    as.character(parsed),
+    c(
+      "Galf(b1-3)Glcf(b1-",
+      "Neuf5Ac(a2-",
+      "Fruf(b2-"
+    )
+  )
+})
+
 test_that("Linear Code: unknown linkages", {
   expect_equal(as.character(parse_linear_code("Ab?Gb")), "Gal(b1-?)Glc(b1-")
   expect_equal(as.character(parse_linear_code("A?3Gb")), "Gal(?1-3)Glc(b1-")

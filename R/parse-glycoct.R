@@ -329,6 +329,55 @@ extract_glycoct_ring_bounds <- function(content) {
   stringr::str_extract(content, "-((?:\\d+|x):(?:\\d+|x))", group = 1)
 }
 
+#' Parse numeric GlycoCT ring bounds
+#'
+#' @param bounds A GlycoCT ring-bounds string.
+#'
+#' @return An integer vector of length two, or two missing integers.
+#' @noRd
+parse_glycoct_ring_bounds <- function(bounds) {
+  if (is.na(bounds) || stringr::str_detect(bounds, "x")) {
+    return(c(NA_integer_, NA_integer_))
+  }
+  as.integer(stringr::str_split_1(bounds, stringr::fixed(":")))
+}
+
+#' Check whether GlycoCT ring bounds describe a supported cyclic form
+#'
+#' @param bounds A GlycoCT ring-bounds string.
+#'
+#' @return A logical scalar.
+#' @noRd
+is_supported_glycoct_ring_bounds <- function(bounds) {
+  parsed <- parse_glycoct_ring_bounds(bounds)
+  !anyNA(parsed) && parsed[[2]] - parsed[[1]] %in% c(3L, 4L)
+}
+
+#' Check whether GlycoCT content describes a furanose ring
+#'
+#' @param content GlycoCT monosaccharide content without the leading anomer.
+#'
+#' @return A logical scalar.
+#' @noRd
+is_glycoct_furanose <- function(content) {
+  bounds <- parse_glycoct_ring_bounds(extract_glycoct_ring_bounds(content))
+  !anyNA(bounds) && identical(bounds[[2]] - bounds[[1]], 3L)
+}
+
+#' Preserve a GlycoCT furanose ring in a mapped monosaccharide
+#'
+#' @param mono A glyrepr monosaccharide name.
+#' @param content GlycoCT monosaccharide content without the leading anomer.
+#'
+#' @return A glyrepr monosaccharide name.
+#' @noRd
+preserve_glycoct_ring <- function(mono, content) {
+  if (is_glycoct_furanose(content)) {
+    return(as_furanose_monosaccharide(mono))
+  }
+  mono
+}
+
 #' Remove the ring-bounds component from a GlycoCT monosaccharide descriptor
 #'
 #' @param content GlycoCT monosaccharide content without the leading anomer.
@@ -1367,9 +1416,14 @@ glycoct_signature_mono_matches <- function(signature, entry) {
   if (is.na(signature$bounds) || is.na(entry$bounds)) {
     return(identical(signature$bounds, entry$bounds))
   }
+  same_ring_family <- is_supported_glycoct_ring_bounds(signature$bounds) &&
+    is_supported_glycoct_ring_bounds(entry$bounds) &&
+    parse_glycoct_ring_bounds(signature$bounds)[[1]] ==
+      parse_glycoct_ring_bounds(entry$bounds)[[1]]
   identical(signature$bounds, entry$bounds) ||
     signature$wildcard_bounds ||
-    entry$wildcard_bounds
+    entry$wildcard_bounds ||
+    same_ring_family
 }
 
 glycoct_signature_key <- function(core, subs, linkages) {
@@ -1555,7 +1609,7 @@ consolidate_residues <- function(residues, linkages, mono_mapping_index) {
             vertices,
             list(list(
               original_id = main_mono_id,
-              mono = matched,
+              mono = preserve_glycoct_ring(matched, main_mono$content),
               sub = "",
               anomer = main_mono$anomer,
               anomer_pos = main_mono$anomer_pos,
@@ -1580,7 +1634,10 @@ consolidate_residues <- function(residues, linkages, mono_mapping_index) {
             vertices,
             list(list(
               original_id = main_mono_id,
-              mono = partial_result$mono,
+              mono = preserve_glycoct_ring(
+                partial_result$mono,
+                main_mono$content
+              ),
               sub = partial_result$sub,
               anomer = main_mono$anomer,
               anomer_pos = main_mono$anomer_pos,
@@ -2093,6 +2150,10 @@ matches_glycoct_pattern <- function(group, residues, linkages, mapping) {
 }
 
 map_single_mono <- function(content) {
+  preserve_glycoct_ring(map_single_mono_ringless(content), content)
+}
+
+map_single_mono_ringless <- function(content) {
   # Extract monosaccharide name from content like "dglc-HEX-1:5" or "lgal-HEX-1:5|6:d"
 
   is_alditol <- is_glycoct_alditol_mono(content)
@@ -2120,6 +2181,9 @@ map_single_mono <- function(content) {
   }
   if (is_generic_glycoct_hex(content)) {
     return("Hex")
+  }
+  if (is_generic_glycoct_pen(content)) {
+    return("Pen")
   }
 
   # If no exact match, fall back to basic parsing
@@ -2184,6 +2248,19 @@ is_generic_glycoct_hex <- function(content) {
   isTRUE(stringr::str_detect(
     content,
     "^HEX-(?:\\d+|x):(?:\\d+|x)(?:\\|6:d)?$"
+  ))
+}
+
+#' Check whether a GlycoCT content string is a generic pentose
+#'
+#' @param content GlycoCT monosaccharide content without the leading anomer.
+#'
+#' @return A logical scalar.
+#' @noRd
+is_generic_glycoct_pen <- function(content) {
+  isTRUE(stringr::str_detect(
+    content,
+    "^PEN-(?:\\d+|x):(?:\\d+|x)$"
   ))
 }
 

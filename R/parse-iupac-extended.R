@@ -55,6 +55,7 @@ IUPAC_EXT_TO_CON <- local({
   monos <- setdiff(monos, "Sia")
   # Deal with general rules
   ext_monos <- dplyr::case_when(
+    monos %in% unname(furanose_monosaccharide_map()) ~ monos,
     stringr::str_detect(monos, "NAc$") ~ stringr::str_replace(
       monos,
       "NAc$",

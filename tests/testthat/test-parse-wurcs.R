@@ -209,7 +209,7 @@ test_that("parse_residue works for each monosaccharide without substituents", {
   )
   expect_equal(
     parse_residue("a212h-1x_1-4"),
-    c(mono = "Xyl", anomer = "?1", sub = "")
+    c(mono = "Xylf", anomer = "?1", sub = "")
   )
   expect_equal(
     parse_residue("a222h-1a_1-5"),
@@ -706,14 +706,18 @@ test_that("parse_residue handles generic nonulosonic acids", {
 })
 
 
-test_that("parse_residue normalizes supported 1-4 ring closures", {
+test_that("parse_residue preserves supported furanose ring closures", {
   expect_equal(
     parse_residue("a2112h-1a_1-4"),
-    c(mono = "Gal", anomer = "a1", sub = "")
+    c(mono = "Galf", anomer = "a1", sub = "")
   )
   expect_equal(
     parse_residue("a2112h-1x_1-4_2*NCC/3=O"),
-    c(mono = "GalNAc", anomer = "?1", sub = "")
+    c(mono = "GalfNAc", anomer = "?1", sub = "")
+  )
+  expect_equal(
+    parse_residue("Aad21122h-2a_2-5_5*NCC/3=O"),
+    c(mono = "Neuf5Ac", anomer = "a2", sub = "")
   )
   expect_equal(
     parse_residue("axxxxh-1x_1-4"),
@@ -727,7 +731,7 @@ test_that("parse_residue normalizes supported 1-4 ring closures", {
   ))
   expect_identical(
     unname(as.character(result)),
-    "Gal(a1-2)Gal(a1-4)Gal(b1-"
+    "Galf(a1-2)Galf(a1-4)Gal(b1-"
   )
 })
 
