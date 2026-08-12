@@ -5,6 +5,8 @@
 #' For more information about WURCS, see [WURCS](https://github.com/glycoinfo/WURCS/wiki).
 #' Alditol residues are parsed as regular reducing-end glycans with unknown
 #' anomer configurations.
+#' Ambiguous alternative linkage groups are represented as floating glycan
+#' parts when their child residue or subtree is not localized to one parent.
 #'
 #' @param x A character vector of WURCS strings. NA values are allowed and will be returned as NA structures.
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
@@ -130,10 +132,16 @@ WURCS_MONO_REGEX <- c(
   "Par" = "^a2d22m-1[abx]_1-5",
   "Dig" = "^ad222m-1[abx]_1-5",
   "Col" = "^a1d21m-1[abx]_1-5",
-  "Ara" = "^a211h-1[abx]_1-5",
-  "Lyx" = "^a221h-1[abx]_1-5",
-  "Xyl" = "^a212h-1[abx]_1-5",
-  "Rib" = "^a222h-1[abx]_1-5",
+  "Ara" = "^a211h-1[abx]_1-[45]",
+  "Lyx" = "^a221h-1[abx]_1-[45]",
+  "Xyl" = "^a212h-1[abx]_1-[45]",
+  "Rib" = "^a222h-1[abx]_1-[45]",
+
+  # Generic nonulosonic acids with unknown stereochemistry.
+  "NeuAc" = "^Aadxxxxxh-2[abx]_2-6(?=.*_5\\*NCC/3=O)",
+  "NeuGc" = "^Aadxxxxxh-2[abx]_2-6(?=.*_5\\*NCCO/3=O)",
+  "gNeu" = "^Aadxxxxxh-2[abx]_2-6(?=.*_5\\*N(?!CC(O)?/3=O))",
+  "gKdn" = "^Aadxxxxxh-2[abx]_2-6(?!.*_5\\*N)",
 
   # Neu5Ac and Neu5Gc - match if contains _5*NCC/3=O or _5*NCCO/3=O anywhere in the string
   # These must come before Kdn since they are more specific
@@ -141,10 +149,10 @@ WURCS_MONO_REGEX <- c(
   "Neu5Gc" = "^Aad21122h-2[abx]_2-6.*_5\\*NCCO/3=O",
 
   # Kdn: exclude N, Ac, and Gc
-  "Kdn" = "^Aad21122h-2[abx]_2-6(?!_5\\*N(CC(O)?/3=O)?)",
+  "Kdn" = "^Aad21122h-2[abx]_2-6(?!.*_5\\*N(CC(O)?/3=O)?)",
 
   # Neu: exclude Ac and Gc
-  "Neu" = "^Aad21122h-2[abx]_2-6_5\\*N(?!CC(O)?/3=O)",
+  "Neu" = "^Aad21122h-2[abx]_2-6(?=.*_5\\*N(?!CC(O)?/3=O))",
 
   # Rest of the monosaccharides are themselves.
   "Pse" = "^had22111m-2[abx]_2-6_5\\*N_7\\*N",
@@ -176,6 +184,15 @@ WURCS_MONO_REGEX <- c(
 
 
 WURCS_UNKNOWN_RING_MONO_REGEX <- c(
+  "Neu5Ac" = "^Aad21122h-2[abx]_2-\\?(?=.*_5\\*NCC/3=O)",
+  "Neu5Gc" = "^Aad21122h-2[abx]_2-\\?(?=.*_5\\*NCCO/3=O)",
+  "Neu" = "^Aad21122h-2[abx]_2-\\?(?=.*_5\\*N(?!CC(O)?/3=O))",
+  "Kdn" = "^Aad21122h-2[abx]_2-\\?(?!.*_5\\*N)",
+  "NeuAc" = "^Aadxxxxxh-2[abx]_2-\\?(?=.*_5\\*NCC/3=O)",
+  "NeuGc" = "^Aadxxxxxh-2[abx]_2-\\?(?=.*_5\\*NCCO/3=O)",
+  "gNeu" = "^Aadxxxxxh-2[abx]_2-\\?(?=.*_5\\*N(?!CC(O)?/3=O))",
+  "gKdn" = "^Aadxxxxxh-2[abx]_2-\\?(?!.*_5\\*N)",
+
   "GlcNAc" = "^a2122h-1[abx]_1-\\?_2\\*NCC/3=O",
   "GalNAc" = "^a2112h-1[abx]_1-\\?_2\\*NCC/3=O",
   "ManNAc" = "^a1122h-1[abx]_1-\\?_2\\*NCC/3=O",
@@ -249,6 +266,11 @@ WURCS_UNKNOWN_RING_MONO_REGEX <- c(
 
 
 WURCS_AMBIGUOUS_MONO_REGEX <- c(
+  "NeuAc" = "^AUdxxxxxh(?=.*_5\\*NCC/3=O)",
+  "NeuGc" = "^AUdxxxxxh(?=.*_5\\*NCCO/3=O)",
+  "gNeu" = "^AUdxxxxxh(?=.*_5\\*N(?!CC(O)?/3=O))",
+  "gKdn" = "^AUdxxxxxh(?!.*_5\\*N)",
+
   "Neu5Ac" = "^AUd21122h.*_5\\*NCC/3=O",
   "Neu5Gc" = "^AUd21122h.*_5\\*NCCO/3=O",
   "Neu" = "^AUd21122h.*_5\\*N",
@@ -380,6 +402,11 @@ WURCS_ALDITOL_MONO_REGEX <- c(
   "Lyx" = "^h221h",
   "Xyl" = "^h212h",
   "Rib" = "^h222h",
+
+  "NeuAc" = "^hUdxxxxxh(?=.*_5\\*NCC/3=O)",
+  "NeuGc" = "^hUdxxxxxh(?=.*_5\\*NCCO/3=O)",
+  "gNeu" = "^hUdxxxxxh(?=.*_5\\*N(?!CC(O)?/3=O))",
+  "gKdn" = "^hUdxxxxxh(?!.*_5\\*N)",
 
   "Neu5Ac" = "^hUd21122h_5\\*NCC/3=O",
   "Neu5Gc" = "^hUd21122h_5\\*NCCO/3=O",
@@ -550,16 +577,21 @@ parse_residue_details <- function(residue) {
   #        for multiple substituents, they are separated by commas, e.g. "3Me,6S"
 
   is_alditol <- FALSE
+  matching_residue <- stringr::str_replace(
+    residue,
+    "(-1[abx]_1)-4",
+    "\\1-5"
+  )
 
   # Get monosaacharide name
   mono_idx <- detect_wurcs_pattern(
-    residue,
+    matching_residue,
     WURCS_MONO_REGEX,
     WURCS_MONO_PREFIXES
   )
   if (mono_idx == 0) {
     unknown_ring_mono_idx <- detect_wurcs_pattern(
-      residue,
+      matching_residue,
       WURCS_UNKNOWN_RING_MONO_REGEX,
       WURCS_UNKNOWN_RING_MONO_PREFIXES
     )
@@ -574,7 +606,7 @@ parse_residue_details <- function(residue) {
       )
     } else {
       alditol_mono_idx <- detect_wurcs_pattern(
-        residue,
+        matching_residue,
         WURCS_ALDITOL_MONO_REGEX,
         WURCS_ALDITOL_MONO_PREFIXES
       )
@@ -585,7 +617,7 @@ parse_residue_details <- function(residue) {
         is_alditol <- TRUE
       } else {
         ambiguous_mono_idx <- detect_wurcs_pattern(
-          residue,
+          matching_residue,
           WURCS_AMBIGUOUS_MONO_REGEX,
           WURCS_AMBIGUOUS_MONO_PREFIXES
         )
@@ -615,21 +647,26 @@ parse_residue_details <- function(residue) {
   # is part of the monosaccharide itself, not an additional substituent
   if (
     mono %in%
-      c("Neu5Ac", "Neu5Gc") &&
+      c("Neu5Ac", "Neu5Gc", "Neu") &&
       !is_alditol &&
       stringr::str_starts(residue, "Aad")
   ) {
     # For Neu5Ac/Neu5Gc, remove the base Kdn structure and the characteristic 5-position modification
-    base_kdn_pattern <- "^Aad21122h-2[abx]_2-6"
+    base_kdn_pattern <- "^Aad21122h-2[abx]_2-(?:6|\\?)"
     if (mono == "Neu5Ac") {
       # Remove the base Kdn pattern and the 5*NCC/3=O
       sub_code <- stringr::str_remove(residue, base_kdn_pattern)
       sub_code <- stringr::str_remove(sub_code, "_5\\*NCC/3=O")
-    } else {
-      # Neu5Gc
+    } else if (mono == "Neu5Gc") {
       # Remove the base Kdn pattern and the 5*NCCO/3=O
       sub_code <- stringr::str_remove(residue, base_kdn_pattern)
       sub_code <- stringr::str_remove(sub_code, "_5\\*NCCO/3=O")
+    } else {
+      sub_code <- stringr::str_remove(residue, base_kdn_pattern)
+      sub_code <- stringr::str_remove(
+        sub_code,
+        "_5\\*N(?!CC(O)?/3=O)"
+      )
     }
   } else if (
     mono %in%
@@ -645,9 +682,18 @@ parse_residue_details <- function(residue) {
     } else {
       sub_code <- stringr::str_remove(sub_code, "_5\\*N(?!CC(O)?/3=O)")
     }
+  } else if (mono %in% c("NeuAc", "NeuGc", "gNeu")) {
+    sub_code <- stringr::str_remove(matching_residue, mono_pattern)
+    if (mono == "NeuAc") {
+      sub_code <- stringr::str_remove(sub_code, "_5\\*NCC/3=O")
+    } else if (mono == "NeuGc") {
+      sub_code <- stringr::str_remove(sub_code, "_5\\*NCCO/3=O")
+    } else {
+      sub_code <- stringr::str_remove(sub_code, "_5\\*N(?!CC(O)?/3=O)")
+    }
   } else {
     # For other monosaccharides, use the standard approach
-    sub_code <- stringr::str_remove(residue, mono_pattern)
+    sub_code <- stringr::str_remove(matching_residue, mono_pattern)
   }
   sub_code <- normalize_n_sulfate_sub_code(residue, sub_code)
 
@@ -780,10 +826,88 @@ parse_linkages <- function(x) {
 }
 
 
-parse_one_linkage <- function(x) {
+parse_wurcs_linkages <- function(x, residues) {
+  linkages <- stringr::str_split_1(x, "_")
+  floating <- stringr::str_detect(linkages, stringr::fixed("}"))
+
+  list(
+    ordinary = purrr::map(
+      linkages[!floating],
+      parse_one_linkage,
+      anomers = purrr::map_chr(residues, "anomer")
+    ),
+    floating = purrr::map(linkages[floating], parse_wurcs_floating_linkage)
+  )
+}
+
+
+parse_wurcs_floating_linkage <- function(x) {
+  linkage <- stringr::str_remove(x, stringr::fixed("}"))
+  parts <- stringr::str_split_1(linkage, stringr::fixed("-"))
+  if (length(parts) != 2L) {
+    cli::cli_abort(
+      "Floating WURCS substituents are not supported: {.str {x}}"
+    )
+  }
+
+  child <- parse_wurcs_linkage_endpoint(parts[[1]])
+  candidates <- purrr::map(
+    stringr::str_split_1(parts[[2]], stringr::fixed("|")),
+    parse_wurcs_linkage_endpoint
+  )
+  candidate_nodes <- purrr::map_int(candidates, "node")
+  positions_by_parent <- split(
+    purrr::map_chr(candidates, "position"),
+    candidate_nodes
+  )
+  position_sets <- purrr::map(
+    positions_by_parent,
+    ~ sort(unique(.x))
+  )
+  if (length(unique(position_sets)) != 1L) {
+    cli::cli_abort(
+      "Floating WURCS linkages with parent-specific acceptor positions are not supported: {.str {x}}"
+    )
+  }
+
+  list(
+    root = child$node,
+    child_position = child$position,
+    parent_positions = position_sets[[1]],
+    parents = unique(candidate_nodes)
+  )
+}
+
+
+parse_wurcs_linkage_endpoint <- function(x) {
+  list(
+    node = letter_to_int(stringr::str_sub(x, 1, 1)),
+    position = stringr::str_sub(x, 2, -1)
+  )
+}
+
+
+parse_one_linkage <- function(x, anomers = NULL) {
   # Input: a string of one WURCS linkage, e.g. "a4-b1"
   # Output: a named list of `from`, `to`, and `linkage`
   spl <- stringr::str_split_1(x, "-")
+  if (is.null(anomers)) {
+    swap_endpoints <- stringr::str_detect(
+      spl[[2]],
+      stringr::fixed("|")
+    )
+  } else {
+    left_donor <- wurcs_endpoint_can_be_donor(spl[[1]], anomers)
+    right_donor <- wurcs_endpoint_can_be_donor(spl[[2]], anomers)
+    swap_endpoints <- left_donor &&
+      !right_donor ||
+      !left_donor &&
+        !right_donor &&
+        stringr::str_detect(spl[[2]], stringr::fixed("|"))
+  }
+  if (swap_endpoints) {
+    spl <- rev(spl)
+  }
 
   handle_parallel_pos <- function(part) {
     if (stringr::str_detect(part, "|")) {
@@ -799,18 +923,6 @@ parse_one_linkage <- function(x) {
 
   from_part <- handle_parallel_pos(spl[[1]])
   to_part <- handle_parallel_pos(spl[[2]])
-  if (stringr::str_detect(to_part, stringr::fixed("/"))) {
-    # WURCS has a strange linkage rule:
-    # In the normal case, the linkage positions are opposite to the orders of IUPAC.
-    # For example, "a4-b1" means "1-4" in IUPAC.
-    # However, when second position is a parallel position, e.g. "b2|b2",
-    # the linkage positions are the same as the orders of IUPAC.
-    # For example, "f2-g3|g6" means "2-3/6" in IUPAC.
-    # In this case, we need to swap from_part and to_part.
-    temp <- from_part
-    from_part <- to_part
-    to_part <- temp
-  }
 
   from_idx <- letter_to_int(stringr::str_sub(from_part, 1, 1))
   to_idx <- letter_to_int(stringr::str_sub(to_part, 1, 1))
@@ -820,6 +932,16 @@ parse_one_linkage <- function(x) {
     stringr::str_sub(from_part, 2, -1)
   )
   list(from = from_idx, to = to_idx, linkage = linkage)
+}
+
+
+wurcs_endpoint_can_be_donor <- function(endpoint, anomers) {
+  alternatives <- stringr::str_split_1(endpoint, stringr::fixed("|"))
+  node <- letter_to_int(stringr::str_sub(alternatives[[1]], 1, 1))
+  positions <- stringr::str_sub(alternatives, 2, -1)
+  anomer_position <- stringr::str_sub(anomers[[node]], 2, -1)
+
+  any(positions == "?" | positions == anomer_position)
 }
 
 letter_to_int <- function(letter) {
@@ -842,7 +964,7 @@ prepare_graph_dfs <- function(residues, linkages) {
     residues,
     ~ data.frame(as.list(.x))
   ))
-  if (is.null(linkages)) {
+  if (length(linkages) == 0L) {
     edgelist_df <- data.frame(
       from = integer(),
       to = integer(),
@@ -861,16 +983,78 @@ prepare_graph_dfs <- function(residues, linkages) {
 }
 
 
-build_glycan_graph <- function(edgelist_df, vertex_df) {
+build_glycan_graph <- function(edgelist_df, vertex_df, floating = list()) {
   # For format of input values, see `prepare_graph_dfs`.
   graph <- igraph::graph_from_data_frame(
     edgelist_df,
     vertices = vertex_df[c("name", "mono", "sub")]
   )
-  core_node <- igraph::V(graph)[igraph::degree(graph, mode = "in") == 0]
+  if (length(floating) > 0) {
+    graph <- annotate_wurcs_floating_parts(graph, vertex_df, floating)
+  }
+  floating_roots <- purrr::map_int(floating, "root")
+  core_node <- igraph::V(graph)[
+    igraph::degree(graph, mode = "in") == 0 &
+      !seq_len(igraph::vcount(graph)) %in% floating_roots
+  ]
   core_anomer <- vertex_df$anomer[as.numeric(core_node)]
   graph$anomer <- core_anomer
   graph$alditol <- FALSE # Not implemented yet
+  graph
+}
+
+
+annotate_wurcs_floating_parts <- function(graph, vertex_df, floating) {
+  components <- igraph::components(graph, mode = "weak")$membership
+  floating_components <- components[purrr::map_int(floating, "root")]
+  floating_nodes <- purrr::map(
+    floating_components,
+    ~ as.integer(which(components == .x))
+  )
+  main_vertices <- as.integer(setdiff(
+    seq_len(igraph::vcount(graph)),
+    unlist(floating_nodes, use.names = FALSE)
+  ))
+  occupied_slots <- definitely_occupied_acceptor_slots(
+    graph,
+    main_vertices
+  )
+
+  graph$floating_parts <- purrr::map2(
+    floating,
+    floating_nodes,
+    function(metadata, nodes) {
+      parents <- metadata$parents
+      parents <- intersect(parents, main_vertices)
+      if (length(parents) == 0) {
+        cli::cli_abort(
+          "A WURCS floating part has no candidate parent in the main tree."
+        )
+      }
+
+      linkage <- paste0(
+        stringr::str_sub(vertex_df$anomer[[metadata$root]], 1, 1),
+        metadata$child_position,
+        "-",
+        paste(metadata$parent_positions, collapse = "/")
+      )
+      parents <- normalize_floating_part_parents(
+        parents,
+        main_vertices,
+        linkage,
+        occupied_slots,
+        context = "WURCS floating part"
+      )
+
+      list(
+        root = as.integer(metadata$root),
+        nodes = nodes,
+        linkage = linkage,
+        parents = as.integer(parents)
+      )
+    }
+  )
+
   graph
 }
 
@@ -909,6 +1093,7 @@ do_parse_wurcs <- function(x, residue_cache = NULL) {
   # e.g. c(1, 1, 2, 3, 3)
   residue_sequence_part <- stringr::str_extract(x, wurcs_regex, group = 2)
   residue_sequence <- parse_residue_sequence(residue_sequence_part)
+  residues <- unique_residues[residue_sequence]
 
   # linkages: a list of named lists, each list contains `from`, `to`, and `linkage`.
   # `from` and `to` are the indices of monosaccharides in the sequence.
@@ -916,12 +1101,18 @@ do_parse_wurcs <- function(x, residue_cache = NULL) {
   linkage_part <- stringr::str_extract(x, wurcs_regex, group = 3)
   if (linkage_part == "") {
     linkages <- NULL
+    floating <- list()
   } else {
-    linkages <- parse_linkages(linkage_part)
+    linkage_data <- parse_wurcs_linkages(linkage_part, residues)
+    linkages <- linkage_data$ordinary
+    floating <- linkage_data$floating
   }
 
-  residues <- unique_residues[residue_sequence]
   graph_dfs <- prepare_graph_dfs(residues, linkages)
-  graph <- build_glycan_graph(graph_dfs$edgelist, graph_dfs$vertex)
+  graph <- build_glycan_graph(
+    graph_dfs$edgelist,
+    graph_dfs$vertex,
+    floating = floating
+  )
   graph
 }

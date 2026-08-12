@@ -208,6 +208,10 @@ test_that("parse_residue works for each monosaccharide without substituents", {
     c(mono = "Xyl", anomer = "a1", sub = "")
   )
   expect_equal(
+    parse_residue("a212h-1x_1-4"),
+    c(mono = "Xyl", anomer = "?1", sub = "")
+  )
+  expect_equal(
     parse_residue("a222h-1a_1-5"),
     c(mono = "Rib", anomer = "a1", sub = "")
   )
@@ -657,7 +661,95 @@ test_that("parse_residue maps generic WURCS descriptors to generic monosaccharid
 })
 
 
+test_that("parse_residue handles generic nonulosonic acids", {
+  expect_equal(
+    parse_residue("Aadxxxxxh-2x_2-6_5*NCC/3=O"),
+    c(mono = "NeuAc", anomer = "?2", sub = "")
+  )
+  expect_equal(
+    parse_residue("Aadxxxxxh-2a_2-6_5*NCCO/3=O"),
+    c(mono = "NeuGc", anomer = "a2", sub = "")
+  )
+  expect_equal(
+    parse_residue("Aadxxxxxh-2a_2-6_4*OCC/3=O_5*NCC/3=O"),
+    c(mono = "NeuAc", anomer = "a2", sub = "4Ac")
+  )
+  expect_equal(
+    parse_residue("Aadxxxxxh-2x_2-?_4*OCC/3=O_5*NCCO/3=O"),
+    c(mono = "NeuGc", anomer = "?2", sub = "4Ac")
+  )
+  expect_equal(
+    parse_residue("AUdxxxxxh_4*OCC/3=O_5*N"),
+    c(mono = "gNeu", anomer = "??", sub = "4Ac")
+  )
+  expect_equal(
+    parse_residue("hUdxxxxxh_4*OCC/3=O_5*NCC/3=O"),
+    c(mono = "NeuAc", anomer = "?2", sub = "4Ac")
+  )
+  expect_equal(
+    parse_residue("AUdxxxxxh_5*N"),
+    c(mono = "gNeu", anomer = "??", sub = "")
+  )
+  expect_equal(
+    parse_residue("AUdxxxxxh"),
+    c(mono = "gKdn", anomer = "??", sub = "")
+  )
+  expect_equal(
+    parse_residue("hUdxxxxxh_5*NCC/3=O"),
+    c(mono = "NeuAc", anomer = "?2", sub = "")
+  )
+
+  result <- parse_wurcs(
+    "WURCS=2.0/1,1,0/[AUdxxxxxh_5*NCC/3=O]/1/"
+  )
+  expect_identical(unname(as.character(result)), "NeuAc(??-")
+})
+
+
+test_that("parse_residue normalizes supported 1-4 ring closures", {
+  expect_equal(
+    parse_residue("a2112h-1a_1-4"),
+    c(mono = "Gal", anomer = "a1", sub = "")
+  )
+  expect_equal(
+    parse_residue("a2112h-1x_1-4_2*NCC/3=O"),
+    c(mono = "GalNAc", anomer = "?1", sub = "")
+  )
+  expect_equal(
+    parse_residue("axxxxh-1x_1-4"),
+    c(mono = "Hex", anomer = "?1", sub = "")
+  )
+
+  result <- parse_wurcs(paste0(
+    "WURCS=2.0/2,3,2/",
+    "[a2112h-1b_1-5][a2112h-1a_1-4]/",
+    "1-2-2/a4-b1_b2-c1"
+  ))
+  expect_identical(
+    unname(as.character(result)),
+    "Gal(a1-2)Gal(a1-4)Gal(b1-"
+  )
+})
+
+
 test_that("parse_residue handles unknown ring closure", {
+  expect_equal(
+    parse_residue("Aad21122h-2x_2-?_5*NCC/3=O"),
+    c(mono = "Neu5Ac", anomer = "?2", sub = "")
+  )
+  expect_equal(
+    parse_residue("Aad21122h-2a_2-?_4*OCC/3=O_5*NCC/3=O"),
+    c(mono = "Neu5Ac", anomer = "a2", sub = "4Ac")
+  )
+  expect_equal(
+    parse_residue("Aad21122h-2x_2-?_4*OCC/3=O_5*N"),
+    c(mono = "Neu", anomer = "?2", sub = "4Ac")
+  )
+  expect_equal(
+    parse_residue("Aad21122h-2b_2-6_4*OCC/3=O_5*N"),
+    c(mono = "Neu", anomer = "b2", sub = "4Ac")
+  )
+
   expect_unknown_ring_residue <- function(residue, mono, sub = "") {
     expect_equal(
       parse_residue(residue),
@@ -1045,6 +1137,119 @@ test_that("parse_wurcs correctly handles unknown linkages", {
 })
 
 
+test_that("parse_wurcs supports implicit floating parts", {
+  wurcs <- paste0(
+    "WURCS=2.0/3,3,2/",
+    "[a2122h-1x_1-5][a2112h-1b_1-5]",
+    "[Aad21122h-2a_2-6_5*NCC/3=O]/",
+    "1-2-3/a4-b1_c2-a6|b6}"
+  )
+
+  result <- parse_wurcs(wurcs)
+
+  expect_identical(
+    unname(as.character(result)),
+    "{Neu5Ac(a2-6)}Gal(b1-4)Glc(?1-"
+  )
+  expect_equal(
+    glyrepr::structure_floating_parts(result)$parents,
+    list(integer())
+  )
+})
+
+test_that("parse_wurcs compares floating acceptor positions as sets", {
+  wurcs <- paste0(
+    "WURCS=2.0/3,3,2/",
+    "[a2122h-1x_1-5][a2112h-1b_1-5]",
+    "[Aad21122h-2a_2-6_5*NCC/3=O]/",
+    "1-2-3/a4-b1_c2-a3|a6|b6|b3}"
+  )
+
+  result <- parse_wurcs(wurcs)
+
+  expect_identical(
+    unname(as.character(result)),
+    "{Neu5Ac(a2-3/6)}Gal(b1-4)Glc(?1-"
+  )
+})
+
+
+test_that("parse_wurcs supports floating parts without ordinary linkages", {
+  wurcs <- paste0(
+    "WURCS=2.0/2,2,1/",
+    "[a2122h-1x_1-5][Aad21122h-2a_2-6_5*NCC/3=O]/",
+    "1-2/b2-a6}"
+  )
+
+  result <- parse_wurcs(wurcs)
+
+  expect_identical(
+    unname(as.character(result)),
+    "Neu5Ac(a2-6)Glc(?1-"
+  )
+  expect_identical(unname(glyrepr::has_floating_parts(result)), FALSE)
+})
+
+
+test_that("parse_wurcs preserves multiple floating subtrees", {
+  wurcs <- paste0(
+    "WURCS=2.0/4,5,4/",
+    "[a2122h-1x_1-5][a2112h-1b_1-5]",
+    "[a2122h-1b_1-5_2*NCC/3=O][a1221m-1a_1-5]/",
+    "1-2-3-2-4/a4-b1_c4-d1_c1-a3|b3}_e1-a6|b6}"
+  )
+
+  result <- parse_wurcs(wurcs)
+  floating <- glyrepr::structure_floating_parts(result)
+
+  expect_identical(
+    unname(as.character(result)),
+    "{Fuc(a1-6)}{Gal(b1-4)GlcNAc(b1-3)}Gal(b1-4)Glc(?1-"
+  )
+  expect_equal(floating$nodes, list(1L, c(2L, 3L)))
+  expect_equal(floating$parents, list(integer(), integer()))
+})
+
+
+test_that("parse_wurcs orients uncertain edges inside floating subtrees", {
+  wurcs <- paste0(
+    "WURCS=2.0/4,4,3/",
+    "[a2122h-1x_1-5][a2112h-1x_1-5]",
+    "[a2122h-1b_1-5_2*NCC/3=O][a1122h-1a_1-5]/",
+    "1-2-3-4/a4-d1_b?-c4_c1-a3|b3|c3|d3}"
+  )
+
+  result <- parse_wurcs(wurcs)
+
+  expect_identical(
+    unname(as.character(result)),
+    "{Gal(??-4)GlcNAc(b1-3)}Man(a1-4)Glc(?1-"
+  )
+  expect_equal(
+    glyrepr::structure_floating_parts(result)$parents,
+    list(integer())
+  )
+})
+
+
+test_that("parse_wurcs removes occupied explicit parents", {
+  wurcs <- paste0(
+    "WURCS=2.0/4,4,3/",
+    "[a2112h-1x_1-5][a2122h-1b_1-5]",
+    "[a1122h-1a_1-5][a1221m-1a_1-5]/",
+    "1-2-3-4/a4-b1_a3-c1_d1-a3|b3}"
+  )
+
+  result <- parse_wurcs(wurcs)
+
+  expect_identical(
+    unname(as.character(result)),
+    "Fuc(a1-3)Glc(b1-4)[Man(a1-3)]Gal(?1-"
+  )
+  expect_identical(unname(glyrepr::has_floating_parts(result)), FALSE)
+})
+
+
 test_that("parse_wurcs handles ambiguous u residues", {
   expect_equal(
     as.character(parse_wurcs(
@@ -1063,6 +1268,12 @@ test_that("parse_wurcs handles ambiguous u residues", {
       "WURCS=2.0/2,2,1/[u2122A][a2122h-1x_1-5_2*NCC/3=O]/1-2/a?-b1"
     )),
     "GlcNAc(?1-?)GlcA(??-"
+  )
+  expect_equal(
+    as.character(parse_wurcs(
+      "WURCS=2.0/2,2,1/[u2112h][a2122h-1x_1-5]/1-2/a2-b3|b4"
+    )),
+    "Gal(?2-3/4)Glc(?1-"
   )
 })
 
