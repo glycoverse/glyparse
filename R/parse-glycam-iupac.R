@@ -20,6 +20,9 @@
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
 #'   structure cannot be parsed. `"na"` returns `NA` at invalid positions.
 #' @param progress Whether to show a progress bar while parsing.
+#' @param drop_generic Whether to replace parsed generic glycans with `NA`. A
+#'   message reports the number replaced. By default, mixing generic and
+#'   concrete glycans raises an error.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
@@ -33,13 +36,15 @@
 parse_glycam_iupac <- function(
   x,
   on_failure = "error",
-  progress = FALSE
+  progress = FALSE,
+  drop_generic = FALSE
 ) {
   normalized_struc_parser_wrapper(
     x,
     convert_glycam_iupac_to_condensed,
     on_failure = on_failure,
-    progress = progress
+    progress = progress,
+    drop_generic = drop_generic
   )
 }
 

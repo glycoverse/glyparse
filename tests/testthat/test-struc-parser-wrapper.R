@@ -43,3 +43,30 @@ test_that("struc_parser_wrapper treats invalid parsed graphs as failures", {
 
   expect_identical(as.character(result), c("Hex(??-", NA_character_))
 })
+
+test_that("struc_parser_wrapper drops generic glycans by input position", {
+  input <- c(
+    generic = "Hex(??-",
+    concrete = "Glc(?1-",
+    generic_duplicate = "Hex(??-",
+    missing = NA_character_
+  )
+
+  expect_snapshot(
+    error = TRUE,
+    struc_parser_wrapper(input, do_parse_iupac_condensed)
+  )
+  expect_snapshot(
+    result <- struc_parser_wrapper(
+      input,
+      do_parse_iupac_condensed,
+      drop_generic = TRUE
+    )
+  )
+
+  expect_identical(
+    unname(as.character(result)),
+    c(NA_character_, "Glc(?1-", NA_character_, NA_character_)
+  )
+  expect_identical(names(result), names(input))
+})
