@@ -87,3 +87,7 @@ test_that("LINUCS parses every furanose monosaccharide", {
 
   expect_identical(purrr::map_chr(graphs, ~ igraph::V(.x)$mono), furanose)
 })
+
+test_that("LINUCS rejects malformed Api furanose aliases", {
+  expect_error(parse_linucs("[][b-D-Afif]{}"), "Can't parse")
+})

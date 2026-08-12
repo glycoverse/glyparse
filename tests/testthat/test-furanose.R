@@ -16,3 +16,13 @@ test_that("IUPAC-condensed parses every furanose monosaccharide", {
 
   expect_identical(as.character(parsed), input)
 })
+
+test_that("furanose aliases replace only pyranose ring markers", {
+  glycam_map <- glycam_iupac_mono_map()
+  linucs_map <- linucs_mono_stem_map()
+
+  expect_identical(unname(glycam_map[["DApif"]]), "Apif")
+  expect_identical(unname(linucs_map[["D-Apif"]]), "Apif")
+  expect_false("DAfif" %in% names(glycam_map))
+  expect_false("D-Afif" %in% names(linucs_map))
+})

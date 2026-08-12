@@ -193,6 +193,10 @@ test_that("GlyCAM IUPAC parses every furanose monosaccharide", {
   expect_identical(purrr::map_chr(graphs, ~ igraph::V(.x)$mono), furanose)
 })
 
+test_that("GlyCAM IUPAC rejects malformed Api furanose aliases", {
+  expect_error(parse_glycam_iupac("DAfifb1-OH"), "Can't parse")
+})
+
 test_that("GlyCAM IUPAC converts residue modifiers", {
   skip_on_old_win()
 

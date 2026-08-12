@@ -57,12 +57,19 @@ as_ringless_monosaccharide <- function(mono) {
 #' @return A named character vector containing furanose aliases.
 #' @noRd
 add_furanose_monosaccharide_mappings <- function(map) {
+  source_names <- names(map)
   mapped <- unname(map)
+  ring_suffix <- stringr::str_extract(
+    source_names,
+    "(?<=p)[^p]*$"
+  )
+  has_pyranose_marker <- !is.na(ring_suffix) &
+    (ring_suffix == "" | endsWith(mapped, ring_suffix))
   can_convert <- mapped %in%
     names(furanose_monosaccharide_map()) &
-    stringr::str_detect(names(map), "p")
+    has_pyranose_marker
   furanose_names <- stringr::str_replace(
-    names(map)[can_convert],
+    source_names[can_convert],
     "p([^p]*)$",
     "f\\1"
   )
