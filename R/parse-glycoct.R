@@ -189,6 +189,11 @@ parse_glycoct_und_block <- function(lines) {
       "Can't parse GlycoCT UND subtree linkage {.val {attachment}}"
     )
   }
+  if (stringr::str_detect(matches[3], stringr::fixed("|"))) {
+    cli::cli_abort(
+      "GlycoCT UND linkages with alternative donor positions are not supported: {.val {attachment}}"
+    )
+  }
 
   block <- parse_glycoct_block(lines)
   c(

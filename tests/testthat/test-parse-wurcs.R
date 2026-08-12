@@ -1129,6 +1129,22 @@ test_that("parse_wurcs supports implicit floating parts", {
   )
 })
 
+test_that("parse_wurcs compares floating acceptor positions as sets", {
+  wurcs <- paste0(
+    "WURCS=2.0/3,3,2/",
+    "[a2122h-1x_1-5][a2112h-1b_1-5]",
+    "[Aad21122h-2a_2-6_5*NCC/3=O]/",
+    "1-2-3/a4-b1_c2-a3|a6|b6|b3}"
+  )
+
+  result <- parse_wurcs(wurcs)
+
+  expect_identical(
+    unname(as.character(result)),
+    "{Neu5Ac(a2-3/6)}Gal(b1-4)Glc(?1-"
+  )
+})
+
 
 test_that("parse_wurcs supports floating parts without ordinary linkages", {
   wurcs <- paste0(

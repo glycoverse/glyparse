@@ -846,11 +846,11 @@ parse_wurcs_floating_linkage <- function(x) {
     purrr::map_chr(candidates, "position"),
     candidate_nodes
   )
-  position_sets <- unique(purrr::map_chr(
+  position_sets <- purrr::map(
     positions_by_parent,
-    ~ paste(unique(.x), collapse = "/")
-  ))
-  if (length(position_sets) != 1L) {
+    ~ sort(unique(.x))
+  )
+  if (length(unique(position_sets)) != 1L) {
     cli::cli_abort(
       "Floating WURCS linkages with parent-specific acceptor positions are not supported: {.str {x}}"
     )
@@ -859,7 +859,7 @@ parse_wurcs_floating_linkage <- function(x) {
   list(
     root = child$node,
     child_position = child$position,
-    parent_positions = unique(purrr::map_chr(candidates, "position")),
+    parent_positions = position_sets[[1]],
     parents = unique(candidate_nodes)
   )
 }

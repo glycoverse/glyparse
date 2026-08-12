@@ -641,6 +641,21 @@ test_that("single-parent GlycoCT UND sections become ordinary edges", {
   expect_identical(unname(glyrepr::has_floating_parts(result)), FALSE)
 })
 
+test_that("GlycoCT UND donor alternatives fail explicitly", {
+  und <- c(
+    "UND1:100.0:100.0",
+    "ParentIDs:1",
+    "SubtreeLinkageID1:o(3+1|2)d",
+    "RES",
+    "2b:a-lgal-HEX-1:5|6:d"
+  )
+
+  expect_snapshot(
+    error = TRUE,
+    parse_glycoct_und_block(und)
+  )
+})
+
 test_that("GlycoCT UND candidate parents exclude occupied acceptor slots", {
   glycoct <- paste(
     "RES",

@@ -1,3 +1,11 @@
+# GlycoCT UND donor alternatives fail explicitly
+
+    Code
+      parse_glycoct_und_block(und)
+    Condition
+      Error in `parse_glycoct_und_block()`:
+      ! GlycoCT UND linkages with alternative donor positions are not supported: "o(3+1|2)d"
+
 # GlycoCT UND parts require a feasible candidate parent
 
     Code
