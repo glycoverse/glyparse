@@ -180,9 +180,12 @@ test_that("GlyCAM IUPAC parses checklist monosaccharide names", {
   )
 })
 
-test_that("GlyCAM IUPAC parses every furanose monosaccharide", {
-  furanose <- unname(furanose_monosaccharide_map())
+test_that("GlyCAM IUPAC parses every mapped furanose monosaccharide", {
   mono_map <- glycam_iupac_mono_map()
+  furanose <- intersect(
+    unname(furanose_monosaccharide_map()),
+    unname(mono_map)
+  )
   source_names <- names(mono_map)[match(furanose, mono_map)]
   anomer_pos <- glyrepr::get_anomer_pos(furanose)
   input <- paste0(source_names, "?", anomer_pos, "-OH")

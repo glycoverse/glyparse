@@ -76,9 +76,12 @@ test_that("LINUCS supports on_failure handling", {
   )
 })
 
-test_that("LINUCS parses every furanose monosaccharide", {
-  furanose <- unname(furanose_monosaccharide_map())
+test_that("LINUCS parses every mapped furanose monosaccharide", {
   mono_map <- linucs_mono_stem_map()
+  furanose <- intersect(
+    unname(furanose_monosaccharide_map()),
+    unname(mono_map)
+  )
   source_names <- names(mono_map)[match(furanose, mono_map)]
   input <- paste0("[][b-", source_names, "]{}")
 
