@@ -182,7 +182,7 @@ convert_glycam_iupac_mono <- function(mono) {
 #' @return A named character vector mapping GlyCAM labels to glyrepr labels.
 #' @noRd
 glycam_iupac_mono_map <- function() {
-  add_furanose_monosaccharide_mappings(c(
+  map <- c(
     Hexp = "Hex",
     DFucp = "Fuc",
     DGalp = "Gal",
@@ -264,7 +264,27 @@ glycam_iupac_mono_map <- function() {
     DTagp = "Tag",
     LSorp = "Sor",
     DPsip = "Psi"
-  ))
+  )
+
+  unusual_map <- unusual_configuration_monosaccharide_map()
+  configurable <- stringr::str_detect(names(map), "^[DL]") &
+    unname(map) %in% names(unusual_map)
+  configurations <- stringr::str_sub(names(map)[configurable], 1, 1)
+  natural_monos <- unname(map[configurable])
+  map[configurable] <- apply_monosaccharide_configuration(
+    natural_monos,
+    configurations
+  )
+  unusual_sources <- names(map)[configurable]
+  stringr::str_sub(unusual_sources, 1, 1) <- invert_configuration(
+    configurations
+  )
+  map[unusual_sources] <- apply_monosaccharide_configuration(
+    natural_monos,
+    invert_configuration(configurations)
+  )
+
+  add_furanose_monosaccharide_mappings(map)
 }
 
 

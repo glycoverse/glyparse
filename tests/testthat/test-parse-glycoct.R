@@ -38,6 +38,23 @@ test_that("GlycoCT preserves furanose ring bounds", {
   )
 })
 
+test_that("GlycoCT preserves unusual configurations", {
+  expect_warning(
+    parsed <- parse_glycoct(c(
+      "RES\n1b:a-dgal-HEX-1:5|6:d",
+      "RES\n1b:b-lgul-HEX-1:5",
+      "RES\n1b:x-dido-HEX-1:5|6:a",
+      "RES\n1b:a-dgal-HEX-1:4|6:d",
+      "RES\n1b:o-dgal-HEX-0:0|1:aldi|6:d"
+    )),
+    "regular reducing-end glycans"
+  )
+  expect_identical(
+    as.character(parsed),
+    c("DFuc(a1-", "LGul(b1-", "DIdoA(?1-", "DFucf(a1-", "DFuc(?1-")
+  )
+})
+
 test_that("GlycoCT accepts space-separated records", {
   glycoct <- paste(
     "RES",

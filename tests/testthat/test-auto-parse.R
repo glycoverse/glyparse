@@ -72,6 +72,17 @@ test_that("auto_parse correctly identifies and parses GlyCAM IUPAC format", {
   expect_equal(as.character(result), as.character(expected))
 })
 
+test_that("auto_parse preserves unusual configurations", {
+  expect_identical(
+    as.character(auto_parse("DFucpa1-OH")),
+    "DFuc(a1-"
+  )
+  expect_identical(
+    as.character(auto_parse("DFuc(a1-")),
+    "DFuc(a1-"
+  )
+})
+
 test_that("auto_parse correctly identifies and parses IUPAC-compact format", {
   input <- "Mana1-3(Mana1-6)Manb1-4GlcNAcb"
   result <- auto_parse(input)

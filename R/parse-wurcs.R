@@ -434,6 +434,51 @@ WURCS_ALDITOL_MONO_REGEX <- c(
 )
 
 
+#' Invert the stereochemical backbone in a WURCS pattern
+#'
+#' @param pattern A WURCS monosaccharide regular expression.
+#'
+#' @return A pattern for the opposite absolute configuration.
+#' @noRd
+invert_wurcs_pattern_configuration <- function(pattern) {
+  backbone <- stringr::str_extract(pattern, "(?<=\\^)[[:alnum:]]+")
+  inverted <- chartr("12", "21", backbone)
+  stringr::str_replace(pattern, stringr::fixed(backbone), inverted)
+}
+
+
+#' Add unusual configurations to WURCS monosaccharide patterns
+#'
+#' @param patterns Named WURCS monosaccharide regular expressions.
+#'
+#' @return Patterns including configuration-inverted counterparts.
+#' @noRd
+add_unusual_wurcs_patterns <- function(patterns) {
+  unusual_map <- unusual_configuration_monosaccharide_map()
+  configurable <- names(patterns) %in% names(unusual_map)
+  unusual <- purrr::map_chr(
+    patterns[configurable],
+    invert_wurcs_pattern_configuration
+  )
+  names(unusual) <- unname(unusual_map[names(patterns)[configurable]])
+  unusual <- unusual[!unname(unusual) %in% unname(patterns)]
+
+  c(unusual, patterns)
+}
+
+
+WURCS_MONO_REGEX <- add_unusual_wurcs_patterns(WURCS_MONO_REGEX)
+WURCS_UNKNOWN_RING_MONO_REGEX <- add_unusual_wurcs_patterns(
+  WURCS_UNKNOWN_RING_MONO_REGEX
+)
+WURCS_AMBIGUOUS_MONO_REGEX <- add_unusual_wurcs_patterns(
+  WURCS_AMBIGUOUS_MONO_REGEX
+)
+WURCS_ALDITOL_MONO_REGEX <- add_unusual_wurcs_patterns(
+  WURCS_ALDITOL_MONO_REGEX
+)
+
+
 WURCS_SUB_REGEX <- c(
   "Me" = "OC",
   "Ac" = "OCC/3=O",

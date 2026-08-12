@@ -155,6 +155,24 @@ test_that("KCF parses a single monosaccharide", {
   expect_equal(result, "Glc(?1-")
 })
 
+test_that("KCF preserves unusual configurations", {
+  records <- paste0(
+    "ENTRY       test                      Glycan\n",
+    "NODE        1\n",
+    "            1   ",
+    c("LFuc", "DFuc3S", "LGul", "DFucf"),
+    "         0     0\n",
+    "///"
+  )
+
+  parsed <- parse_kcf(records)
+
+  expect_identical(
+    as.character(parsed),
+    c("Fuc(?1-", "DFuc3S(?1-", "LGul(?1-", "DFucf(?1-")
+  )
+})
+
 test_that("KCF parses every furanose monosaccharide label", {
   furanose <- unname(furanose_monosaccharide_map())
   records <- paste0(

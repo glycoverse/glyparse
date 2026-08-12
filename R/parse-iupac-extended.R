@@ -138,6 +138,15 @@ convert_token <- function(token) {
   )
   mono <- stringr::str_extract(token, RESIDUE_PATTERN, group = 2)
   new_mono <- convert_mono(mono)
+  configuration <- stringr::str_extract(
+    token,
+    "-([DL\\?])-",
+    group = 1
+  )
+  new_mono <- apply_monosaccharide_configuration(
+    new_mono,
+    configuration
+  )
   pos1 <- stringr::str_extract(token, RESIDUE_PATTERN, group = 3)
   # pos2 might be missing for the core monosaccharide
   # e.g. GlcNAc(b1-6)]GalNAc(a1-

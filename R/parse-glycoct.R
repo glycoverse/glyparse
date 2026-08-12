@@ -820,6 +820,36 @@ format_glycoct_reducing_anomer <- function(reducing_end) {
   paste0(anomer_config, anomer_pos)
 }
 
+
+#' Add unusual configurations to GlycoCT monosaccharide mappings
+#'
+#' @param mappings Named GlycoCT monosaccharide mappings.
+#'
+#' @return The mappings with configuration-inverted counterparts.
+#' @noRd
+add_unusual_glycoct_mappings <- function(mappings) {
+  unusual_map <- unusual_configuration_monosaccharide_map()
+  natural <- intersect(names(mappings), names(unusual_map))
+  unusual <- mappings[natural]
+
+  unusual <- purrr::map(unusual, function(mapping) {
+    mapping$res <- stringr::str_replace_all(
+      mapping$res,
+      "(?<=-)[dl](?=[a-z])",
+      \(configuration) invert_configuration(configuration)
+    )
+    mapping
+  })
+  names(unusual) <- unname(unusual_map[natural])
+  duplicates <- purrr::map_lgl(
+    unusual,
+    \(mapping) any(purrr::map_lgl(mappings, identical, mapping))
+  )
+  unusual <- unusual[!duplicates]
+
+  c(mappings, unusual)
+}
+
 load_mono_mappings <- function() {
   # Hardcoded GLYCOCT_MAP to avoid external file dependency
   GLYCOCT_MAP <- list(
@@ -1129,7 +1159,7 @@ load_mono_mappings <- function() {
     )
   )
 
-  return(GLYCOCT_MAP)
+  add_unusual_glycoct_mappings(GLYCOCT_MAP)
 }
 
 #' Load GlycoCT alditol monosaccharide mappings
@@ -1354,7 +1384,7 @@ load_alditol_mono_mappings <- function() {
     )
   )
 
-  return(GLYCOCT_ALDITOL_MAP)
+  add_unusual_glycoct_mappings(GLYCOCT_ALDITOL_MAP)
 }
 
 compile_glycoct_mapping <- function(name, mapping) {

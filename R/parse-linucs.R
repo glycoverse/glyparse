@@ -298,7 +298,7 @@ match_linucs_mono_stem <- function(x) {
 #' @return A named character vector.
 #' @noRd
 linucs_mono_stem_map <- function() {
-  add_furanose_monosaccharide_mappings(c(
+  map <- c(
     `6-deoxy-HexpNAc` = "dHexNAc",
     `6-deoxy-HexNAc` = "dHexNAc",
     HexpNAc = "HexNAc",
@@ -358,7 +358,7 @@ linucs_mono_stem_map <- function() {
     `D-QuipNAc` = "QuiNAc",
     `L-RhapNAc` = "RhaNAc",
     `L-Fucp` = "Fuc",
-    `D-Fucp` = "dHex",
+    `D-Fucp` = "Fuc",
     `D-Quip` = "Qui",
     `L-Rhap` = "Rha",
     `D-Olip` = "Oli",
@@ -400,7 +400,32 @@ linucs_mono_stem_map <- function() {
     `D-Tagp` = "Tag",
     `L-Sorp` = "Sor",
     `D-Psip` = "Psi"
-  ))
+  )
+
+  unusual_map <- unusual_configuration_monosaccharide_map()
+  configurable <- unname(map) %in%
+    names(unusual_map) &
+    stringr::str_detect(names(map), "(^|6-deoxy-)[DL]-")
+  configurations <- stringr::str_extract(
+    names(map)[configurable],
+    "[DL](?=-)"
+  )
+  natural_monos <- unname(map[configurable])
+  map[configurable] <- apply_monosaccharide_configuration(
+    natural_monos,
+    configurations
+  )
+  unusual_sources <- stringr::str_replace(
+    names(map)[configurable],
+    "[DL](?=-)",
+    \(configuration) invert_configuration(configuration)
+  )
+  map[unusual_sources] <- apply_monosaccharide_configuration(
+    natural_monos,
+    invert_configuration(configurations)
+  )
+
+  add_furanose_monosaccharide_mappings(map)
 }
 
 
