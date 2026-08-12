@@ -2182,6 +2182,9 @@ map_single_mono_ringless <- function(content) {
   if (is_generic_glycoct_hex(content)) {
     return("Hex")
   }
+  if (is_generic_glycoct_pen(content)) {
+    return("Pen")
+  }
 
   # If no exact match, fall back to basic parsing
   parts <- stringr::str_split(content, "-")[[1]]
@@ -2245,6 +2248,19 @@ is_generic_glycoct_hex <- function(content) {
   isTRUE(stringr::str_detect(
     content,
     "^HEX-(?:\\d+|x):(?:\\d+|x)(?:\\|6:d)?$"
+  ))
+}
+
+#' Check whether a GlycoCT content string is a generic pentose
+#'
+#' @param content GlycoCT monosaccharide content without the leading anomer.
+#'
+#' @return A logical scalar.
+#' @noRd
+is_generic_glycoct_pen <- function(content) {
+  isTRUE(stringr::str_detect(
+    content,
+    "^PEN-(?:\\d+|x):(?:\\d+|x)$"
   ))
 }
 

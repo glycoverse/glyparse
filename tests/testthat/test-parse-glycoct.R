@@ -78,6 +78,11 @@ test_that("GlycoCT maps generic HEX descriptors", {
   expect_equal(as.character(parse_glycoct(hexnac_6s)), "HexNAc6S(?1-")
 })
 
+test_that("GlycoCT maps generic PEN descriptors", {
+  expect_equal(as.character(parse_glycoct("RES\n1b:x-PEN-x:x")), "Pen(??-")
+  expect_equal(as.character(parse_glycoct("RES\n1b:x-PEN-1:4")), "Pen(?1-")
+})
+
 test_that("GlycoCT maps generic Neu5Ac descriptors", {
   neu5ac <- paste0(
     "RES\n",
