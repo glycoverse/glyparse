@@ -298,7 +298,7 @@ match_linucs_mono_stem <- function(x) {
 #' @return A named character vector.
 #' @noRd
 linucs_mono_stem_map <- function() {
-  c(
+  add_furanose_monosaccharide_mappings(c(
     `6-deoxy-HexpNAc` = "dHexNAc",
     `6-deoxy-HexNAc` = "dHexNAc",
     HexpNAc = "HexNAc",
@@ -400,7 +400,7 @@ linucs_mono_stem_map <- function() {
     `D-Tagp` = "Tag",
     `L-Sorp` = "Sor",
     `D-Psip` = "Psi"
-  )
+  ))
 }
 
 
@@ -458,7 +458,7 @@ parse_linucs_residue_substituents <- function(x, mono) {
 #' @return A character vector of glyrepr monosaccharide names.
 #' @noRd
 linucs_n_sulfate_monos <- function() {
-  c(
+  monos <- c(
     "HexN",
     "GlcN",
     "ManN",
@@ -469,6 +469,7 @@ linucs_n_sulfate_monos <- function() {
     "TalN",
     "IdoN"
   )
+  c(monos, as_furanose_monosaccharide(monos))
 }
 
 

@@ -75,3 +75,15 @@ test_that("LINUCS supports on_failure handling", {
     c(valid = "Hex(?1-", invalid = NA_character_)
   )
 })
+
+test_that("LINUCS parses every furanose monosaccharide", {
+  furanose <- unname(furanose_monosaccharide_map())
+  mono_map <- linucs_mono_stem_map()
+  source_names <- names(mono_map)[match(furanose, mono_map)]
+  input <- paste0("[][b-", source_names, "]{}")
+
+  parsed <- parse_linucs(input)
+  graphs <- glyrepr::get_structure_graphs(parsed, return_list = TRUE)
+
+  expect_identical(purrr::map_chr(graphs, ~ igraph::V(.x)$mono), furanose)
+})

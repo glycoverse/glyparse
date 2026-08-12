@@ -51,6 +51,18 @@ test_that("IUPAC-compact vectorizes terminal anomer positions", {
   expect_identical(as.character(parsed), c("Glc(b1-", "Neu5Ac(a2-"))
 })
 
+test_that("IUPAC-compact parses every furanose monosaccharide", {
+  furanose <- unname(furanose_monosaccharide_map())
+  anomer_pos <- glyrepr::get_anomer_pos(furanose)
+
+  parsed <- parse_iupac_compact(furanose)
+
+  expect_identical(
+    as.character(parsed),
+    paste0(furanose, "(?", anomer_pos, "-")
+  )
+})
+
 test_that("IUPAC-compact supports on_failure handling", {
   skip_on_old_win()
 

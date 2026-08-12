@@ -171,13 +171,26 @@ test_that("GlyCAM IUPAC parses checklist monosaccharide names", {
       MurNAc = "MurNAc(b1-",
       MurNGc = "MurNGc(b1-",
       Mur = "Mur(b1-",
-      Api = "Api(b1-",
+      Api = "Apif(b1-",
       Fru = "Fru(b2-",
       Tag = "Tag(b2-",
       Sor = "Sor(b2-",
       Psi = "Psi(b2-"
     )
   )
+})
+
+test_that("GlyCAM IUPAC parses every furanose monosaccharide", {
+  furanose <- unname(furanose_monosaccharide_map())
+  mono_map <- glycam_iupac_mono_map()
+  source_names <- names(mono_map)[match(furanose, mono_map)]
+  anomer_pos <- glyrepr::get_anomer_pos(furanose)
+  input <- paste0(source_names, "?", anomer_pos, "-OH")
+
+  parsed <- parse_glycam_iupac(input)
+  graphs <- glyrepr::get_structure_graphs(parsed, return_list = TRUE)
+
+  expect_identical(purrr::map_chr(graphs, ~ igraph::V(.x)$mono), furanose)
 })
 
 test_that("GlyCAM IUPAC converts residue modifiers", {

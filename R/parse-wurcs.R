@@ -577,11 +577,13 @@ parse_residue_details <- function(residue) {
   #        for multiple substituents, they are separated by commas, e.g. "3Me,6S"
 
   is_alditol <- FALSE
-  matching_residue <- stringr::str_replace(
+  is_furanose <- stringr::str_detect(
     residue,
-    "(-1[abx]_1)-4",
-    "\\1-5"
+    "-(?:1[abx]_1-4|2[abx]_2-5)(?:_|$)"
   )
+  matching_residue <- residue |>
+    stringr::str_replace("(-1[abx]_1)-4", "\\1-5") |>
+    stringr::str_replace("(-2[abx]_2)-5", "\\1-6")
 
   # Get monosaacharide name
   mono_idx <- detect_wurcs_pattern(
@@ -649,20 +651,20 @@ parse_residue_details <- function(residue) {
     mono %in%
       c("Neu5Ac", "Neu5Gc", "Neu") &&
       !is_alditol &&
-      stringr::str_starts(residue, "Aad")
+      stringr::str_starts(matching_residue, "Aad")
   ) {
     # For Neu5Ac/Neu5Gc, remove the base Kdn structure and the characteristic 5-position modification
     base_kdn_pattern <- "^Aad21122h-2[abx]_2-(?:6|\\?)"
     if (mono == "Neu5Ac") {
       # Remove the base Kdn pattern and the 5*NCC/3=O
-      sub_code <- stringr::str_remove(residue, base_kdn_pattern)
+      sub_code <- stringr::str_remove(matching_residue, base_kdn_pattern)
       sub_code <- stringr::str_remove(sub_code, "_5\\*NCC/3=O")
     } else if (mono == "Neu5Gc") {
       # Remove the base Kdn pattern and the 5*NCCO/3=O
-      sub_code <- stringr::str_remove(residue, base_kdn_pattern)
+      sub_code <- stringr::str_remove(matching_residue, base_kdn_pattern)
       sub_code <- stringr::str_remove(sub_code, "_5\\*NCCO/3=O")
     } else {
-      sub_code <- stringr::str_remove(residue, base_kdn_pattern)
+      sub_code <- stringr::str_remove(matching_residue, base_kdn_pattern)
       sub_code <- stringr::str_remove(
         sub_code,
         "_5\\*N(?!CC(O)?/3=O)"
@@ -671,10 +673,10 @@ parse_residue_details <- function(residue) {
   } else if (
     mono %in%
       c("Neu5Ac", "Neu5Gc", "Neu") &&
-      stringr::str_starts(residue, "AUd")
+      stringr::str_starts(matching_residue, "AUd")
   ) {
     base_kdn_pattern <- "^AUd21122h"
-    sub_code <- stringr::str_remove(residue, base_kdn_pattern)
+    sub_code <- stringr::str_remove(matching_residue, base_kdn_pattern)
     if (mono == "Neu5Ac") {
       sub_code <- stringr::str_remove(sub_code, "_5\\*NCC/3=O")
     } else if (mono == "Neu5Gc") {
@@ -731,6 +733,10 @@ parse_residue_details <- function(residue) {
 
     # Join multiple substituents with commas
     sub <- paste(substituents, collapse = ",")
+  }
+
+  if (is_furanose) {
+    mono <- as_furanose_monosaccharide(mono)
   }
 
   list(

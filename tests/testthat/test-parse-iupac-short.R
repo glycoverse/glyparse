@@ -11,6 +11,18 @@ test_that("Monosaccharides are correctly parsed", {
   expect_mono("Neu5Aca-", "Neu5Ac")
 })
 
+test_that("furanose monosaccharides are correctly parsed", {
+  furanose <- unname(furanose_monosaccharide_map())
+  anomer_pos <- glyrepr::get_anomer_pos(furanose)
+
+  parsed <- parse_iupac_short(paste0(furanose, "?-"))
+
+  expect_identical(
+    as.character(parsed),
+    paste0(furanose, "(?", anomer_pos, "-")
+  )
+})
+
 
 test_that("generic monosaccharides are parsed correctly", {
   expect_mono <- function(x, mono) {

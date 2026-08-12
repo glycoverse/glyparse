@@ -61,6 +61,15 @@ convert_linear_to_iupac <- function(x) {
     "Api" = "P",
     "Fru" = "E"
   )
+  furanose <- as_furanose_monosaccharide(names(mono_map))
+  has_furanose <- furanose != names(mono_map)
+  mono_map <- c(
+    mono_map,
+    rlang::set_names(
+      paste0(unname(mono_map[has_furanose]), "^"),
+      furanose[has_furanose]
+    )
+  )
 
   # Substituent mapping from IUPAC to Linear Code
   sub_map <- c(
@@ -93,7 +102,10 @@ convert_linear_to_iupac <- function(x) {
   # ===== Convert monosaccharides =====
   # "A(b1-3)A_2P_(b1-3)[A(b1-4)]G(b1-" will be converted to "Gal(b1-3)Gal_2P_(b1-3)[Gal(b1-4)]Glc(b1-"
 
-  mono_patterns <- stringr::str_glue("(?<![:alnum:]|\\?){mono_map}(?=[_\\(])")
+  mono_codes <- purrr::map_chr(unname(mono_map), stringr::str_escape)
+  mono_patterns <- stringr::str_glue(
+    "(?<![:alnum:]|\\?){mono_codes}(?=[_\\(])"
+  )
   mono_replaces <- names(mono_map)
   for (i in seq_along(mono_patterns)) {
     x <- stringr::str_replace_all(x, mono_patterns[i], mono_replaces[i])
