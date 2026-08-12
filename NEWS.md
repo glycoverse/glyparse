@@ -1,6 +1,6 @@
 # glyparse (development version)
 
-* Parsers now preserve explicit furanose forms as `glyrepr` monosaccharide names such as `Galf`, `GlcfNAc`, and `Neuf5Ac` across IUPAC, GlyCAM IUPAC, GlycoCT, WURCS, LINUCS, Linear Code, and KCF inputs.
+* Parsers now preserve explicit furanose forms as `glyrepr` monosaccharide names such as `Galf`, `GlcfNAc`, and `Neuf5Ac` across IUPAC, GlyCAM IUPAC, GlycoCT, WURCS, LINUCS, Linear Code, and KCF inputs. (#41)
 * `auto_parse()` and all format-specific parsers gain `drop_generic` to replace generic glycans with `NA` when generic and concrete glycans coexist, with a message reporting the number dropped. (#39)
 * `parse_glycoct()` now supports floating glycan substructures represented by `UND` sections, uses implicit floating parts when every main-tree node is a candidate parent, and excludes explicit candidates whose acceptor positions are already occupied. (#40)
 * `parse_wurcs()` now supports floating monosaccharides and subtrees, including implicit all-main attachment domains and filtered explicit candidate parents. It also recognizes generic nonulosonic acids and sialic acids with unknown ring closure. (#40)
