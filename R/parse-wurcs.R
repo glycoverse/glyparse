@@ -184,6 +184,10 @@ WURCS_MONO_REGEX <- c(
 
 
 WURCS_UNKNOWN_RING_MONO_REGEX <- c(
+  "Neu5Ac" = "^Aad21122h-2[abx]_2-\\?_5\\*NCC/3=O",
+  "Neu5Gc" = "^Aad21122h-2[abx]_2-\\?_5\\*NCCO/3=O",
+  "Neu" = "^Aad21122h-2[abx]_2-\\?_5\\*N(?!CC(O)?/3=O)",
+  "Kdn" = "^Aad21122h-2[abx]_2-\\?(?!_5\\*N)",
   "NeuAc" = "^Aadxxxxxh-2[abx]_2-\\?_5\\*NCC/3=O",
   "NeuGc" = "^Aadxxxxxh-2[abx]_2-\\?_5\\*NCCO/3=O",
   "gNeu" = "^Aadxxxxxh-2[abx]_2-\\?_5\\*N(?!CC(O)?/3=O)",
@@ -648,7 +652,7 @@ parse_residue_details <- function(residue) {
       stringr::str_starts(residue, "Aad")
   ) {
     # For Neu5Ac/Neu5Gc, remove the base Kdn structure and the characteristic 5-position modification
-    base_kdn_pattern <- "^Aad21122h-2[abx]_2-6"
+    base_kdn_pattern <- "^Aad21122h-2[abx]_2-(?:6|\\?)"
     if (mono == "Neu5Ac") {
       # Remove the base Kdn pattern and the 5*NCC/3=O
       sub_code <- stringr::str_remove(residue, base_kdn_pattern)
