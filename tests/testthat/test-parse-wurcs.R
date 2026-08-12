@@ -1070,6 +1070,23 @@ test_that("parse_wurcs supports implicit floating parts", {
 })
 
 
+test_that("parse_wurcs supports floating parts without ordinary linkages", {
+  wurcs <- paste0(
+    "WURCS=2.0/2,2,1/",
+    "[a2122h-1x_1-5][Aad21122h-2a_2-6_5*NCC/3=O]/",
+    "1-2/b2-a6}"
+  )
+
+  result <- parse_wurcs(wurcs)
+
+  expect_identical(
+    unname(as.character(result)),
+    "Neu5Ac(a2-6)Glc(?1-"
+  )
+  expect_identical(unname(glyrepr::has_floating_parts(result)), FALSE)
+})
+
+
 test_that("parse_wurcs preserves multiple floating subtrees", {
   wurcs <- paste0(
     "WURCS=2.0/4,5,4/",
@@ -1147,6 +1164,12 @@ test_that("parse_wurcs handles ambiguous u residues", {
       "WURCS=2.0/2,2,1/[u2122A][a2122h-1x_1-5_2*NCC/3=O]/1-2/a?-b1"
     )),
     "GlcNAc(?1-?)GlcA(??-"
+  )
+  expect_equal(
+    as.character(parse_wurcs(
+      "WURCS=2.0/2,2,1/[u2112h][a2122h-1x_1-5]/1-2/a2-b3|b4"
+    )),
+    "Gal(?2-3/4)Glc(?1-"
   )
 })
 

@@ -847,12 +847,22 @@ parse_one_linkage <- function(x, anomers = NULL) {
   # Input: a string of one WURCS linkage, e.g. "a4-b1"
   # Output: a named list of `from`, `to`, and `linkage`
   spl <- stringr::str_split_1(x, "-")
-  if (!is.null(anomers)) {
+  if (is.null(anomers)) {
+    swap_endpoints <- stringr::str_detect(
+      spl[[2]],
+      stringr::fixed("|")
+    )
+  } else {
     left_donor <- wurcs_endpoint_can_be_donor(spl[[1]], anomers)
     right_donor <- wurcs_endpoint_can_be_donor(spl[[2]], anomers)
-    if (left_donor && !right_donor) {
-      spl <- rev(spl)
-    }
+    swap_endpoints <- left_donor &&
+      !right_donor ||
+      !left_donor &&
+        !right_donor &&
+        stringr::str_detect(spl[[2]], stringr::fixed("|"))
+  }
+  if (swap_endpoints) {
+    spl <- rev(spl)
   }
 
   handle_parallel_pos <- function(part) {
@@ -869,21 +879,6 @@ parse_one_linkage <- function(x, anomers = NULL) {
 
   from_part <- handle_parallel_pos(spl[[1]])
   to_part <- handle_parallel_pos(spl[[2]])
-  if (
-    is.null(anomers) &&
-      stringr::str_detect(to_part, stringr::fixed("/"))
-  ) {
-    # WURCS has a strange linkage rule:
-    # In the normal case, the linkage positions are opposite to the orders of IUPAC.
-    # For example, "a4-b1" means "1-4" in IUPAC.
-    # However, when second position is a parallel position, e.g. "b2|b2",
-    # the linkage positions are the same as the orders of IUPAC.
-    # For example, "f2-g3|g6" means "2-3/6" in IUPAC.
-    # In this case, we need to swap from_part and to_part.
-    temp <- from_part
-    from_part <- to_part
-    to_part <- temp
-  }
 
   from_idx <- letter_to_int(stringr::str_sub(from_part, 1, 1))
   to_idx <- letter_to_int(stringr::str_sub(to_part, 1, 1))
@@ -925,7 +920,7 @@ prepare_graph_dfs <- function(residues, linkages) {
     residues,
     ~ data.frame(as.list(.x))
   ))
-  if (is.null(linkages)) {
+  if (length(linkages) == 0L) {
     edgelist_df <- data.frame(
       from = integer(),
       to = integer(),
