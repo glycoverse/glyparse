@@ -620,6 +620,25 @@ test_that("GlycoCT UND sections become floating glycan parts", {
   expect_equal(floating$parents, list(integer(), integer()))
 })
 
+test_that("GlycoCT warns for alditols inside UND sections", {
+  glycoct <- paste(
+    "RES",
+    "1b:a-dgal-HEX-1:5",
+    "UND",
+    "UND1:100.0:100.0",
+    "ParentIDs:1",
+    "SubtreeLinkageID1:o(3+1)d",
+    "RES",
+    "2b:o-dglc-HEX-0:0|1:aldi"
+  )
+
+  expect_warning(
+    result <- parse_glycoct(glycoct),
+    "regular reducing-end glycans with unknown anomer configurations"
+  )
+  expect_identical(unname(as.character(result)), "Glc(?1-3)Gal(a1-")
+})
+
 test_that("single-parent GlycoCT UND sections become ordinary edges", {
   glycoct <- paste(
     "RES",

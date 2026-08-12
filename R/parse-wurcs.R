@@ -149,10 +149,10 @@ WURCS_MONO_REGEX <- c(
   "Neu5Gc" = "^Aad21122h-2[abx]_2-6.*_5\\*NCCO/3=O",
 
   # Kdn: exclude N, Ac, and Gc
-  "Kdn" = "^Aad21122h-2[abx]_2-6(?!_5\\*N(CC(O)?/3=O)?)",
+  "Kdn" = "^Aad21122h-2[abx]_2-6(?!.*_5\\*N(CC(O)?/3=O)?)",
 
   # Neu: exclude Ac and Gc
-  "Neu" = "^Aad21122h-2[abx]_2-6_5\\*N(?!CC(O)?/3=O)",
+  "Neu" = "^Aad21122h-2[abx]_2-6(?=.*_5\\*N(?!CC(O)?/3=O))",
 
   # Rest of the monosaccharides are themselves.
   "Pse" = "^had22111m-2[abx]_2-6_5\\*N_7\\*N",
@@ -184,10 +184,10 @@ WURCS_MONO_REGEX <- c(
 
 
 WURCS_UNKNOWN_RING_MONO_REGEX <- c(
-  "Neu5Ac" = "^Aad21122h-2[abx]_2-\\?_5\\*NCC/3=O",
-  "Neu5Gc" = "^Aad21122h-2[abx]_2-\\?_5\\*NCCO/3=O",
-  "Neu" = "^Aad21122h-2[abx]_2-\\?_5\\*N(?!CC(O)?/3=O)",
-  "Kdn" = "^Aad21122h-2[abx]_2-\\?(?!_5\\*N)",
+  "Neu5Ac" = "^Aad21122h-2[abx]_2-\\?(?=.*_5\\*NCC/3=O)",
+  "Neu5Gc" = "^Aad21122h-2[abx]_2-\\?(?=.*_5\\*NCCO/3=O)",
+  "Neu" = "^Aad21122h-2[abx]_2-\\?(?=.*_5\\*N(?!CC(O)?/3=O))",
+  "Kdn" = "^Aad21122h-2[abx]_2-\\?(?!.*_5\\*N)",
   "NeuAc" = "^Aadxxxxxh-2[abx]_2-\\?(?=.*_5\\*NCC/3=O)",
   "NeuGc" = "^Aadxxxxxh-2[abx]_2-\\?(?=.*_5\\*NCCO/3=O)",
   "gNeu" = "^Aadxxxxxh-2[abx]_2-\\?(?=.*_5\\*N(?!CC(O)?/3=O))",
@@ -647,7 +647,7 @@ parse_residue_details <- function(residue) {
   # is part of the monosaccharide itself, not an additional substituent
   if (
     mono %in%
-      c("Neu5Ac", "Neu5Gc") &&
+      c("Neu5Ac", "Neu5Gc", "Neu") &&
       !is_alditol &&
       stringr::str_starts(residue, "Aad")
   ) {
@@ -657,11 +657,16 @@ parse_residue_details <- function(residue) {
       # Remove the base Kdn pattern and the 5*NCC/3=O
       sub_code <- stringr::str_remove(residue, base_kdn_pattern)
       sub_code <- stringr::str_remove(sub_code, "_5\\*NCC/3=O")
-    } else {
-      # Neu5Gc
+    } else if (mono == "Neu5Gc") {
       # Remove the base Kdn pattern and the 5*NCCO/3=O
       sub_code <- stringr::str_remove(residue, base_kdn_pattern)
       sub_code <- stringr::str_remove(sub_code, "_5\\*NCCO/3=O")
+    } else {
+      sub_code <- stringr::str_remove(residue, base_kdn_pattern)
+      sub_code <- stringr::str_remove(
+        sub_code,
+        "_5\\*N(?!CC(O)?/3=O)"
+      )
     }
   } else if (
     mono %in%

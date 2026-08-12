@@ -737,6 +737,18 @@ test_that("parse_residue handles unknown ring closure", {
     parse_residue("Aad21122h-2x_2-?_5*NCC/3=O"),
     c(mono = "Neu5Ac", anomer = "?2", sub = "")
   )
+  expect_equal(
+    parse_residue("Aad21122h-2a_2-?_4*OCC/3=O_5*NCC/3=O"),
+    c(mono = "Neu5Ac", anomer = "a2", sub = "4Ac")
+  )
+  expect_equal(
+    parse_residue("Aad21122h-2x_2-?_4*OCC/3=O_5*N"),
+    c(mono = "Neu", anomer = "?2", sub = "4Ac")
+  )
+  expect_equal(
+    parse_residue("Aad21122h-2b_2-6_4*OCC/3=O_5*N"),
+    c(mono = "Neu", anomer = "b2", sub = "4Ac")
+  )
 
   expect_unknown_ring_residue <- function(residue, mono, sub = "") {
     expect_equal(

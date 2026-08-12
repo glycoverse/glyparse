@@ -70,7 +70,13 @@ do_parse_glycoct <- function(x) {
   blocks <- split_glycoct_blocks(lines)
 
   main <- parse_glycoct_block(blocks$main)
-  if (has_glycoct_alditol_residue(main$residues)) {
+  floating <- purrr::map(blocks$floating, parse_glycoct_und_block)
+  has_alditol <- has_glycoct_alditol_residue(main$residues) ||
+    any(purrr::map_lgl(
+      floating,
+      ~ has_glycoct_alditol_residue(.x$residues)
+    ))
+  if (has_alditol) {
     warn_glycoct_alditol()
   }
   main_graph <- build_glycoct_graph_data(main$residues, main$linkages)
@@ -79,7 +85,6 @@ do_parse_glycoct <- function(x) {
     return(main_graph$graph)
   }
 
-  floating <- purrr::map(blocks$floating, parse_glycoct_und_block)
   floating_graphs <- purrr::map(
     floating,
     ~ build_glycoct_graph_data(.x$residues, .x$linkages)
