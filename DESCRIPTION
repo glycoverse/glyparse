@@ -24,7 +24,7 @@ Imports:
     checkmate,
     cli,
     dplyr,
-    glyrepr (>= 0.14.0),
+    glyrepr (>= 0.14.0.9000),
     igraph,
     purrr (>= 1.0.0),
     rlang,
@@ -35,3 +35,5 @@ Depends:
 VignetteBuilder: knitr
 BugReports: https://github.com/glycoverse/glyparse/issues
 RoxygenNote: 7.3.3
+Remotes:  
+    glycoverse/glyrepr
