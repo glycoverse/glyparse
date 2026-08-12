@@ -573,16 +573,21 @@ parse_residue_details <- function(residue) {
   #        for multiple substituents, they are separated by commas, e.g. "3Me,6S"
 
   is_alditol <- FALSE
+  matching_residue <- stringr::str_replace(
+    residue,
+    "(-1[abx]_1)-4",
+    "\\1-5"
+  )
 
   # Get monosaacharide name
   mono_idx <- detect_wurcs_pattern(
-    residue,
+    matching_residue,
     WURCS_MONO_REGEX,
     WURCS_MONO_PREFIXES
   )
   if (mono_idx == 0) {
     unknown_ring_mono_idx <- detect_wurcs_pattern(
-      residue,
+      matching_residue,
       WURCS_UNKNOWN_RING_MONO_REGEX,
       WURCS_UNKNOWN_RING_MONO_PREFIXES
     )
@@ -597,7 +602,7 @@ parse_residue_details <- function(residue) {
       )
     } else {
       alditol_mono_idx <- detect_wurcs_pattern(
-        residue,
+        matching_residue,
         WURCS_ALDITOL_MONO_REGEX,
         WURCS_ALDITOL_MONO_PREFIXES
       )
@@ -608,7 +613,7 @@ parse_residue_details <- function(residue) {
         is_alditol <- TRUE
       } else {
         ambiguous_mono_idx <- detect_wurcs_pattern(
-          residue,
+          matching_residue,
           WURCS_AMBIGUOUS_MONO_REGEX,
           WURCS_AMBIGUOUS_MONO_PREFIXES
         )
@@ -670,7 +675,7 @@ parse_residue_details <- function(residue) {
     }
   } else {
     # For other monosaccharides, use the standard approach
-    sub_code <- stringr::str_remove(residue, mono_pattern)
+    sub_code <- stringr::str_remove(matching_residue, mono_pattern)
   }
   sub_code <- normalize_n_sulfate_sub_code(residue, sub_code)
 

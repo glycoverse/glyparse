@@ -690,6 +690,32 @@ test_that("parse_residue handles generic nonulosonic acids", {
 })
 
 
+test_that("parse_residue normalizes supported 1-4 ring closures", {
+  expect_equal(
+    parse_residue("a2112h-1a_1-4"),
+    c(mono = "Gal", anomer = "a1", sub = "")
+  )
+  expect_equal(
+    parse_residue("a2112h-1x_1-4_2*NCC/3=O"),
+    c(mono = "GalNAc", anomer = "?1", sub = "")
+  )
+  expect_equal(
+    parse_residue("axxxxh-1x_1-4"),
+    c(mono = "Hex", anomer = "?1", sub = "")
+  )
+
+  result <- parse_wurcs(paste0(
+    "WURCS=2.0/2,3,2/",
+    "[a2112h-1b_1-5][a2112h-1a_1-4]/",
+    "1-2-2/a4-b1_b2-c1"
+  ))
+  expect_identical(
+    unname(as.character(result)),
+    "Gal(a1-2)Gal(a1-4)Gal(b1-"
+  )
+})
+
+
 test_that("parse_residue handles unknown ring closure", {
   expect_unknown_ring_residue <- function(residue, mono, sub = "") {
     expect_equal(
