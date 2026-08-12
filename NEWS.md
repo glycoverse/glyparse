@@ -1,5 +1,6 @@
 # glyparse (development version)
 
+* `auto_parse()` and all format-specific parsers gain `drop_generic` to replace generic glycans with `NA` when generic and concrete glycans coexist, with a message reporting the number dropped. (#39)
 * Parser functions now construct structure vectors through `glyrepr`'s low-level graph APIs, avoiding repeated scalar construction for distinct inputs.
 * Parsers that normalize to IUPAC-condensed notation now normalize complete unique vectors and construct them in one call.
 * Graph-based parsers gain `validate` to skip graph validation for trusted inputs (#36).
