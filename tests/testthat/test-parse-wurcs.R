@@ -688,6 +688,10 @@ test_that("parse_residue maps generic WURCS descriptors to generic monosaccharid
     parse_residue("AUd21122h_4*OCC/3=O_5*NCC/3=O"),
     c(mono = "Neu5Ac", anomer = "??", sub = "4Ac")
   )
+  expect_equal(
+    parse_residue("AUd12211h_4*OCC/3=O_5*NCC/3=O"),
+    c(mono = "LNeu5Ac", anomer = "??", sub = "4Ac")
+  )
 })
 
 
@@ -770,6 +774,14 @@ test_that("parse_residue handles unknown ring closure", {
   expect_equal(
     parse_residue("Aad21122h-2x_2-?_5*NCC/3=O"),
     c(mono = "Neu5Ac", anomer = "?2", sub = "")
+  )
+  expect_equal(
+    parse_residue("Aad12211h-2a_2-?_4*OCC/3=O_5*NCC/3=O"),
+    c(mono = "LNeu5Ac", anomer = "a2", sub = "4Ac")
+  )
+  expect_equal(
+    parse_residue("Aad12211h-2b_2-?_5*NCCO/3=O"),
+    c(mono = "LNeu5Gc", anomer = "b2", sub = "")
   )
   expect_equal(
     parse_residue("Aad21122h-2a_2-?_4*OCC/3=O_5*NCC/3=O"),

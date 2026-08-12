@@ -692,19 +692,34 @@ parse_residue_details <- function(residue) {
   # Get substituent(s)
   # For Neu5Ac and Neu5Gc, we need special handling since the 5-position NAc/NGc
   # is part of the monosaccharide itself, not an additional substituent
+  unusual_map <- unusual_configuration_monosaccharide_map()
+  identity_mono <- names(unusual_map)[
+    match(mono, unname(unusual_map))
+  ]
+  if (is.na(identity_mono)) {
+    identity_mono <- mono
+  }
   if (
-    mono %in%
+    identity_mono %in%
       c("Neu5Ac", "Neu5Gc", "Neu") &&
       !is_alditol &&
       stringr::str_starts(matching_residue, "Aad")
   ) {
     # For Neu5Ac/Neu5Gc, remove the base Kdn structure and the characteristic 5-position modification
-    base_kdn_pattern <- "^Aad21122h-2[abx]_2-(?:6|\\?)"
-    if (mono == "Neu5Ac") {
+    backbone <- stringr::str_extract(
+      mono_pattern,
+      "(?<=\\^)[[:alnum:]]+"
+    )
+    base_kdn_pattern <- paste0(
+      "^",
+      backbone,
+      "-2[abx]_2-(?:6|\\?)"
+    )
+    if (identity_mono == "Neu5Ac") {
       # Remove the base Kdn pattern and the 5*NCC/3=O
       sub_code <- stringr::str_remove(matching_residue, base_kdn_pattern)
       sub_code <- stringr::str_remove(sub_code, "_5\\*NCC/3=O")
-    } else if (mono == "Neu5Gc") {
+    } else if (identity_mono == "Neu5Gc") {
       # Remove the base Kdn pattern and the 5*NCCO/3=O
       sub_code <- stringr::str_remove(matching_residue, base_kdn_pattern)
       sub_code <- stringr::str_remove(sub_code, "_5\\*NCCO/3=O")
@@ -716,15 +731,19 @@ parse_residue_details <- function(residue) {
       )
     }
   } else if (
-    mono %in%
+    identity_mono %in%
       c("Neu5Ac", "Neu5Gc", "Neu") &&
       stringr::str_starts(matching_residue, "AUd")
   ) {
-    base_kdn_pattern <- "^AUd21122h"
+    backbone <- stringr::str_extract(
+      mono_pattern,
+      "(?<=\\^)[[:alnum:]]+"
+    )
+    base_kdn_pattern <- paste0("^", backbone)
     sub_code <- stringr::str_remove(matching_residue, base_kdn_pattern)
-    if (mono == "Neu5Ac") {
+    if (identity_mono == "Neu5Ac") {
       sub_code <- stringr::str_remove(sub_code, "_5\\*NCC/3=O")
-    } else if (mono == "Neu5Gc") {
+    } else if (identity_mono == "Neu5Gc") {
       sub_code <- stringr::str_remove(sub_code, "_5\\*NCCO/3=O")
     } else {
       sub_code <- stringr::str_remove(sub_code, "_5\\*N(?!CC(O)?/3=O)")
