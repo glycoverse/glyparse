@@ -85,13 +85,12 @@ concrete glycans raises an error.</p></dd>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>GlycoCT format consists of two parts:</p><ul><li><p>RES: Contains monosaccharides (lines starting with 'b:') and substituents (lines starting with 's:')</p></li>
+    <p>GlycoCT format consists of:</p><ul><li><p>RES: Contains monosaccharides (lines starting with 'b:') and substituents (lines starting with 's:')</p></li>
 <li><p>LIN: Contains linkage information between residues</p></li>
+<li><p>UND: Contains floating substructures whose attachment to the main glycan
+is unresolved</p></li>
 </ul><p>Alditol residues are parsed as regular reducing-end glycans with unknown
 anomer configurations.</p>
-<p>GlycoCT <code>UND</code> sections are not currently supported. Inputs containing an
-underdetermined subgraph fail according to <code>on_failure</code> instead of returning
-an incomplete connected core.</p>
 <p>For more information about GlycoCT format, see the glycoct.md documentation.</p>
     </div>
 

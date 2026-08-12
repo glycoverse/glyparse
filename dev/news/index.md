@@ -7,6 +7,18 @@
   glycans with `NA` when generic and concrete glycans coexist, with a
   message reporting the number dropped.
   ([\#39](https://github.com/glycoverse/glyparse/issues/39))
+- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
+  now supports floating glycan substructures represented by `UND`
+  sections, uses implicit floating parts when every main-tree node is a
+  candidate parent, and excludes explicit candidates whose acceptor
+  positions are already occupied.
+  ([\#40](https://github.com/glycoverse/glyparse/issues/40))
+- [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
+  now supports floating monosaccharides and subtrees, including implicit
+  all-main attachment domains and filtered explicit candidate parents.
+  It also recognizes supported `1-4` furanose rings, generic nonulosonic
+  acids, and sialic acids with unknown ring closure.
+  ([\#40](https://github.com/glycoverse/glyparse/issues/40))
 - Parser functions now construct structure vectors through `glyrepr`’s
   low-level graph APIs, avoiding repeated scalar construction for
   distinct inputs.
@@ -21,10 +33,6 @@
   now reuse indexed residue matching and cached classification to
   improve parsing performance
   ([\#37](https://github.com/glycoverse/glyparse/issues/37)).
-- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
-  now rejects unsupported GlycoCT `UND` sections through `on_failure`
-  instead of silently returning an incomplete connected core
-  ([\#38](https://github.com/glycoverse/glyparse/issues/38)).
 
 ## glyparse 0.7.1
 
