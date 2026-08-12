@@ -7,6 +7,7 @@
 #' @param progress Whether to show a progress bar while parsing.
 #' @param validate Whether to validate parsed glycan graphs before constructing
 #'   the result.
+#' @param drop_generic Whether to replace parsed generic glycans with `NA`.
 #' @param call The call to report in user-facing errors.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
@@ -17,6 +18,7 @@ struc_parser_wrapper <- function(
   on_failure = "error",
   progress = FALSE,
   validate = TRUE,
+  drop_generic = FALSE,
   call = rlang::caller_env()
 ) {
   on_failure <- validate_struc_parser_wrapper_args(
@@ -24,6 +26,7 @@ struc_parser_wrapper <- function(
     on_failure,
     progress,
     validate,
+    drop_generic,
     call = call
   )
   wrapper_input <- prepare_struc_parser_input(x)
@@ -46,6 +49,12 @@ struc_parser_wrapper <- function(
     on_failure,
     call = call
   )
+  if (drop_generic) {
+    parsed_unique <- drop_generic_parsed_graphs(
+      wrapper_input,
+      parsed_unique
+    )
+  }
 
   if (length(parsed_unique$valid_unique_x) == 0) {
     return(make_na_glycan_structure(
@@ -76,12 +85,14 @@ normalized_struc_parser_wrapper <- function(
   normalizer = identity,
   on_failure = "error",
   progress = FALSE,
+  drop_generic = FALSE,
   call = rlang::caller_env()
 ) {
   on_failure <- validate_struc_parser_wrapper_args(
     x,
     on_failure,
     progress,
+    drop_generic = drop_generic,
     call = call
   )
   wrapper_input <- prepare_struc_parser_input(x)
@@ -98,6 +109,27 @@ normalized_struc_parser_wrapper <- function(
     normalizer,
     progress = progress
   )
+  if (drop_generic) {
+    abort_on_invalid_parse(
+      wrapper_input$unique_x[is.na(normalized_unique)],
+      on_failure,
+      call = call
+    )
+    normalized_x <- normalized_unique[
+      build_normalized_structure_indices(wrapper_input)
+    ]
+    if (!is.null(wrapper_input$names)) {
+      attr(normalized_x, "names") <- wrapper_input$names
+    }
+    return(struc_parser_wrapper(
+      normalized_x,
+      do_parse_iupac_condensed,
+      on_failure = on_failure,
+      progress = progress,
+      drop_generic = TRUE,
+      call = call
+    ))
+  }
   unique_result <- suppressWarnings(glyrepr::as_glycan_structure(
     normalized_unique,
     on_failure = "na"
@@ -161,6 +193,7 @@ build_normalized_structure_indices <- function(wrapper_input) {
 #' @param x A character vector of structure strings.
 #' @param on_failure How to handle parsing failures.
 #' @param progress Whether to show a progress bar while parsing.
+#' @param drop_generic Whether to replace parsed generic glycans with `NA`.
 #' @param call The call to report in user-facing errors.
 #'
 #' @return The validated `on_failure` value.
@@ -170,16 +203,48 @@ validate_struc_parser_wrapper_args <- function(
   on_failure,
   progress,
   validate = TRUE,
+  drop_generic = FALSE,
   call
 ) {
   checkmate::assert_character(x)
   checkmate::assert_flag(progress)
   checkmate::assert_flag(validate)
+  checkmate::assert_flag(drop_generic)
   rlang::arg_match(
     on_failure,
     values = c("error", "na"),
     error_call = call
   )
+}
+
+
+#' Replace parsed generic glycans with missing values.
+#'
+#' @param wrapper_input Prepared input metadata.
+#' @param parsed_unique Parsed valid unique structures.
+#'
+#' @return `parsed_unique` without generic structures.
+#' @noRd
+drop_generic_parsed_graphs <- function(wrapper_input, parsed_unique) {
+  mono_types <- purrr::map_chr(
+    parsed_unique$valid_unique_graphs,
+    glyrepr::get_mono_type
+  )
+  generic_mask <- mono_types == "generic"
+  if (!any(generic_mask)) {
+    return(parsed_unique)
+  }
+
+  generic_unique_x <- parsed_unique$valid_unique_x[generic_mask]
+  n_generic <- sum(wrapper_input$non_na_x %in% generic_unique_x)
+  cli::cli_inform(
+    "Dropped {n_generic} generic glycan{?s} (replaced with {.code NA})."
+  )
+
+  parsed_unique$valid_unique_x <- parsed_unique$valid_unique_x[!generic_mask]
+  parsed_unique$valid_unique_graphs <-
+    parsed_unique$valid_unique_graphs[!generic_mask]
+  parsed_unique
 }
 
 

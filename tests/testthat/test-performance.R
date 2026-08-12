@@ -107,6 +107,28 @@ test_that("graph parsers expose validate", {
   }
 })
 
+test_that("all parsers expose drop_generic", {
+  parsers <- c(
+    "auto_parse",
+    "parse_glycam_iupac",
+    "parse_glycoct",
+    "parse_iupac_compact",
+    "parse_iupac_condensed",
+    "parse_iupac_extended",
+    "parse_iupac_short",
+    "parse_kcf",
+    "parse_linear_code",
+    "parse_linucs",
+    "parse_pglyco_struc",
+    "parse_strucgp_struc",
+    "parse_wurcs"
+  )
+
+  for (parser in parsers) {
+    expect_identical(formals(get(parser))$drop_generic, FALSE, info = parser)
+  }
+})
+
 test_that("struc_parser_wrapper avoids high-level structure constructors", {
   testthat::local_mocked_bindings(
     as_glycan_structure = function(...) {

@@ -4,7 +4,13 @@
 \alias{parse_linucs}
 \title{Parse LINUCS Structures}
 \usage{
-parse_linucs(x, on_failure = "error", progress = FALSE, validate = TRUE)
+parse_linucs(
+  x,
+  on_failure = "error",
+  progress = FALSE,
+  validate = TRUE,
+  drop_generic = FALSE
+)
 }
 \arguments{
 \item{x}{A character vector of LINUCS strings. NA values are allowed and
@@ -17,6 +23,10 @@ structure cannot be parsed. \code{"na"} returns \code{NA} at invalid positions.}
 
 \item{validate}{Whether to validate parsed glycan graphs before constructing
 the result.}
+
+\item{drop_generic}{Whether to replace parsed generic glycans with \code{NA}. A
+message reports the number replaced. By default, mixing generic and
+concrete glycans raises an error.}
 }
 \value{
 A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.
@@ -31,7 +41,7 @@ linkage token, a residue token, and a braced child list, for example
 LINUCS linkages are written as \code{"(parent+child)"}, where \code{parent} is the
 linkage position on the parent residue and \code{child} is the anomeric linkage
 position on the child residue. Residue labels are normalized to the
-monosaccharide and substituent vocabulary used by \link[glyrepr:glyrepr]{glyrepr::glyrepr}.
+monosaccharide and substituent vocabulary used by \link[glyrepr:glyrepr-package]{glyrepr::glyrepr}.
 }
 \examples{
 linucs <- "[][b-D-Glcp]{[(4+1)][b-D-Galp]{}}"
