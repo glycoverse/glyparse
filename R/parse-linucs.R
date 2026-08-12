@@ -494,7 +494,9 @@ linucs_n_sulfate_monos <- function() {
     "TalN",
     "IdoN"
   )
-  c(monos, as_furanose_monosaccharide(monos))
+  unusual <- unname(unusual_configuration_monosaccharide_map()[monos])
+  monos <- c(monos, unusual[!is.na(unusual)])
+  unique(c(monos, as_furanose_monosaccharide(monos)))
 }
 
 
