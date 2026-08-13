@@ -778,6 +778,58 @@ test_that("single-parent GlycoCT UND substituents become ordinary", {
   )
 })
 
+test_that("all-main GlycoCT substituent candidates exclude occupied slots", {
+  glycoct <- paste(
+    "RES",
+    "1b:a-dgal-HEX-1:5",
+    "2b:b-dglc-HEX-1:5",
+    "LIN",
+    "1:1o(3+1)2d",
+    "UND",
+    "UND1:100.0:100.0",
+    "ParentIDs:1|2",
+    "SubtreeLinkageID1:o(3+1)n",
+    "RES",
+    "3s:sulfate"
+  )
+
+  result <- parse_glycoct(glycoct)
+
+  expect_identical(
+    unname(as.character(result)),
+    "Glc3S(b1-3)Gal(a1-"
+  )
+  expect_identical(
+    unname(glyrepr::has_floating_substituents(result)),
+    FALSE
+  )
+})
+
+test_that("floating substituent positions preserve representable domains", {
+  normalized <- normalize_floating_substituent_parents(
+    c(1L, 2L),
+    c(1L, 2L),
+    "3/6S",
+    c("1\r3", "2\r3"),
+    context = "test substituent"
+  )
+
+  expect_identical(
+    normalized,
+    list(substituent = "6S", parents = integer())
+  )
+  expect_snapshot(
+    error = TRUE,
+    normalize_floating_substituent_parents(
+      c(1L, 2L),
+      c(1L, 2L),
+      "3/6S",
+      c("1\r3", "2\r6"),
+      context = "test substituent"
+    )
+  )
+})
+
 test_that("GlycoCT supports floating parts and substituents together", {
   glycoct <- paste(
     "RES",

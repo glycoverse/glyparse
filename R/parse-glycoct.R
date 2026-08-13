@@ -721,7 +721,7 @@ build_glycoct_floating_graph <- function(
           position,
           glycoct_substituent_abbreviation(substituent)
         )
-        parents <- normalize_floating_substituent_parents(
+        domain <- normalize_floating_substituent_parents(
           parents,
           main_vertices,
           substituent,
@@ -730,8 +730,8 @@ build_glycoct_floating_graph <- function(
         )
 
         list(
-          substituent = substituent,
-          parents = as.integer(parents)
+          substituent = domain$substituent,
+          parents = as.integer(domain$parents)
         )
       }
     )
@@ -883,8 +883,8 @@ collapse_floating_substituent_positions <- function(positions) {
 #' @param occupied_slots Definitely occupied main-tree carbon slots.
 #' @param context Input-format context for error messages.
 #'
-#' @return An empty vector for an implicit all-main candidate set, otherwise
-#'   the feasible explicit candidate parents.
+#' @return A list containing the normalized substituent and candidate parents.
+#'   An empty parent vector represents an implicit all-main candidate set.
 #' @noRd
 normalize_floating_substituent_parents <- function(
   parents,
@@ -893,27 +893,49 @@ normalize_floating_substituent_parents <- function(
   occupied_slots,
   context
 ) {
-  if (setequal(parents, main_vertices)) {
-    return(integer())
-  }
-
   positions <- floating_substituent_positions(substituent)
   if (length(positions) == 0L) {
-    return(parents)
+    if (setequal(parents, main_vertices)) {
+      parents <- integer()
+    }
+    return(list(substituent = substituent, parents = parents))
   }
 
-  feasible <- purrr::map_lgl(parents, function(parent) {
+  feasible_positions <- purrr::map(parents, function(parent) {
     slots <- paste(parent, positions, sep = "\r")
-    any(!slots %in% occupied_slots)
+    positions[!slots %in% occupied_slots]
   })
-  parents <- parents[feasible]
+  feasible_parents <- lengths(feasible_positions) > 0L
+  parents <- parents[feasible_parents]
+  feasible_positions <- feasible_positions[feasible_parents]
   if (length(parents) == 0L) {
     cli::cli_abort(
       "No feasible parent remains for a {context} after excluding occupied carbon positions.",
       call = rlang::caller_env()
     )
   }
-  parents
+
+  position_sets <- purrr::map(
+    feasible_positions,
+    ~ sort(unique(.x))
+  )
+  if (length(unique(position_sets)) != 1L) {
+    cli::cli_abort(
+      "Can't represent the feasible parent-position combinations for a {context} after excluding occupied carbon positions.",
+      call = rlang::caller_env()
+    )
+  }
+
+  position <- collapse_floating_substituent_positions(position_sets[[1]])
+  substituent <- stringr::str_replace(
+    substituent,
+    "^[?0-9/]+",
+    position
+  )
+  if (setequal(parents, main_vertices)) {
+    parents <- integer()
+  }
+  list(substituent = substituent, parents = parents)
 }
 
 #' Normalize floating-part candidate parents

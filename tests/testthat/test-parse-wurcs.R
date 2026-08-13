@@ -1418,6 +1418,26 @@ test_that("single-parent WURCS floating substituents become ordinary", {
 })
 
 
+test_that("all-main WURCS substituent candidates exclude occupied slots", {
+  wurcs <- paste0(
+    "WURCS=2.0/2,2,2/",
+    "[a2112h-1a_1-5][a2122h-1a_1-5]/",
+    "1-2/a3-b1_a3|b3}*OSO/3=O/3=O"
+  )
+
+  result <- parse_wurcs(wurcs)
+
+  expect_identical(
+    unname(as.character(result)),
+    "Glc3S(a1-3)Gal(a1-"
+  )
+  expect_identical(
+    unname(glyrepr::has_floating_substituents(result)),
+    FALSE
+  )
+})
+
+
 test_that("parse_wurcs orients uncertain edges inside floating subtrees", {
   wurcs <- paste0(
     "WURCS=2.0/4,4,3/",

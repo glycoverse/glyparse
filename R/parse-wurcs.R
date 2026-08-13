@@ -1199,7 +1199,7 @@ annotate_wurcs_floating_substituents <- function(
         ))
       }
       parents <- metadata$parents
-      parents <- normalize_floating_substituent_parents(
+      domain <- normalize_floating_substituent_parents(
         parents,
         main_vertices,
         metadata$substituent,
@@ -1208,8 +1208,8 @@ annotate_wurcs_floating_substituents <- function(
       )
 
       list(
-        substituent = metadata$substituent,
-        parents = as.integer(parents)
+        substituent = domain$substituent,
+        parents = as.integer(domain$parents)
       )
     }
   )
