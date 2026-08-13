@@ -1220,6 +1220,26 @@ test_that("parse_wurcs preserves alditols with unknown reducing-end anomers", {
 })
 
 
+test_that("parse_wurcs warns when non-reducing alditols are normalized", {
+  non_reducing_alditol <- "WURCS=2.0/2,2,1/[a2122h-1a_1-5][h2112h]/1-2/a4-b1"
+  expect_warning(
+    structure <- parse_wurcs(non_reducing_alditol),
+    "Only the main reducing-end WURCS residue"
+  )
+  expect_identical(as.character(structure), "Gal(?1-4)Glc(a1-")
+  expect_identical(unname(glyrepr::get_alditol(structure)), FALSE)
+
+  root_and_non_reducing_alditols <-
+    "WURCS=2.0/2,2,1/[h2122h][h2112h]/1-2/a4-b1"
+  expect_warning(
+    structure <- parse_wurcs(root_and_non_reducing_alditols),
+    "Only the main reducing-end WURCS residue"
+  )
+  expect_identical(as.character(structure), "Gal(?1-4)Glc-ol(?1-")
+  expect_identical(unname(glyrepr::get_alditol(structure)), TRUE)
+})
+
+
 test_that("parse_wurcs correctly handles unknown linkages", {
   expect_equal(
     as.character(parse_wurcs(

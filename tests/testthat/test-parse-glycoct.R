@@ -408,6 +408,36 @@ test_that("GlycoCT preserves alditols with unknown reducing-end anomers", {
   expect_identical(unname(glyrepr::get_alditol(linked_structure)), TRUE)
 })
 
+test_that("GlycoCT warns when non-reducing alditols are normalized", {
+  non_reducing_alditol <- paste0(
+    "RES\n",
+    "1b:a-dgal-HEX-1:5\n",
+    "2b:o-dglc-HEX-0:0|1:aldi\n",
+    "LIN\n",
+    "1:1o(3+1)2d"
+  )
+  expect_warning(
+    structure <- parse_glycoct(non_reducing_alditol),
+    "Only the main reducing-end GlycoCT residue"
+  )
+  expect_identical(as.character(structure), "Glc(?1-3)Gal(a1-")
+  expect_identical(unname(glyrepr::get_alditol(structure)), FALSE)
+
+  root_and_non_reducing_alditols <- paste0(
+    "RES\n",
+    "1b:o-dglc-HEX-0:0|1:aldi\n",
+    "2b:o-dgal-HEX-0:0|1:aldi\n",
+    "LIN\n",
+    "1:1o(4+1)2d"
+  )
+  expect_warning(
+    structure <- parse_glycoct(root_and_non_reducing_alditols),
+    "Only the main reducing-end GlycoCT residue"
+  )
+  expect_identical(as.character(structure), "Gal(?1-4)Glc-ol(?1-")
+  expect_identical(unname(glyrepr::get_alditol(structure)), TRUE)
+})
+
 test_that("GlycoCT parses all distinct converter alditol descriptors", {
   alditol_mapping <- function(res, lin = NULL) {
     list(res = res, lin = lin)

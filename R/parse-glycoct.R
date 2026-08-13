@@ -71,14 +71,20 @@ do_parse_glycoct <- function(x) {
 
   main <- parse_glycoct_block(blocks$main)
   floating <- purrr::map(blocks$floating, parse_glycoct_und_block)
+  main_graph <- build_glycoct_graph_data(main$residues, main$linkages)
+  main_alditol_count <- sum(purrr::map_lgl(
+    main_graph$vertices,
+    ~ isTRUE(.x$is_alditol)
+  ))
+  has_unrepresented_main_alditol <- main_alditol_count >
+    as.integer(isTRUE(main_graph$graph$alditol))
   has_floating_alditol <- any(purrr::map_lgl(
     floating,
     ~ has_glycoct_alditol_residue(.x$residues)
   ))
-  if (has_floating_alditol) {
-    warn_glycoct_floating_alditol()
+  if (has_unrepresented_main_alditol || has_floating_alditol) {
+    warn_glycoct_unrepresented_alditol()
   }
-  main_graph <- build_glycoct_graph_data(main$residues, main$linkages)
 
   if (length(blocks$floating) == 0) {
     return(main_graph$graph)
@@ -319,14 +325,14 @@ has_glycoct_alditol_residue <- function(residues) {
   ))
 }
 
-#' Warn about floating alditol normalization in GlycoCT parsing
+#' Warn about unrepresented alditol normalization in GlycoCT parsing
 #'
 #' @return `NULL`, invisibly.
 #' @noRd
-warn_glycoct_floating_alditol <- function() {
+warn_glycoct_unrepresented_alditol <- function() {
   cli::cli_warn(c(
     "Only the main reducing-end GlycoCT residue can retain alditol status.",
-    "i" = "Alditol residues in UND sections are parsed as regular residues."
+    "i" = "Other alditol residues are parsed as regular residues."
   ))
   invisible(NULL)
 }

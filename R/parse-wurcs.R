@@ -1169,15 +1169,27 @@ build_glycan_graph <- function(
       floating_substituents
     )
   }
+  core_node <- find_wurcs_core_node(graph, floating)
+  core_anomer <- vertex_df$anomer[core_node]
+  graph$anomer <- core_anomer
+  graph$alditol <- isTRUE(vertex_df$alditol[core_node])
+  graph
+}
+
+
+#' Find the main reducing-end WURCS node
+#'
+#' @param graph A parsed WURCS graph.
+#' @param floating Parsed floating-part metadata.
+#'
+#' @return The numeric vertex index of the main reducing end.
+#' @noRd
+find_wurcs_core_node <- function(graph, floating = list()) {
   floating_roots <- purrr::map_int(floating, "root")
-  core_node <- igraph::V(graph)[
+  as.integer(igraph::V(graph)[
     igraph::degree(graph, mode = "in") == 0 &
       !seq_len(igraph::vcount(graph)) %in% floating_roots
-  ]
-  core_anomer <- vertex_df$anomer[as.numeric(core_node)]
-  graph$anomer <- core_anomer
-  graph$alditol <- isTRUE(vertex_df$alditol[as.numeric(core_node)])
-  graph
+  ])
 }
 
 
@@ -1339,7 +1351,8 @@ do_parse_wurcs <- function(x, residue_cache = NULL) {
     floating = floating,
     floating_substituents = floating_substituents
   )
-  if (any(alditols) && !isTRUE(graph$alditol)) {
+  core_node <- find_wurcs_core_node(graph, floating)
+  if (any(alditols[-core_node])) {
     warn_wurcs_non_root_alditol()
   }
   graph
