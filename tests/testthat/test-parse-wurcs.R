@@ -298,6 +298,36 @@ test_that("parse_residue works for each monosaccharide without substituents", {
 })
 
 
+test_that("parse_residue preserves unusual configurations", {
+  residues <- c(
+    DFuc = "a2112m-1a_1-5",
+    DFucf = "a2112m-1a_1-4",
+    LGul = "a1121h-1b_1-5",
+    DIdoA = "a1212A-1x_1-5",
+    LNeu5Ac = "Aad12211h-2a_2-6_5*NCC/3=O",
+    LGul_unknown_ring = "a1121h-1x_1-?",
+    DFuc_ambiguous = "u2112m",
+    DFuc_alditol = "h2112m"
+  )
+
+  parsed <- purrr::map(residues, parse_residue)
+
+  expect_identical(
+    purrr::map_chr(parsed, "mono"),
+    c(
+      DFuc = "DFuc",
+      DFucf = "DFucf",
+      LGul = "LGul",
+      DIdoA = "DIdoA",
+      LNeu5Ac = "LNeu5Ac",
+      LGul_unknown_ring = "LGul",
+      DFuc_ambiguous = "DFuc",
+      DFuc_alditol = "DFuc"
+    )
+  )
+})
+
+
 test_that("parse_residue raises an error with unkown monosaccharide", {
   expect_error(
     parse_residue("axxxxxh-1a_1-5"),
@@ -636,7 +666,7 @@ test_that("parse_residue maps generic WURCS descriptors to generic monosaccharid
   )
   expect_equal(
     parse_residue("u2112m"),
-    c(mono = "dHex", anomer = "??", sub = "")
+    c(mono = "DFuc", anomer = "??", sub = "")
   )
   expect_equal(
     parse_residue("a2112m-1x_1-5_2*NCC/3=O"),
@@ -657,6 +687,10 @@ test_that("parse_residue maps generic WURCS descriptors to generic monosaccharid
   expect_equal(
     parse_residue("AUd21122h_4*OCC/3=O_5*NCC/3=O"),
     c(mono = "Neu5Ac", anomer = "??", sub = "4Ac")
+  )
+  expect_equal(
+    parse_residue("AUd12211h_4*OCC/3=O_5*NCC/3=O"),
+    c(mono = "LNeu5Ac", anomer = "??", sub = "4Ac")
   )
 })
 
@@ -740,6 +774,14 @@ test_that("parse_residue handles unknown ring closure", {
   expect_equal(
     parse_residue("Aad21122h-2x_2-?_5*NCC/3=O"),
     c(mono = "Neu5Ac", anomer = "?2", sub = "")
+  )
+  expect_equal(
+    parse_residue("Aad12211h-2a_2-?_4*OCC/3=O_5*NCC/3=O"),
+    c(mono = "LNeu5Ac", anomer = "a2", sub = "4Ac")
+  )
+  expect_equal(
+    parse_residue("Aad12211h-2b_2-?_5*NCCO/3=O"),
+    c(mono = "LNeu5Gc", anomer = "b2", sub = "")
   )
   expect_equal(
     parse_residue("Aad21122h-2a_2-?_4*OCC/3=O_5*NCC/3=O"),

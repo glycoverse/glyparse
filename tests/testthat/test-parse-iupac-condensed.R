@@ -5,6 +5,17 @@ test_that("IUPAC-condensed: some O-glycan", {
   expect_snapshot(print(glycan, verbose = TRUE))
 })
 
+test_that("IUPAC-condensed preserves unusual configurations", {
+  parsed <- parse_iupac_condensed(
+    "DFuc3S(a1-2)[LGul(b1-3)]DFucf(?1-"
+  )
+
+  expect_identical(
+    as.character(parsed),
+    "DFuc3S(a1-2)[LGul(b1-3)]DFucf(?1-"
+  )
+})
+
 test_that("IUPAC-condensed can drop generic glycans", {
   input <- c("Hex(??-", "Glc(?1-", "HexNAc(??-")
 

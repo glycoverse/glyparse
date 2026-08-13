@@ -62,6 +62,39 @@ test_that("LINUCS preserves NA and name semantics", {
   )
 })
 
+test_that("LINUCS preserves unusual configurations", {
+  parsed <- parse_linucs(c(
+    "[][a-L-Fucp]{}",
+    "[][a-D-Fucp3S]{}",
+    "[][b-L-Gulp]{}",
+    "[][?-D-Fucf]{}"
+  ))
+
+  expect_identical(
+    as.character(parsed),
+    c("Fuc(a1-", "DFuc3S(a1-", "LGul(b1-", "DFucf(?1-")
+  )
+})
+
+test_that("LINUCS parses N-sulfate suffixes on unusual configurations", {
+  parsed <- parse_linucs(c(
+    "[][L-GulpNS]{}",
+    "[][L-GulfNS]{}",
+    "[][D-IdopNS]{}",
+    "[][D-IdofNS]{}"
+  ))
+
+  expect_identical(
+    as.character(parsed),
+    c(
+      "LGulN2S(?1-",
+      "LGulfN2S(?1-",
+      "DIdoN2S(?1-",
+      "DIdofN2S(?1-"
+    )
+  )
+})
+
 test_that("LINUCS supports on_failure handling", {
   skip_on_old_win()
 

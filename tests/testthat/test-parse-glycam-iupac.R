@@ -29,6 +29,25 @@ test_that("GlyCAM IUPAC parses generic monosaccharides alone", {
   expect_identical(as.character(parsed), c(Hex = "Hex(b1-"))
 })
 
+test_that("GlyCAM IUPAC preserves unusual configurations", {
+  parsed <- parse_glycam_iupac(c(
+    natural_fucose = "LFucpa1-OH",
+    d_fucose = "DFucp[3S]a1-OH",
+    l_gulose = "LGulpb1-OH",
+    d_fucofuranose = "DFucfa1-OH"
+  ))
+
+  expect_identical(
+    as.character(parsed),
+    c(
+      natural_fucose = "Fuc(a1-",
+      d_fucose = "DFuc3S(a1-",
+      l_gulose = "LGul(b1-",
+      d_fucofuranose = "DFucf(a1-"
+    )
+  )
+})
+
 test_that("GlyCAM IUPAC parses checklist monosaccharide names", {
   skip_on_old_win()
 
@@ -153,7 +172,7 @@ test_that("GlyCAM IUPAC parses checklist monosaccharide names", {
       Dig = "Dig(b1-",
       Col = "Col(b1-",
       Ara = "Ara(b1-",
-      Lyx = "Lyx(b1-",
+      Lyx = "LLyx(b1-",
       Xyl = "Xyl(b1-",
       Rib = "Rib(b1-",
       Neu5Ac = "Neu5Ac(b2-",
@@ -171,7 +190,7 @@ test_that("GlyCAM IUPAC parses checklist monosaccharide names", {
       MurNAc = "MurNAc(b1-",
       MurNGc = "MurNGc(b1-",
       Mur = "Mur(b1-",
-      Api = "Apif(b1-",
+      Api = "DApif(b1-",
       Fru = "Fru(b2-",
       Tag = "Tag(b2-",
       Sor = "Sor(b2-",

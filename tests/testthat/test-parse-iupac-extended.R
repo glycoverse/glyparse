@@ -18,14 +18,42 @@ test_that("monosaccharides are parsed correctly", {
 
 test_that("every furanose monosaccharide is parsed correctly", {
   furanose <- unname(furanose_monosaccharide_map())
-  extended <- names(IUPAC_EXT_TO_CON)[match(furanose, IUPAC_EXT_TO_CON)]
+  unusual_map <- unusual_configuration_monosaccharide_map()
+  unusual_index <- match(furanose, unname(unusual_map))
+  natural <- furanose
+  natural[!is.na(unusual_index)] <- names(unusual_map)[
+    unusual_index[!is.na(unusual_index)]
+  ]
+  unusual <- unname(unusual_map[natural])
+  configuration <- invert_configuration(stringr::str_sub(unusual, 1, 1))
+  configuration[!is.na(unusual_index)] <- stringr::str_sub(
+    furanose[!is.na(unusual_index)],
+    1,
+    1
+  )
+  configuration[is.na(configuration)] <- "?"
+  extended <- names(IUPAC_EXT_TO_CON)[match(natural, IUPAC_EXT_TO_CON)]
   anomer_pos <- glyrepr::get_anomer_pos(furanose)
-  input <- paste0("?-D-", extended, "-(", anomer_pos, "→")
+  input <- paste0("?-", configuration, "-", extended, "-(", anomer_pos, "→")
 
   parsed <- parse_iupac_extended(input)
   graphs <- glyrepr::get_structure_graphs(parsed, return_list = TRUE)
 
   expect_identical(purrr::map_chr(graphs, ~ igraph::V(.x)$mono), furanose)
+})
+
+
+test_that("IUPAC-extended preserves unusual configurations", {
+  parsed <- parse_iupac_extended(c(
+    "α-L-Gulp-(1→",
+    "β-D-Fucp3S-(1→",
+    "?-D-Fucf-(1→"
+  ))
+
+  expect_identical(
+    as.character(parsed),
+    c("LGul(a1-", "DFuc3S(b1-", "DFucf(?1-")
+  )
 })
 
 
