@@ -3,9 +3,10 @@
 ## glyparse (development version)
 
 - Parsers now preserve unusual monosaccharide configurations using
-  `glyrepr` names such as `DFuc`, `LGul`, and `DFucf`, while unprefixed
-  names retain their natural configurations.
-  ([\#43](https://github.com/glycoverse/glyparse/issues/43))
+  `glyrepr` names such as `D-Fuc`, `L-Gul`, and `D-Fucf`, while
+  unprefixed names retain their natural configurations.
+  ([\#43](https://github.com/glycoverse/glyparse/issues/43),
+  [\#44](https://github.com/glycoverse/glyparse/issues/44))
 - Parsers now preserve explicit furanose forms as `glyrepr`
   monosaccharide names such as `Galf`, `GlcfNAc`, and `Neuf5Ac` across
   IUPAC, GlyCAM IUPAC, GlycoCT, WURCS, LINUCS, Linear Code, and KCF
