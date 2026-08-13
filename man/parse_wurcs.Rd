@@ -34,8 +34,8 @@ A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.
 This function parses WURCS strings into a \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}}.
 Currently, only WURCS 2.0 is supported.
 For more information about WURCS, see \href{https://github.com/glycoinfo/WURCS/wiki}{WURCS}.
-Alditol residues are parsed as regular reducing-end glycans with unknown
-anomer configurations.
+Main reducing-end alditol residues retain their alditol status and use an
+unknown anomer configuration.
 Ambiguous alternative linkage groups are represented as floating glycan
 parts when their child residue or subtree is not localized to one parent.
 Floating substituents preserve their chemistry, carbon-position ambiguity,

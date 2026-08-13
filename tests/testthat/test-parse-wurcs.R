@@ -1207,20 +1207,16 @@ test_that("parse_residue handles alditol residues", {
 })
 
 
-test_that("parse_wurcs warns and uses unknown reducing-end anomers for alditols", {
+test_that("parse_wurcs preserves alditols with unknown reducing-end anomers", {
   glcnac_alditol <- "WURCS=2.0/1,1,0/[h2122h_2*NCC/3=O]/1/"
-  expect_warning(
-    glcnac_structure <- parse_wurcs(glcnac_alditol),
-    "regular reducing-end glycans with unknown anomer configurations"
-  )
-  expect_equal(as.character(glcnac_structure), "GlcNAc(?1-")
+  glcnac_structure <- parse_wurcs(glcnac_alditol)
+  expect_equal(as.character(glcnac_structure), "GlcNAc-ol(?1-")
+  expect_identical(unname(glyrepr::get_alditol(glcnac_structure)), TRUE)
 
   linked_alditol <- "WURCS=2.0/2,2,1/[h2122h_2*NCC/3=O][a2112h-1b_1-5]/1-2/a4-b1"
-  expect_warning(
-    linked_structure <- parse_wurcs(linked_alditol),
-    "regular reducing-end glycans with unknown anomer configurations"
-  )
-  expect_equal(as.character(linked_structure), "Gal(b1-4)GlcNAc(?1-")
+  linked_structure <- parse_wurcs(linked_alditol)
+  expect_equal(as.character(linked_structure), "Gal(b1-4)GlcNAc-ol(?1-")
+  expect_identical(unname(glyrepr::get_alditol(linked_structure)), TRUE)
 })
 
 

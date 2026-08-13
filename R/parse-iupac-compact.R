@@ -9,8 +9,8 @@
 #' notation into IUPAC-condensed notation, then uses the IUPAC-condensed parser
 #' to construct the glycan structure.
 #'
-#' Alditol glycans are parsed as regular reducing-end glycans with unknown
-#' anomer configurations.
+#' Alditol glycans marked with `+aldi` retain their alditol status and use an
+#' unknown reducing-end anomer configuration.
 #'
 #' @param x A character vector of IUPAC-compact strings. NA values are allowed
 #'   and will be returned as NA structures.
@@ -64,10 +64,6 @@ do_parse_iupac_compact <- function(x) {
 #' @return A character vector containing IUPAC-condensed notation.
 #' @noRd
 convert_iupac_compact_to_condensed <- function(x) {
-  if (any(is_iupac_compact_alditol(x))) {
-    warn_iupac_compact_alditol()
-  }
-
   x |>
     normalize_iupac_compact_aliases() |>
     normalize_iupac_compact_modifiers() |>
@@ -148,8 +144,8 @@ normalize_iupac_compact_linkages <- function(x) {
 #'
 #' @param x A character vector of partially normalized IUPAC-compact strings.
 #'
-#' @return A character vector with alditol suffixes removed and reducing-end
-#'   anomer set to unknown.
+#' @return A character vector with alditol suffixes converted to `-ol` and
+#'   reducing-end anomers set to unknown.
 #' @noRd
 normalize_iupac_compact_alditol <- function(x) {
   alditol <- is_iupac_compact_alditol(x)
@@ -163,7 +159,7 @@ normalize_iupac_compact_alditol <- function(x) {
     if (is.null(terminal)) {
       return(value)
     }
-    replacement <- paste0(terminal$mono, terminal$modifiers)
+    replacement <- paste0(terminal$mono, terminal$modifiers, "-ol")
     stringr::str_replace(value, iupac_compact_terminal_pattern(), replacement)
   })
   x
@@ -185,11 +181,15 @@ normalize_iupac_compact_terminal <- function(x) {
 
   mono <- terminal_match[matched, "mono"]
   modifiers <- terminal_match[matched, "modifiers"]
+  alditol <- terminal_match[matched, "alditol"]
+  alditol[is.na(alditol)] <- ""
   anomer <- terminal_match[matched, "anomer"]
   anomer[is.na(anomer)] <- "?"
 
   anomer_pos <- iupac_compact_default_anomer_pos(mono)
-  terminal <- stringr::str_glue("{mono}{modifiers}({anomer}{anomer_pos}-")
+  terminal <- stringr::str_glue(
+    "{mono}{modifiers}{alditol}({anomer}{anomer_pos}-"
+  )
   x[matched] <- stringr::str_replace(
     x[matched],
     iupac_compact_terminal_pattern(),
@@ -207,19 +207,6 @@ normalize_iupac_compact_terminal <- function(x) {
 #' @noRd
 is_iupac_compact_alditol <- function(x) {
   stringr::str_ends(x, stringr::fixed("+aldi"))
-}
-
-
-#' Warn about alditol normalization in IUPAC-compact parsing.
-#'
-#' @return `NULL`, invisibly.
-#' @noRd
-warn_iupac_compact_alditol <- function() {
-  cli::cli_warn(c(
-    "Alditol IUPAC-compact glycans are parsed as regular reducing-end glycans with unknown anomer configurations.",
-    "i" = "For example, Glc-ol is returned as Glc(?1-."
-  ))
-  invisible(NULL)
 }
 
 
@@ -310,6 +297,7 @@ iupac_compact_terminal_pattern <- function() {
     "(?<modifiers>(?:",
     iupac_compact_modifier_pattern(),
     ")*)",
+    "(?<alditol>-ol)?",
     "(?<anomer>[ab\\?])?",
     "$"
   )

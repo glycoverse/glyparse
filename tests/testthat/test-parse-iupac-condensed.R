@@ -16,6 +16,13 @@ test_that("IUPAC-condensed preserves unusual configurations", {
   )
 })
 
+test_that("IUPAC-condensed preserves alditols", {
+  parsed <- parse_iupac_condensed("Gal(b1-4)GlcNAc-ol(a1-")
+
+  expect_identical(as.character(parsed), "Gal(b1-4)GlcNAc-ol(a1-")
+  expect_identical(unname(glyrepr::get_alditol(parsed)), TRUE)
+})
+
 test_that("IUPAC-condensed can drop generic glycans", {
   input <- c("Hex(??-", "Glc(?1-", "HexNAc(??-")
 

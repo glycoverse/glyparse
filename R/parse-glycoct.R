@@ -10,8 +10,8 @@
 #' - UND: Contains floating substructures or substituents whose attachment to
 #'   the main glycan is unresolved
 #'
-#' Alditol residues are parsed as regular reducing-end glycans with unknown
-#' anomer configurations.
+#' Main reducing-end alditol residues retain their alditol status and use an
+#' unknown anomer configuration.
 #'
 #' For more information about GlycoCT format, see the glycoct.md documentation.
 #'
@@ -71,13 +71,12 @@ do_parse_glycoct <- function(x) {
 
   main <- parse_glycoct_block(blocks$main)
   floating <- purrr::map(blocks$floating, parse_glycoct_und_block)
-  has_alditol <- has_glycoct_alditol_residue(main$residues) ||
-    any(purrr::map_lgl(
-      floating,
-      ~ has_glycoct_alditol_residue(.x$residues)
-    ))
-  if (has_alditol) {
-    warn_glycoct_alditol()
+  has_floating_alditol <- any(purrr::map_lgl(
+    floating,
+    ~ has_glycoct_alditol_residue(.x$residues)
+  ))
+  if (has_floating_alditol) {
+    warn_glycoct_floating_alditol()
   }
   main_graph <- build_glycoct_graph_data(main$residues, main$linkages)
 
@@ -304,8 +303,7 @@ parse_res_section <- function(res_lines) {
 #' @return A logical scalar.
 #' @noRd
 is_glycoct_alditol_mono <- function(content) {
-  isTRUE(stringr::str_detect(content, "-0:0")) &&
-    isTRUE(stringr::str_detect(content, "\\|1:aldi"))
+  isTRUE(stringr::str_detect(content, "\\|1:aldi"))
 }
 
 #' Check whether parsed GlycoCT residues contain an alditol
@@ -321,14 +319,14 @@ has_glycoct_alditol_residue <- function(residues) {
   ))
 }
 
-#' Warn about alditol normalization in GlycoCT parsing
+#' Warn about floating alditol normalization in GlycoCT parsing
 #'
 #' @return `NULL`, invisibly.
 #' @noRd
-warn_glycoct_alditol <- function() {
+warn_glycoct_floating_alditol <- function() {
   cli::cli_warn(c(
-    "Alditol GlycoCT residues are parsed as regular reducing-end glycans with unknown anomer configurations.",
-    "i" = "For example, GlcNAc-ol is returned as GlcNAc(?1-."
+    "Only the main reducing-end GlycoCT residue can retain alditol status.",
+    "i" = "Alditol residues in UND sections are parsed as regular residues."
   ))
   invisible(NULL)
 }
@@ -556,7 +554,7 @@ build_glycoct_graph_data <- function(residues, linkages) {
   } else {
     g$anomer <- "?1"
   }
-  g$alditol <- FALSE
+  g$alditol <- !is.null(reducing_end) && isTRUE(reducing_end$is_alditol)
 
   list(
     graph = g,
@@ -652,7 +650,7 @@ build_glycoct_floating_graph <- function(
     use.names = FALSE
   )
   forest$anomer <- main$graph$anomer
-  forest$alditol <- FALSE
+  forest$alditol <- isTRUE(main$graph$alditol)
 
   main_parent_indices <- stats::setNames(
     seq_along(main$original_ids),

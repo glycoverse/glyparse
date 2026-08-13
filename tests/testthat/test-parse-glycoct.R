@@ -39,19 +39,22 @@ test_that("GlycoCT preserves furanose ring bounds", {
 })
 
 test_that("GlycoCT preserves unusual configurations", {
-  expect_warning(
-    parsed <- parse_glycoct(c(
-      "RES\n1b:a-dgal-HEX-1:5|6:d",
-      "RES\n1b:b-lgul-HEX-1:5",
-      "RES\n1b:x-dido-HEX-1:5|6:a",
-      "RES\n1b:a-dgal-HEX-1:4|6:d",
-      "RES\n1b:o-dgal-HEX-0:0|1:aldi|6:d"
-    )),
-    "regular reducing-end glycans"
-  )
+  parsed <- parse_glycoct(c(
+    "RES\n1b:a-dgal-HEX-1:5|6:d",
+    "RES\n1b:b-lgul-HEX-1:5",
+    "RES\n1b:x-dido-HEX-1:5|6:a",
+    "RES\n1b:a-dgal-HEX-1:4|6:d",
+    "RES\n1b:o-dgal-HEX-0:0|1:aldi|6:d"
+  ))
   expect_identical(
     as.character(parsed),
-    c("D-Fuc(a1-", "L-Gul(b1-", "D-IdoA(?1-", "D-Fucf(a1-", "D-Fuc(?1-")
+    c(
+      "D-Fuc(a1-",
+      "L-Gul(b1-",
+      "D-IdoA(?1-",
+      "D-Fucf(a1-",
+      "D-Fuc-ol(?1-"
+    )
   )
 })
 
@@ -365,7 +368,7 @@ test_that("GlycoCT handles N-sulfated amino sugars with unknown ring bounds", {
   expect_equal(igraph::vertex_attr(graph, "sub"), "2S")
 })
 
-test_that("GlycoCT warns and uses unknown reducing-end anomers for alditols", {
+test_that("GlycoCT preserves alditols with unknown reducing-end anomers", {
   glcnac_alditol <- paste0(
     "RES\n",
     "1b:o-dglc-HEX-0:0|1:aldi\n",
@@ -373,11 +376,23 @@ test_that("GlycoCT warns and uses unknown reducing-end anomers for alditols", {
     "LIN\n",
     "1:1d(2+1)2n"
   )
-  expect_warning(
-    glcnac_structure <- parse_glycoct(glcnac_alditol),
-    "regular reducing-end glycans with unknown anomer configurations"
+  glcnac_structure <- parse_glycoct(glcnac_alditol)
+  expect_equal(as.character(glcnac_structure), "GlcNAc-ol(?1-")
+  expect_identical(unname(glyrepr::get_alditol(glcnac_structure)), TRUE)
+
+  unknown_ring_alditol <- paste0(
+    "RES\n",
+    "1b:x-dgal-HEX-x:x|1:aldi\n",
+    "2s:n-acetyl\n",
+    "LIN\n",
+    "1:1d(2+1)2n"
   )
-  expect_equal(as.character(glcnac_structure), "GlcNAc(?1-")
+  unknown_ring_structure <- parse_glycoct(unknown_ring_alditol)
+  expect_equal(as.character(unknown_ring_structure), "GalNAc-ol(?1-")
+  expect_identical(
+    unname(glyrepr::get_alditol(unknown_ring_structure)),
+    TRUE
+  )
 
   linked_alditol <- paste0(
     "RES\n",
@@ -388,11 +403,9 @@ test_that("GlycoCT warns and uses unknown reducing-end anomers for alditols", {
     "1:1d(2+1)2n\n",
     "2:1o(4+1)3d"
   )
-  expect_warning(
-    linked_structure <- parse_glycoct(linked_alditol),
-    "regular reducing-end glycans with unknown anomer configurations"
-  )
-  expect_equal(as.character(linked_structure), "Gal(b1-4)GlcNAc(?1-")
+  linked_structure <- parse_glycoct(linked_alditol)
+  expect_equal(as.character(linked_structure), "Gal(b1-4)GlcNAc-ol(?1-")
+  expect_identical(unname(glyrepr::get_alditol(linked_structure)), TRUE)
 })
 
 test_that("GlycoCT parses all distinct converter alditol descriptors", {
@@ -547,15 +560,12 @@ test_that("GlycoCT parses all distinct converter alditol descriptors", {
 
   purrr::iwalk(alditol_mappings, function(mapping, mono_name) {
     glycoct <- create_glycoct_from_mapping(mapping)
-    expect_warning(
-      result <- parse_glycoct(glycoct),
-      "regular reducing-end glycans with unknown anomer configurations"
-    )
+    result <- parse_glycoct(glycoct)
     graph <- glyrepr::get_structure_graphs(result, return_list = FALSE)
 
     expect_equal(igraph::vertex_attr(graph, "mono"), mono_name)
     expect_equal(graph$anomer, paste0("?", glyrepr::get_anomer_pos(mono_name)))
-    expect_false(isTRUE(graph$alditol))
+    expect_identical(graph$alditol, TRUE)
   })
 
   # GlycanFormatConverter emits the same GlycoCT alditol descriptor for Ara-ol
@@ -880,7 +890,7 @@ test_that("GlycoCT warns for alditols inside UND sections", {
 
   expect_warning(
     result <- parse_glycoct(glycoct),
-    "regular reducing-end glycans with unknown anomer configurations"
+    "Only the main reducing-end GlycoCT residue"
   )
   expect_identical(unname(as.character(result)), "Glc(?1-3)Gal(a1-")
 })

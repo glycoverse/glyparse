@@ -3,8 +3,8 @@
 #' This function parses WURCS strings into a [glyrepr::glycan_structure()].
 #' Currently, only WURCS 2.0 is supported.
 #' For more information about WURCS, see [WURCS](https://github.com/glycoinfo/WURCS/wiki).
-#' Alditol residues are parsed as regular reducing-end glycans with unknown
-#' anomer configurations.
+#' Main reducing-end alditol residues retain their alditol status and use an
+#' unknown anomer configuration.
 #' Ambiguous alternative linkage groups are represented as floating glycan
 #' parts when their child residue or subtree is not localized to one parent.
 #' Floating substituents preserve their chemistry, carbon-position ambiguity,
@@ -558,14 +558,14 @@ is_wurcs_alditol_residue <- function(residue) {
 }
 
 
-#' Warn about alditol normalization in WURCS parsing.
+#' Warn about non-root alditol normalization in WURCS parsing.
 #'
 #' @return `NULL`, invisibly.
 #' @noRd
-warn_wurcs_alditol <- function() {
+warn_wurcs_non_root_alditol <- function() {
   cli::cli_warn(c(
-    "Alditol WURCS residues are parsed as regular reducing-end glycans with unknown anomer configurations.",
-    "i" = "For example, GlcNAc-ol is returned as GlcNAc(?1-."
+    "Only the main reducing-end WURCS residue can retain alditol status.",
+    "i" = "Non-root alditol residues are parsed as regular residues."
   ))
   invisible(NULL)
 }
@@ -880,7 +880,7 @@ parse_unique_residue_details <- function(x, residue_cache = NULL) {
   )
   list(
     values = lapply(details, `[[`, "value"),
-    has_alditol = any(vapply(details, `[[`, logical(1), "alditol"))
+    alditols = vapply(details, `[[`, logical(1), "alditol")
   )
 }
 
@@ -1115,7 +1115,11 @@ letter_to_int <- function(letter) {
 }
 
 
-prepare_graph_dfs <- function(residues, linkages) {
+prepare_graph_dfs <- function(
+  residues,
+  linkages,
+  alditols = rep(FALSE, length(residues))
+) {
   # Generate edgelist dataframe and vertex dataframe.
   # `edgelist_df`: "from", "to", "linkage".
   # `vertex_df`: "name", "mono", "anomer", "sub".
@@ -1124,6 +1128,7 @@ prepare_graph_dfs <- function(residues, linkages) {
     residues,
     ~ data.frame(as.list(.x))
   ))
+  vertex_df$alditol <- alditols
   if (length(linkages) == 0L) {
     edgelist_df <- data.frame(
       from = integer(),
@@ -1171,7 +1176,7 @@ build_glycan_graph <- function(
   ]
   core_anomer <- vertex_df$anomer[as.numeric(core_node)]
   graph$anomer <- core_anomer
-  graph$alditol <- FALSE # Not implemented yet
+  graph$alditol <- isTRUE(vertex_df$alditol[as.numeric(core_node)])
   graph
 }
 
@@ -1303,9 +1308,6 @@ do_parse_wurcs <- function(x, residue_cache = NULL) {
     residue_cache = residue_cache
   )
   unique_residues <- residue_details$values
-  if (residue_details$has_alditol) {
-    warn_wurcs_alditol()
-  }
 
   # residue_sequence: an integer vector of monosaccharide indices,
   # referring to the order of unique_residues, repeated monosaccharides allowed.
@@ -1313,6 +1315,7 @@ do_parse_wurcs <- function(x, residue_cache = NULL) {
   residue_sequence_part <- stringr::str_extract(x, wurcs_regex, group = 2)
   residue_sequence <- parse_residue_sequence(residue_sequence_part)
   residues <- unique_residues[residue_sequence]
+  alditols <- residue_details$alditols[residue_sequence]
 
   # linkages: a list of named lists, each list contains `from`, `to`, and `linkage`.
   # `from` and `to` are the indices of monosaccharides in the sequence.
@@ -1329,12 +1332,15 @@ do_parse_wurcs <- function(x, residue_cache = NULL) {
     floating_substituents <- linkage_data$floating_substituents
   }
 
-  graph_dfs <- prepare_graph_dfs(residues, linkages)
+  graph_dfs <- prepare_graph_dfs(residues, linkages, alditols = alditols)
   graph <- build_glycan_graph(
     graph_dfs$edgelist,
     graph_dfs$vertex,
     floating = floating,
     floating_substituents = floating_substituents
   )
+  if (any(alditols) && !isTRUE(graph$alditol)) {
+    warn_wurcs_non_root_alditol()
+  }
   graph
 }

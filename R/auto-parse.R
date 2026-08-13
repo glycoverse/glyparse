@@ -75,6 +75,8 @@ choose_parser <- function(x) {
     return(do_parse_strucgp_struc)
   } else if (stringr::str_ends(x, "-OH")) {
     return(do_parse_glycam_iupac)
+  } else if (stringr::str_ends(x, stringr::fixed("-ol"))) {
+    return(do_parse_iupac_condensed)
   } else if (
     stringr::str_detect(x, "\\u2192") || # Unicode arrow →
       stringr::str_detect(x, "->") || # Plain text arrow ->
