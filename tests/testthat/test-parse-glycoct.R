@@ -731,6 +731,89 @@ test_that("GlycoCT UND sections become floating glycan parts", {
   expect_equal(floating$parents, list(integer(), integer()))
 })
 
+test_that("substituent-only GlycoCT UND sections become floating", {
+  glycoct <- paste(
+    "RES",
+    "1b:a-dgal-HEX-1:5",
+    "2b:b-dglc-HEX-1:5",
+    "LIN",
+    "1:1o(3+1)2d",
+    "UND",
+    "UND1:100.0:100.0",
+    "ParentIDs:1|2",
+    "SubtreeLinkageID1:o(-1+1)n",
+    "RES",
+    "3s:sulfate"
+  )
+
+  result <- parse_glycoct(glycoct)
+  floating <- glyrepr::structure_floating_substituents(result)
+
+  expect_identical(
+    unname(as.character(result)),
+    "{?S}Glc(b1-3)Gal(a1-"
+  )
+  expect_identical(floating$substituent, "?S")
+  expect_equal(floating$parents, list(integer()))
+})
+
+test_that("single-parent GlycoCT UND substituents become ordinary", {
+  glycoct <- paste(
+    "RES",
+    "1b:a-dgal-HEX-1:5",
+    "UND",
+    "UND1:100.0:100.0",
+    "ParentIDs:1",
+    "SubtreeLinkageID1:o(3+1)n",
+    "RES",
+    "2s:sulfate"
+  )
+
+  result <- parse_glycoct(glycoct)
+
+  expect_identical(unname(as.character(result)), "Gal3S(a1-")
+  expect_identical(
+    unname(glyrepr::has_floating_substituents(result)),
+    FALSE
+  )
+})
+
+test_that("GlycoCT supports floating parts and substituents together", {
+  glycoct <- paste(
+    "RES",
+    "1b:a-dgal-HEX-1:5",
+    "2b:b-dglc-HEX-1:5",
+    "LIN",
+    "1:1o(3+1)2d",
+    "UND",
+    "UND1:100.0:100.0",
+    "ParentIDs:1|2",
+    "SubtreeLinkageID1:o(6+1)d",
+    "RES",
+    "3b:a-lgal-HEX-1:5|6:d",
+    "UND2:100.0:100.0",
+    "ParentIDs:1|2",
+    "SubtreeLinkageID1:o(-1+1)n",
+    "RES",
+    "4s:sulfate"
+  )
+
+  result <- parse_glycoct(glycoct)
+
+  expect_identical(
+    unname(as.character(result)),
+    "{?S}{Fuc(a1-6)}Glc(b1-3)Gal(a1-"
+  )
+  expect_identical(
+    glyrepr::structure_floating_substituents(result)$substituent,
+    "?S"
+  )
+  expect_identical(
+    glyrepr::structure_floating_parts(result)$linkage,
+    "a1-6"
+  )
+})
+
 test_that("GlycoCT warns for alditols inside UND sections", {
   glycoct <- paste(
     "RES",

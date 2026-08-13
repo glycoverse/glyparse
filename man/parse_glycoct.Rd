@@ -39,8 +39,8 @@ GlycoCT format consists of:
 \itemize{
 \item RES: Contains monosaccharides (lines starting with 'b:') and substituents (lines starting with 's:')
 \item LIN: Contains linkage information between residues
-\item UND: Contains floating substructures whose attachment to the main glycan
-is unresolved
+\item UND: Contains floating substructures or substituents whose attachment to
+the main glycan is unresolved
 }
 
 Alditol residues are parsed as regular reducing-end glycans with unknown
