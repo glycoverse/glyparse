@@ -7,6 +7,8 @@
 #' anomer configurations.
 #' Ambiguous alternative linkage groups are represented as floating glycan
 #' parts when their child residue or subtree is not localized to one parent.
+#' Floating substituents preserve their chemistry, carbon-position ambiguity,
+#' and candidate parent residues.
 #'
 #' @param x A character vector of WURCS strings. NA values are allowed and will be returned as NA structures.
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
@@ -908,31 +910,93 @@ parse_linkages <- function(x) {
 
 parse_wurcs_linkages <- function(x, residues) {
   linkages <- stringr::str_split_1(x, "_")
-  floating <- stringr::str_detect(linkages, stringr::fixed("}"))
+  is_floating <- stringr::str_detect(linkages, stringr::fixed("}"))
+  floating <- purrr::map(
+    linkages[is_floating],
+    parse_wurcs_floating_linkage
+  )
+  floating_types <- purrr::map_chr(floating, "type")
 
   list(
     ordinary = purrr::map(
-      linkages[!floating],
+      linkages[!is_floating],
       parse_one_linkage,
       anomers = purrr::map_chr(residues, "anomer")
     ),
-    floating = purrr::map(linkages[floating], parse_wurcs_floating_linkage)
+    floating = purrr::map(
+      floating[floating_types == "part"],
+      "metadata"
+    ),
+    floating_substituents = purrr::map(
+      floating[floating_types == "substituent"],
+      "metadata"
+    )
   )
 }
 
 
 parse_wurcs_floating_linkage <- function(x) {
-  linkage <- stringr::str_remove(x, stringr::fixed("}"))
-  parts <- stringr::str_split_1(linkage, stringr::fixed("-"))
-  if (length(parts) != 2L) {
+  brace_parts <- stringr::str_split_1(x, stringr::fixed("}"))
+  if (length(brace_parts) != 2L) {
     cli::cli_abort(
-      "Floating WURCS substituents are not supported: {.str {x}}"
+      "Can't parse floating WURCS linkage: {.str {x}}"
     )
   }
 
+  if (stringr::str_starts(brace_parts[[2]], stringr::fixed("*"))) {
+    candidates <- parse_wurcs_floating_candidates(
+      brace_parts[[1]],
+      x,
+      context = "substituent"
+    )
+    sub_code <- stringr::str_remove(brace_parts[[2]], "^\\*")
+    substituent <- parse_wurcs_substituent_name(sub_code)
+    position <- collapse_floating_substituent_positions(
+      candidates$positions
+    )
+
+    return(list(
+      type = "substituent",
+      metadata = list(
+        substituent = paste0(position, substituent),
+        parents = candidates$parents
+      )
+    ))
+  }
+  if (brace_parts[[2]] != "") {
+    cli::cli_abort(
+      "Can't parse floating WURCS linkage: {.str {x}}"
+    )
+  }
+
+  parts <- stringr::str_split_1(brace_parts[[1]], stringr::fixed("-"))
+  if (length(parts) != 2L) {
+    cli::cli_abort(
+      "Can't parse floating WURCS linkage: {.str {x}}"
+    )
+  }
   child <- parse_wurcs_linkage_endpoint(parts[[1]])
+  candidates <- parse_wurcs_floating_candidates(
+    parts[[2]],
+    x,
+    context = "linkage"
+  )
+
+  list(
+    type = "part",
+    metadata = list(
+      root = child$node,
+      child_position = child$position,
+      parent_positions = candidates$positions,
+      parents = candidates$parents
+    )
+  )
+}
+
+
+parse_wurcs_floating_candidates <- function(x, source, context) {
   candidates <- purrr::map(
-    stringr::str_split_1(parts[[2]], stringr::fixed("|")),
+    stringr::str_split_1(x, stringr::fixed("|")),
     parse_wurcs_linkage_endpoint
   )
   candidate_nodes <- purrr::map_int(candidates, "node")
@@ -946,16 +1010,32 @@ parse_wurcs_floating_linkage <- function(x) {
   )
   if (length(unique(position_sets)) != 1L) {
     cli::cli_abort(
-      "Floating WURCS linkages with parent-specific acceptor positions are not supported: {.str {x}}"
+      "Floating WURCS {context}s with parent-specific positions are not supported: {.str {source}}"
     )
   }
 
   list(
-    root = child$node,
-    child_position = child$position,
-    parent_positions = position_sets[[1]],
+    positions = position_sets[[1]],
     parents = unique(candidate_nodes)
   )
+}
+
+
+parse_wurcs_substituent_name <- function(x) {
+  x <- stringr::str_replace(
+    x,
+    "^NSO/3=O/3=O$",
+    "OSO/3=O/3=O"
+  )
+  patterns <- paste0("^(?:", WURCS_SUB_REGEX, ")$")
+  sub_idx <- purrr::detect_index(
+    patterns,
+    ~ stringr::str_detect(x, .x)
+  )
+  if (sub_idx == 0L) {
+    cli::cli_abort("Unable to parse floating substituent: {.str {x}}")
+  }
+  names(WURCS_SUB_REGEX)[[sub_idx]]
 }
 
 
@@ -1063,7 +1143,12 @@ prepare_graph_dfs <- function(residues, linkages) {
 }
 
 
-build_glycan_graph <- function(edgelist_df, vertex_df, floating = list()) {
+build_glycan_graph <- function(
+  edgelist_df,
+  vertex_df,
+  floating = list(),
+  floating_substituents = list()
+) {
   # For format of input values, see `prepare_graph_dfs`.
   graph <- igraph::graph_from_data_frame(
     edgelist_df,
@@ -1071,6 +1156,13 @@ build_glycan_graph <- function(edgelist_df, vertex_df, floating = list()) {
   )
   if (length(floating) > 0) {
     graph <- annotate_wurcs_floating_parts(graph, vertex_df, floating)
+  }
+  if (length(floating_substituents) > 0) {
+    graph <- annotate_wurcs_floating_substituents(
+      graph,
+      floating,
+      floating_substituents
+    )
   }
   floating_roots <- purrr::map_int(floating, "root")
   core_node <- igraph::V(graph)[
@@ -1080,6 +1172,53 @@ build_glycan_graph <- function(edgelist_df, vertex_df, floating = list()) {
   core_anomer <- vertex_df$anomer[as.numeric(core_node)]
   graph$anomer <- core_anomer
   graph$alditol <- FALSE # Not implemented yet
+  graph
+}
+
+
+annotate_wurcs_floating_substituents <- function(
+  graph,
+  floating,
+  substituents
+) {
+  components <- igraph::components(graph, mode = "weak")$membership
+  floating_components <- components[purrr::map_int(floating, "root")]
+  floating_nodes <- which(components %in% floating_components)
+  main_vertices <- as.integer(setdiff(
+    seq_len(igraph::vcount(graph)),
+    floating_nodes
+  ))
+  occupied_slots <- definitely_occupied_carbon_slots(
+    graph,
+    main_vertices
+  )
+
+  graph$floating_substituents <- purrr::map(
+    substituents,
+    function(metadata) {
+      non_main_parents <- setdiff(metadata$parents, main_vertices)
+      if (length(non_main_parents) > 0L) {
+        cli::cli_abort(c(
+          "WURCS floating substituent candidate parents must be main-tree monosaccharides.",
+          "x" = "Candidate node{?s} {.val {non_main_parents}} belong{?s/} to a floating subtree."
+        ))
+      }
+      parents <- metadata$parents
+      domain <- normalize_floating_substituent_parents(
+        parents,
+        main_vertices,
+        metadata$substituent,
+        occupied_slots,
+        context = "WURCS floating substituent"
+      )
+
+      list(
+        substituent = domain$substituent,
+        parents = as.integer(domain$parents)
+      )
+    }
+  )
+
   graph
 }
 
@@ -1182,17 +1321,20 @@ do_parse_wurcs <- function(x, residue_cache = NULL) {
   if (linkage_part == "") {
     linkages <- NULL
     floating <- list()
+    floating_substituents <- list()
   } else {
     linkage_data <- parse_wurcs_linkages(linkage_part, residues)
     linkages <- linkage_data$ordinary
     floating <- linkage_data$floating
+    floating_substituents <- linkage_data$floating_substituents
   }
 
   graph_dfs <- prepare_graph_dfs(residues, linkages)
   graph <- build_glycan_graph(
     graph_dfs$edgelist,
     graph_dfs$vertex,
-    floating = floating
+    floating = floating,
+    floating_substituents = floating_substituents
   )
   graph
 }

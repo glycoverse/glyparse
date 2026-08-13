@@ -1320,6 +1320,140 @@ test_that("parse_wurcs preserves multiple floating subtrees", {
 })
 
 
+test_that("parse_wurcs supports floating substituents", {
+  restricted <- paste0(
+    "WURCS=2.0/3,3,3/",
+    "[a2112h-1a_1-5][a2122h-1a_1-5][a1122h-1a_1-5]/",
+    "1-2-3/b3|c3}*OSO/3=O/3=O_a3-b1_b4-c1"
+  )
+  multiple <- paste0(
+    "WURCS=2.0/3,3,4/",
+    "[a2112h-1a_1-5][a2122h-1a_1-5][a1122h-1a_1-5]/",
+    "1-2-3/a?|b?|c?}*OPO/3O/3=O_",
+    "a?|b?|c?}*OSO/3=O/3=O_a3-b1_b4-c1"
+  )
+
+  restricted_result <- parse_wurcs(restricted)
+  multiple_result <- parse_wurcs(multiple)
+
+  expect_identical(
+    unname(as.character(restricted_result)),
+    "{3S|1,2}Man(a1-4)Glc(a1-3)Gal(a1-"
+  )
+  expect_equal(
+    glyrepr::structure_floating_substituents(
+      restricted_result
+    )$parents,
+    list(c(1L, 2L))
+  )
+  expect_identical(
+    unname(as.character(multiple_result)),
+    "{?P}{?S}Man(a1-4)Glc(a1-3)Gal(a1-"
+  )
+})
+
+
+test_that("parse_wurcs supports floating parts and substituents together", {
+  wurcs <- paste0(
+    "WURCS=2.0/3,3,3/",
+    "[a2122h-1x_1-5][a2112h-1b_1-5]",
+    "[Aad21122h-2a_2-6_5*NCC/3=O]/",
+    "1-2-3/a4-b1_a?|b?}*OSO/3=O/3=O_c2-a6|b6}"
+  )
+
+  result <- parse_wurcs(wurcs)
+
+  expect_identical(
+    unname(as.character(result)),
+    "{?S}{Neu5Ac(a2-6)}Gal(b1-4)Glc(?1-"
+  )
+  expect_identical(
+    glyrepr::structure_floating_substituents(result)$substituent,
+    "?S"
+  )
+  expect_identical(
+    glyrepr::structure_floating_parts(result)$linkage,
+    "a2-6"
+  )
+})
+
+
+test_that("parse_wurcs maps floating substituent chemistry", {
+  codes <- c(
+    Me = "OC",
+    Ac = "OCC/3=O",
+    P = "OPO/3O/3=O",
+    S = "OSO/3=O/3=O",
+    PEtn = "OP^XOCCN/3O/3=O"
+  )
+  parsed <- purrr::map_chr(codes, function(code) {
+    linkage <- paste0("a?|b?}*", code)
+    parse_wurcs_floating_linkage(linkage)$metadata$substituent
+  })
+  ambiguous <- parse_wurcs_floating_linkage(
+    "a6|a4|b4|b6}*OSO/3=O/3=O"
+  )
+  n_sulfate <- parse_wurcs_floating_linkage(
+    "a2}*NSO/3=O/3=O"
+  )
+
+  expect_identical(
+    unname(parsed),
+    paste0("?", names(codes))
+  )
+  expect_identical(ambiguous$metadata$substituent, "4/6S")
+  expect_identical(n_sulfate$metadata$substituent, "2S")
+})
+
+
+test_that("single-parent WURCS floating substituents become ordinary", {
+  wurcs <- paste0(
+    "WURCS=2.0/1,1,1/[a2112h-1a_1-5]/1/",
+    "a3}*OSO/3=O/3=O"
+  )
+
+  result <- parse_wurcs(wurcs)
+
+  expect_identical(unname(as.character(result)), "Gal3S(a1-")
+  expect_identical(
+    unname(glyrepr::has_floating_substituents(result)),
+    FALSE
+  )
+})
+
+
+test_that("floating WURCS N-sulfates use sulfate chemistry", {
+  wurcs <- paste0(
+    "WURCS=2.0/1,1,1/[a2112h-1a_1-5]/1/",
+    "a2}*NSO/3=O/3=O"
+  )
+
+  result <- parse_wurcs(wurcs)
+
+  expect_identical(unname(as.character(result)), "Gal2S(a1-")
+})
+
+
+test_that("all-main WURCS substituent candidates exclude occupied slots", {
+  wurcs <- paste0(
+    "WURCS=2.0/2,2,2/",
+    "[a2112h-1a_1-5][a2122h-1a_1-5]/",
+    "1-2/a3-b1_a3|b3}*OSO/3=O/3=O"
+  )
+
+  result <- parse_wurcs(wurcs)
+
+  expect_identical(
+    unname(as.character(result)),
+    "Glc3S(a1-3)Gal(a1-"
+  )
+  expect_identical(
+    unname(glyrepr::has_floating_substituents(result)),
+    FALSE
+  )
+})
+
+
 test_that("parse_wurcs orients uncertain edges inside floating subtrees", {
   wurcs <- paste0(
     "WURCS=2.0/4,4,3/",

@@ -7,8 +7,8 @@
 #' GlycoCT format consists of:
 #' - RES: Contains monosaccharides (lines starting with 'b:') and substituents (lines starting with 's:')
 #' - LIN: Contains linkage information between residues
-#' - UND: Contains floating substructures whose attachment to the main glycan
-#'   is unresolved
+#' - UND: Contains floating substructures or substituents whose attachment to
+#'   the main glycan is unresolved
 #'
 #' Alditol residues are parsed as regular reducing-end glycans with unknown
 #' anomer configurations.
@@ -85,12 +85,25 @@ do_parse_glycoct <- function(x) {
     return(main_graph$graph)
   }
 
+  floating_substituents <- purrr::keep(
+    floating,
+    is_glycoct_floating_substituent
+  )
+  floating <- purrr::discard(
+    floating,
+    is_glycoct_floating_substituent
+  )
   floating_graphs <- purrr::map(
     floating,
     ~ build_glycoct_graph_data(.x$residues, .x$linkages)
   )
 
-  build_glycoct_floating_graph(main_graph, floating_graphs, floating)
+  build_glycoct_floating_graph(
+    main_graph,
+    floating_graphs,
+    floating,
+    floating_substituents
+  )
 }
 
 #' Split a GlycoCT record into its main and UND blocks
@@ -209,6 +222,17 @@ parse_glycoct_und_block <- function(lines) {
       child_pos = matches[3]
     )
   )
+}
+
+#' Detect a substituent-only GlycoCT UND block
+#'
+#' @param block Parsed UND block data.
+#'
+#' @return A logical scalar.
+#' @noRd
+is_glycoct_floating_substituent <- function(block) {
+  length(block$residues) == 1L &&
+    identical(block$residues[[1]]$type, "sub")
 }
 
 #' Split a GlycoCT record into parser lines
@@ -570,10 +594,16 @@ format_glycoct_linkage <- function(parent_pos, child_pos, child_anomer) {
 #' @param main Main-tree graph data.
 #' @param floating_graphs Graph data for each floating subtree.
 #' @param floating Parsed UND metadata.
+#' @param floating_substituents Parsed substituent-only UND metadata.
 #'
 #' @return An annotated glycan forest understood by `glyrepr`.
 #' @noRd
-build_glycoct_floating_graph <- function(main, floating_graphs, floating) {
+build_glycoct_floating_graph <- function(
+  main,
+  floating_graphs,
+  floating,
+  floating_substituents = list()
+) {
   graph_data <- c(list(main), floating_graphs)
   sizes <- purrr::map_int(graph_data, ~ igraph::vcount(.x$graph))
   offsets <- c(0L, utils::head(cumsum(sizes), -1L))
@@ -632,47 +662,101 @@ build_glycoct_floating_graph <- function(main, floating_graphs, floating) {
     main$graph,
     seq_along(main$original_ids)
   )
-  forest$floating_parts <- purrr::map2(
-    seq_along(floating_graphs),
-    floating,
-    function(part_id, metadata) {
-      data <- floating_graphs[[part_id]]
-      offset <- offsets[[part_id + 1L]]
-      root <- which(igraph::degree(data$graph, mode = "in") == 0)
-      parents <- unname(
-        main_parent_indices[as.character(metadata$parent_ids)]
-      )
-      if (anyNA(parents)) {
-        missing_ids <- metadata$parent_ids[is.na(parents)]
-        cli::cli_abort(c(
-          "GlycoCT UND candidate parents must be main-tree monosaccharides.",
-          "x" = "Can't find main-tree residue ID{?s} {.val {missing_ids}}."
-        ))
-      }
-
-      linkage <- format_glycoct_linkage(
-        metadata$parent_pos,
-        metadata$child_pos,
-        data$vertices[[root]]$anomer
-      )
-      parents <- normalize_floating_part_parents(
-        parents,
-        seq_along(main$original_ids),
-        linkage,
-        occupied_slots,
-        context = "GlycoCT UND part"
-      )
-
-      list(
-        root = as.integer(offset + root),
-        nodes = as.integer(offset + seq_len(sizes[[part_id + 1L]])),
-        linkage = linkage,
-        parents = as.integer(parents)
-      )
-    }
+  occupied_carbon_slots <- definitely_occupied_carbon_slots(
+    main$graph,
+    seq_along(main$original_ids)
   )
+  if (length(floating_graphs) > 0L) {
+    forest$floating_parts <- purrr::map2(
+      seq_along(floating_graphs),
+      floating,
+      function(part_id, metadata) {
+        data <- floating_graphs[[part_id]]
+        offset <- offsets[[part_id + 1L]]
+        root <- which(igraph::degree(data$graph, mode = "in") == 0)
+        parents <- map_glycoct_und_parents(
+          metadata$parent_ids,
+          main_parent_indices
+        )
+
+        linkage <- format_glycoct_linkage(
+          metadata$parent_pos,
+          metadata$child_pos,
+          data$vertices[[root]]$anomer
+        )
+        parents <- normalize_floating_part_parents(
+          parents,
+          seq_along(main$original_ids),
+          linkage,
+          occupied_slots,
+          context = "GlycoCT UND part"
+        )
+
+        list(
+          root = as.integer(offset + root),
+          nodes = as.integer(offset + seq_len(sizes[[part_id + 1L]])),
+          linkage = linkage,
+          parents = as.integer(parents)
+        )
+      }
+    )
+  }
+
+  if (length(floating_substituents) > 0L) {
+    main_vertices <- seq_along(main$original_ids)
+    forest$floating_substituents <- purrr::map(
+      floating_substituents,
+      function(metadata) {
+        parents <- map_glycoct_und_parents(
+          metadata$parent_ids,
+          main_parent_indices
+        )
+        positions <- stringr::str_split_1(
+          metadata$parent_pos,
+          stringr::fixed("|")
+        )
+        position <- collapse_floating_substituent_positions(positions)
+        substituent <- metadata$residues[[1]]$content
+        substituent <- paste0(
+          position,
+          glycoct_substituent_abbreviation(substituent)
+        )
+        domain <- normalize_floating_substituent_parents(
+          parents,
+          main_vertices,
+          substituent,
+          occupied_carbon_slots,
+          context = "GlycoCT UND substituent"
+        )
+
+        list(
+          substituent = domain$substituent,
+          parents = as.integer(domain$parents)
+        )
+      }
+    )
+  }
 
   forest
+}
+
+#' Map GlycoCT UND parent IDs to main-tree graph indices
+#'
+#' @param parent_ids GlycoCT residue IDs declared by an UND block.
+#' @param main_parent_indices Named main-tree graph indices.
+#'
+#' @return Integer main-tree graph indices.
+#' @noRd
+map_glycoct_und_parents <- function(parent_ids, main_parent_indices) {
+  parents <- unname(main_parent_indices[as.character(parent_ids)])
+  if (anyNA(parents)) {
+    missing_ids <- parent_ids[is.na(parents)]
+    cli::cli_abort(c(
+      "GlycoCT UND candidate parents must be main-tree monosaccharides.",
+      "x" = "Can't find main-tree residue ID{?s} {.val {missing_ids}}."
+    ))
+  }
+  as.integer(parents)
 }
 
 #' Find definitely occupied acceptor slots in a glycan tree
@@ -717,6 +801,141 @@ linkage_acceptor_positions <- function(linkage) {
   }
 
   stringr::str_split(acceptor, stringr::fixed("/"))[[1]]
+}
+
+#' Find definitely occupied carbon slots in a glycan tree
+#'
+#' @param graph A parsed glycan graph.
+#' @param vertices Vertices belonging to the tree of interest.
+#'
+#' @return Character keys combining parent vertex and carbon position.
+#' @noRd
+definitely_occupied_carbon_slots <- function(
+  graph,
+  vertices = seq_len(igraph::vcount(graph))
+) {
+  edge_slots <- definitely_occupied_acceptor_slots(graph, vertices)
+  substituent_slots <- purrr::map(
+    vertices,
+    function(vertex) {
+      substituents <- igraph::vertex_attr(graph, "sub", index = vertex)
+      if (identical(substituents, "")) {
+        return(character())
+      }
+      tokens <- stringr::str_split_1(
+        substituents,
+        stringr::fixed(",")
+      )
+      positions <- purrr::map(
+        tokens,
+        floating_substituent_positions
+      )
+      definite <- lengths(positions) == 1L
+      paste(
+        vertex,
+        unlist(positions[definite], use.names = FALSE),
+        sep = "\r"
+      )
+    }
+  )
+
+  unique(c(
+    edge_slots,
+    unlist(substituent_slots, use.names = FALSE)
+  ))
+}
+
+#' Extract possible carbon positions from a substituent token
+#'
+#' @param substituent One substituent token.
+#'
+#' @return A character vector. Unknown positions return an empty vector.
+#' @noRd
+floating_substituent_positions <- function(substituent) {
+  position <- stringr::str_extract(substituent, "^[?0-9/]+")
+  if (
+    is.na(position) ||
+      stringr::str_detect(position, stringr::fixed("?"))
+  ) {
+    return(character())
+  }
+  stringr::str_split_1(position, stringr::fixed("/"))
+}
+
+#' Collapse source-format substituent positions into one glyrepr position
+#'
+#' @param positions Source-format carbon positions.
+#'
+#' @return A canonical position string.
+#' @noRd
+collapse_floating_substituent_positions <- function(positions) {
+  if (any(positions %in% c("?", "-1"))) {
+    return("?")
+  }
+  paste(sort(unique(as.integer(positions))), collapse = "/")
+}
+
+#' Normalize floating-substituent candidate parents
+#'
+#' @param parents Declared main-tree candidate vertex indices.
+#' @param main_vertices Every main-tree vertex index.
+#' @param substituent A floating substituent token.
+#' @param occupied_slots Definitely occupied main-tree carbon slots.
+#' @param context Input-format context for error messages.
+#'
+#' @return A list containing the normalized substituent and candidate parents.
+#'   An empty parent vector represents an implicit all-main candidate set.
+#' @noRd
+normalize_floating_substituent_parents <- function(
+  parents,
+  main_vertices,
+  substituent,
+  occupied_slots,
+  context
+) {
+  positions <- floating_substituent_positions(substituent)
+  if (length(positions) == 0L) {
+    if (setequal(parents, main_vertices)) {
+      parents <- integer()
+    }
+    return(list(substituent = substituent, parents = parents))
+  }
+
+  feasible_positions <- purrr::map(parents, function(parent) {
+    slots <- paste(parent, positions, sep = "\r")
+    positions[!slots %in% occupied_slots]
+  })
+  feasible_parents <- lengths(feasible_positions) > 0L
+  parents <- parents[feasible_parents]
+  feasible_positions <- feasible_positions[feasible_parents]
+  if (length(parents) == 0L) {
+    cli::cli_abort(
+      "No feasible parent remains for a {context} after excluding occupied carbon positions.",
+      call = rlang::caller_env()
+    )
+  }
+
+  position_sets <- purrr::map(
+    feasible_positions,
+    ~ sort(unique(.x))
+  )
+  if (length(unique(position_sets)) != 1L) {
+    cli::cli_abort(
+      "Can't represent the feasible parent-position combinations for a {context} after excluding occupied carbon positions.",
+      call = rlang::caller_env()
+    )
+  }
+
+  position <- collapse_floating_substituent_positions(position_sets[[1]])
+  substituent <- stringr::str_replace(
+    substituent,
+    "^[?0-9/]+",
+    position
+  )
+  if (setequal(parents, main_vertices)) {
+    parents <- integer()
+  }
+  list(substituent = substituent, parents = parents)
 }
 
 #' Normalize floating-part candidate parents
@@ -2069,30 +2288,29 @@ format_extra_substituents <- function(extra_subs, group, residues, linkages) {
     }
 
     # Format the substituent with position
-    if (sub_content == "sulfate") {
-      formatted <- c(formatted, paste0(position, "S"))
-    } else if (sub_content == "n-acetyl") {
-      formatted <- c(formatted, paste0(position, "Ac"))
-    } else if (sub_content == "acetyl") {
-      formatted <- c(formatted, paste0(position, "Ac"))
-    } else if (sub_content == "methyl") {
-      formatted <- c(formatted, paste0(position, "Me"))
-    } else if (sub_content == "amino") {
-      formatted <- c(formatted, paste0(position, "N"))
-    } else if (sub_content == "phosphate") {
-      formatted <- c(formatted, paste0(position, "P"))
-    } else if (sub_content == "phospho-ethanolamine") {
-      formatted <- c(formatted, paste0(position, "PEtn"))
-    } else if (sub_content == "diphospho-ethanolamine") {
-      formatted <- c(formatted, paste0(position, "PPEtn"))
-    } else {
-      # Generic format - for unknown substituents, use the raw name
-      formatted <- c(formatted, paste0(position, sub_content))
-    }
+    formatted <- c(
+      formatted,
+      paste0(position, glycoct_substituent_abbreviation(sub_content))
+    )
   }
 
   # Join multiple substituents
   paste(formatted, collapse = ",")
+}
+
+glycoct_substituent_abbreviation <- function(x) {
+  switch(
+    x,
+    sulfate = "S",
+    `n-acetyl` = "Ac",
+    acetyl = "Ac",
+    methyl = "Me",
+    amino = "N",
+    phosphate = "P",
+    `phospho-ethanolamine` = "PEtn",
+    `diphospho-ethanolamine` = "PPEtn",
+    x
+  )
 }
 
 matches_glycoct_pattern <- function(group, residues, linkages, mapping) {

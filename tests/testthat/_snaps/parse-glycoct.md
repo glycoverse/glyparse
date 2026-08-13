@@ -1,3 +1,12 @@
+# floating substituent positions preserve representable domains
+
+    Code
+      normalize_floating_substituent_parents(c(1L, 2L), c(1L, 2L), "3/6S", c("1\r3",
+        "2\r6"), context = "test substituent")
+    Condition
+      Error:
+      ! Can't represent the feasible parent-position combinations for a test substituent after excluding occupied carbon positions.
+
 # GlycoCT UND donor alternatives fail explicitly
 
     Code
