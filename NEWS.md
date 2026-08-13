@@ -1,6 +1,6 @@
 # glyparse (development version)
 
-* `parse_glycoct()` and `parse_wurcs()` now preserve floating substituents with unresolved parent residues, including their chemistry, carbon positions, and candidate parents.
+* `parse_glycoct()` and `parse_wurcs()` now preserve floating substituents with unresolved parent residues, including their chemistry, carbon positions, and candidate parents. (#45)
 * Parsers now preserve unusual monosaccharide configurations using `glyrepr` names such as `D-Fuc`, `L-Gul`, and `D-Fucf`, while unprefixed names retain their natural configurations. (#43, #44)
 * Parsers now preserve explicit furanose forms as `glyrepr` monosaccharide names such as `Galf`, `GlcfNAc`, and `Neuf5Ac` across IUPAC, GlyCAM IUPAC, GlycoCT, WURCS, LINUCS, Linear Code, and KCF inputs. (#41)
 * `auto_parse()` and all format-specific parsers gain `drop_generic` to replace generic glycans with `NA` when generic and concrete glycans coexist, with a message reporting the number dropped. (#39)
