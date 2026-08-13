@@ -52,7 +52,7 @@ test_that("IUPAC-extended preserves unusual configurations", {
 
   expect_identical(
     as.character(parsed),
-    c("LGul(a1-", "DFuc3S(b1-", "DFucf(?1-")
+    c("L-Gul(a1-", "D-Fuc3S(b1-", "D-Fucf(?1-")
   )
 })
 

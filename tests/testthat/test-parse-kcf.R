@@ -169,8 +169,26 @@ test_that("KCF preserves unusual configurations", {
 
   expect_identical(
     as.character(parsed),
-    c("Fuc(?1-", "DFuc3S(?1-", "LGul(?1-", "DFucf(?1-")
+    c("Fuc(?1-", "D-Fuc3S(?1-", "L-Gul(?1-", "D-Fucf(?1-")
   )
+})
+
+test_that("KCF parses every unusual configuration label", {
+  unusual <- unname(unusual_configuration_monosaccharide_map())
+  labels <- stringr::str_remove(unusual, stringr::fixed("-"))
+  records <- paste0(
+    "ENTRY       test                      Glycan\n",
+    "NODE        1\n",
+    "            1   ",
+    labels,
+    "         0     0\n",
+    "///"
+  )
+
+  parsed <- parse_kcf(records)
+  graphs <- glyrepr::get_structure_graphs(parsed, return_list = TRUE)
+
+  expect_identical(purrr::map_chr(graphs, ~ igraph::V(.x)$mono), unusual)
 })
 
 test_that("KCF parses every furanose monosaccharide label", {

@@ -315,15 +315,78 @@ test_that("parse_residue preserves unusual configurations", {
   expect_identical(
     purrr::map_chr(parsed, "mono"),
     c(
-      DFuc = "DFuc",
-      DFucf = "DFucf",
-      LGul = "LGul",
-      DIdoA = "DIdoA",
-      LNeu5Ac = "LNeu5Ac",
-      LGul_unknown_ring = "LGul",
-      DFuc_ambiguous = "DFuc",
-      DFuc_alditol = "DFuc"
+      DFuc = "D-Fuc",
+      DFucf = "D-Fucf",
+      LGul = "L-Gul",
+      DIdoA = "D-IdoA",
+      LNeu5Ac = "L-Neu5Ac",
+      LGul_unknown_ring = "L-Gul",
+      DFuc_ambiguous = "D-Fuc",
+      DFuc_alditol = "D-Fuc"
     )
+  )
+})
+
+test_that("WURCS patterns cover every distinguishable unusual configuration", {
+  unusual_map <- unusual_configuration_monosaccharide_map()
+  concrete <- glyrepr::available_monosaccharides("concrete")
+  pattern_sets <- list(
+    WURCS_MONO_REGEX,
+    WURCS_UNKNOWN_RING_MONO_REGEX,
+    WURCS_AMBIGUOUS_MONO_REGEX,
+    WURCS_ALDITOL_MONO_REGEX
+  )
+
+  for (patterns in pattern_sets) {
+    natural_indices <- which(names(patterns) %in% names(unusual_map))
+    for (index in natural_indices) {
+      unusual_name <- unname(unusual_map[[names(patterns)[[index]]]])
+      unusual_pattern <- invert_wurcs_pattern_configuration(patterns[[index]])
+      matching_names <- names(patterns)[unname(patterns) == unusual_pattern]
+
+      expect_true(
+        unusual_name %in% matching_names || any(matching_names %in% concrete),
+        info = paste("missing unusual WURCS pattern for", unusual_name)
+      )
+    }
+  }
+})
+
+test_that("parse_residue recognizes GlycanFormatConverter alternate codes", {
+  residues <- c(
+    LGal_a = "a1221h-1a_1-5",
+    LGal_b = "a1221h-1b_1-5",
+    LGal_x = "a1221h-1x_1-5",
+    LGal_ambiguous = "u1221h",
+    LGul_a = "a1121h-1a_1-5",
+    LGul_x = "a1121h-1x_1-5",
+    LGul_ambiguous = "u1121h",
+    ManNAc_relative = "a5122h-1b_1-5_2*NCC/3=O"
+  )
+
+  expect_identical(
+    purrr::map_chr(residues, ~ parse_residue(.x)[["mono"]]),
+    c(
+      LGal_a = "L-Gal",
+      LGal_b = "L-Gal",
+      LGal_x = "L-Gal",
+      LGal_ambiguous = "L-Gal",
+      LGul_a = "L-Gul",
+      LGul_x = "L-Gul",
+      LGul_ambiguous = "L-Gul",
+      ManNAc_relative = "ManNAc"
+    )
+  )
+})
+
+test_that("specific unusual WURCS patterns take priority over generic fallbacks", {
+  expect_identical(
+    parse_residue("a2112m-1x_1-5_2*NCC/3=O")[["mono"]],
+    "D-FucNAc"
+  )
+  expect_identical(
+    parse_residue("a2112m-1x_1-4_2*NCC/3=O")[["mono"]],
+    "D-FucfNAc"
   )
 })
 
@@ -666,11 +729,11 @@ test_that("parse_residue maps generic WURCS descriptors to generic monosaccharid
   )
   expect_equal(
     parse_residue("u2112m"),
-    c(mono = "DFuc", anomer = "??", sub = "")
+    c(mono = "D-Fuc", anomer = "??", sub = "")
   )
   expect_equal(
     parse_residue("a2112m-1x_1-5_2*NCC/3=O"),
-    c(mono = "dHexNAc", anomer = "?1", sub = "")
+    c(mono = "D-FucNAc", anomer = "?1", sub = "")
   )
   expect_equal(
     parse_residue("a4334m-1x_1-?"),
@@ -690,7 +753,7 @@ test_that("parse_residue maps generic WURCS descriptors to generic monosaccharid
   )
   expect_equal(
     parse_residue("AUd12211h_4*OCC/3=O_5*NCC/3=O"),
-    c(mono = "LNeu5Ac", anomer = "??", sub = "4Ac")
+    c(mono = "L-Neu5Ac", anomer = "??", sub = "4Ac")
   )
 })
 
@@ -777,11 +840,11 @@ test_that("parse_residue handles unknown ring closure", {
   )
   expect_equal(
     parse_residue("Aad12211h-2a_2-?_4*OCC/3=O_5*NCC/3=O"),
-    c(mono = "LNeu5Ac", anomer = "a2", sub = "4Ac")
+    c(mono = "L-Neu5Ac", anomer = "a2", sub = "4Ac")
   )
   expect_equal(
     parse_residue("Aad12211h-2b_2-?_5*NCCO/3=O"),
-    c(mono = "LNeu5Gc", anomer = "b2", sub = "")
+    c(mono = "L-Neu5Gc", anomer = "b2", sub = "")
   )
   expect_equal(
     parse_residue("Aad21122h-2a_2-?_4*OCC/3=O_5*NCC/3=O"),

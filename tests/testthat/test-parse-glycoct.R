@@ -51,7 +51,7 @@ test_that("GlycoCT preserves unusual configurations", {
   )
   expect_identical(
     as.character(parsed),
-    c("DFuc(a1-", "LGul(b1-", "DIdoA(?1-", "DFucf(a1-", "DFuc(?1-")
+    c("D-Fuc(a1-", "L-Gul(b1-", "D-IdoA(?1-", "D-Fucf(a1-", "D-Fuc(?1-")
   )
 })
 
@@ -588,6 +588,70 @@ test_that("all monosaccharides can be parsed", {
     mapping <- mappings[[mono_name]]
     glycoct <- create_glycoct_from_mapping(mapping)
     expect_mono_equal(parse_glycoct(glycoct), mono_name)
+  }
+})
+
+test_that("GlycoCT mappings cover every distinguishable unusual configuration", {
+  unusual_map <- unusual_configuration_monosaccharide_map()
+  concrete <- glyrepr::available_monosaccharides("concrete")
+  mappings <- load_mono_mappings()
+  natural <- intersect(names(mappings), names(unusual_map))
+
+  for (mono in natural) {
+    unusual_name <- unname(unusual_map[[mono]])
+    unusual_mapping <- mappings[[mono]]
+    unusual_mapping$res <- stringr::str_replace_all(
+      unusual_mapping$res,
+      "(?<=-)[dl](?=[a-z])",
+      \(configuration) invert_configuration(configuration)
+    )
+    matching_names <- names(mappings)[purrr::map_lgl(
+      mappings,
+      identical,
+      unusual_mapping
+    )]
+
+    expect_true(
+      unusual_name %in% matching_names || any(matching_names %in% concrete),
+      info = paste("missing unusual GlycoCT mapping for", unusual_name)
+    )
+  }
+})
+
+test_that("GlycoCT parses every representable unusual furanose", {
+  unusual <- unname(unusual_configuration_monosaccharide_map())
+  furanose_map <- furanose_monosaccharide_map()
+  furanose <- intersect(unusual, unname(furanose_map))
+  ringless <- names(furanose_map)[match(furanose, unname(furanose_map))]
+  mappings <- load_mono_mappings()
+  represented <- ringless %in% names(mappings)
+  furanose <- furanose[represented]
+  ringless <- ringless[represented]
+
+  for (index in seq_along(furanose)) {
+    mapping <- mappings[[ringless[[index]]]]
+    mapping$res <- stringr::str_replace_all(
+      mapping$res,
+      c("-1:5" = "-1:4", "-2:6" = "-2:5")
+    )
+    glycoct <- paste(
+      c(
+        "RES",
+        mapping$res,
+        if (length(mapping$lin)) c("LIN", mapping$lin)
+      ),
+      collapse = "\n"
+    )
+    graph <- glyrepr::get_structure_graphs(
+      parse_glycoct(glycoct),
+      return_list = FALSE
+    )
+
+    expect_identical(
+      igraph::V(graph)$mono,
+      furanose[[index]],
+      info = paste("failed to preserve unusual furanose", furanose[[index]])
+    )
   }
 })
 

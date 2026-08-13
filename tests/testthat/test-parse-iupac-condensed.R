@@ -7,12 +7,12 @@ test_that("IUPAC-condensed: some O-glycan", {
 
 test_that("IUPAC-condensed preserves unusual configurations", {
   parsed <- parse_iupac_condensed(
-    "DFuc3S(a1-2)[LGul(b1-3)]DFucf(?1-"
+    "D-Fuc3S(a1-2)[L-Gul(b1-3)]D-Fucf(?1-"
   )
 
   expect_identical(
     as.character(parsed),
-    "DFuc3S(a1-2)[LGul(b1-3)]DFucf(?1-"
+    "D-Fuc3S(a1-2)[L-Gul(b1-3)]D-Fucf(?1-"
   )
 })
 

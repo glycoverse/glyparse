@@ -72,7 +72,7 @@ test_that("LINUCS preserves unusual configurations", {
 
   expect_identical(
     as.character(parsed),
-    c("Fuc(a1-", "DFuc3S(a1-", "LGul(b1-", "DFucf(?1-")
+    c("Fuc(a1-", "D-Fuc3S(a1-", "L-Gul(b1-", "D-Fucf(?1-")
   )
 })
 
@@ -87,10 +87,10 @@ test_that("LINUCS parses N-sulfate suffixes on unusual configurations", {
   expect_identical(
     as.character(parsed),
     c(
-      "LGulN2S(?1-",
-      "LGulfN2S(?1-",
-      "DIdoN2S(?1-",
-      "DIdofN2S(?1-"
+      "L-GulN2S(?1-",
+      "L-GulfN2S(?1-",
+      "D-IdoN2S(?1-",
+      "D-IdofN2S(?1-"
     )
   )
 })
