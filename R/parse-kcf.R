@@ -398,13 +398,19 @@ make_kcf_igraph <- function(vertices, glycan_edges) {
 #' @noRd
 parse_kcf_monosaccharide_label <- function(label) {
   candidates <- label
-  if (stringr::str_detect(label, "^[DL].+")) {
+  configurations <- NA_character_
+  if (stringr::str_detect(label, "^[DL](?!-).+")) {
     candidates <- c(candidates, stringr::str_sub(label, 2))
+    configurations <- c(configurations, stringr::str_sub(label, 1, 1))
   }
 
-  for (candidate in candidates) {
-    parsed <- parse_kcf_monosaccharide_candidate(candidate)
+  for (index in seq_along(candidates)) {
+    parsed <- parse_kcf_monosaccharide_candidate(candidates[[index]])
     if (!is.null(parsed)) {
+      parsed$mono <- apply_monosaccharide_configuration(
+        parsed$mono,
+        configurations[[index]]
+      )
       return(parsed)
     }
   }

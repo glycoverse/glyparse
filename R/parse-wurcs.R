@@ -81,6 +81,9 @@ WURCS_MONO_REGEX <- c(
   # For GlcNAc, we have to differentiate it from MurNAc.
   "GlcNAc" = "^a2122h-1[abx]_1-5_2\\*NCC/3=O(?!_3\\*OC\\^RCO/4=O/3C)",
   "GalNAc" = "^a2112h-1[abx]_1-5_2\\*NCC/3=O",
+  # GlycanFormatConverter also recognizes this relative-configuration
+  # descriptor as ManNAc.
+  "ManNAc" = "^a5122h-1[abx]_1-5_2\\*NCC/3=O",
   "ManNAc" = "^a1122h-1[abx]_1-5_2\\*NCC/3=O",
   "GulNAc" = "^a2212h-1[abx]_1-5_2\\*NCC/3=O",
   "AltNAc" = "^a2111h-1[abx]_1-5_2\\*NCC/3=O",
@@ -461,7 +464,14 @@ add_unusual_wurcs_patterns <- function(patterns) {
     invert_wurcs_pattern_configuration
   )
   names(unusual) <- unname(unusual_map[names(patterns)[configurable]])
-  unusual <- unusual[!unname(unusual) %in% unname(patterns)]
+
+  # Preserve a configuration-specific pattern when it collides with a generic
+  # fallback (for example D-FucNAc and dHexNAc). Indistinguishable concrete
+  # aliases keep the existing canonical monosaccharide name.
+  duplicate_index <- match(unname(unusual), unname(patterns))
+  duplicate_names <- names(patterns)[duplicate_index]
+  generic <- glyrepr::available_monosaccharides("generic")
+  unusual <- unusual[is.na(duplicate_names) | duplicate_names %in% generic]
 
   c(unusual, patterns)
 }

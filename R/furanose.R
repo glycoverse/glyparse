@@ -9,10 +9,10 @@ unusual_configuration_monosaccharide_map <- local({
     if (is.null(map)) {
       monos <- glyrepr::available_monosaccharides("concrete")
       unusual <- monos[
-        stringr::str_detect(monos, "^[DL]") &
-          stringr::str_sub(monos, 2) %in% monos
+        stringr::str_detect(monos, "^[DL]-") &
+          stringr::str_sub(monos, 3) %in% monos
       ]
-      map <<- rlang::set_names(unusual, stringr::str_sub(unusual, 2))
+      map <<- rlang::set_names(unusual, stringr::str_sub(unusual, 3))
     }
     map
   }
