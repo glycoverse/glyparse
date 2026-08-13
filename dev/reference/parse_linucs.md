@@ -58,6 +58,7 @@ linkage position on the parent residue and `child` is the anomeric
 linkage position on the child residue. Residue labels are normalized to
 the monosaccharide and substituent vocabulary used by
 [glyrepr::glyrepr](https://glycoverse.github.io/glyrepr/reference/glyrepr-package.html).
+A `-ol` suffix on the root residue is retained as alditol status.
 
 ## Examples
 

@@ -61,8 +61,8 @@ GlycoCT format consists of:
 - UND: Contains floating substructures or substituents whose attachment
   to the main glycan is unresolved
 
-Alditol residues are parsed as regular reducing-end glycans with unknown
-anomer configurations.
+Main reducing-end alditol residues retain their alditol status and use
+an unknown anomer configuration.
 
 For more information about GlycoCT format, see the glycoct.md
 documentation.

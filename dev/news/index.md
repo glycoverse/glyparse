@@ -2,6 +2,15 @@
 
 ## glyparse (development version)
 
+- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md),
+  [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md),
+  [`parse_iupac_compact()`](https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_compact.md),
+  [`parse_iupac_condensed()`](https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_condensed.md),
+  [`parse_linucs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_linucs.md),
+  and
+  [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
+  now preserve alditol reducing ends in parsed structures.
+  ([\#46](https://github.com/glycoverse/glyparse/issues/46))
 - [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
   and
   [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
