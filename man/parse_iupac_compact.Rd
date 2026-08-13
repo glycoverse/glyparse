@@ -37,8 +37,8 @@ and branches are written in parentheses. The parser normalizes compact
 notation into IUPAC-condensed notation, then uses the IUPAC-condensed parser
 to construct the glycan structure.
 
-Alditol glycans are parsed as regular reducing-end glycans with unknown
-anomer configurations.
+Alditol glycans marked with \code{+aldi} retain their alditol status and use an
+unknown reducing-end anomer configuration.
 }
 \examples{
 iupac <- "Mana1-3(Mana1-6)Manb1-4GlcNAcb"

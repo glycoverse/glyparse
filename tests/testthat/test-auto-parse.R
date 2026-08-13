@@ -5,6 +5,13 @@ test_that("auto_parse correctly identifies and parses IUPAC-condensed format", {
   expect_equal(as.character(result), as.character(expected))
 })
 
+test_that("auto_parse preserves inferred IUPAC-condensed alditols", {
+  result <- auto_parse("Glc-ol")
+
+  expect_identical(as.character(result), "Glc-ol(?1-")
+  expect_identical(unname(glyrepr::get_alditol(result)), TRUE)
+})
+
 test_that("auto_parse correctly identifies and parses IUPAC-short format", {
   input <- "Neu5Aca3Gala3(Fuca6)GlcNAcb-"
   result <- auto_parse(input)

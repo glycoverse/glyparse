@@ -17,7 +17,7 @@ linucs_parse_cases <- list(
   ),
   alditol_root = list(
     input = "[][D-Glc-ol]{[(?+1)][b-D-Galp]{}}",
-    expected = "Gal(b1-?)Glc(?1-"
+    expected = "Gal(b1-?)Glc-ol(?1-"
   ),
   nested_modifiers = list(
     input = "[][HexpNAc6S]{[(4+1)][HexpA2S]{[(4+1)][HexpNS3S]{[(4+1)][HexpA2S]{}}}}",
@@ -46,6 +46,12 @@ purrr::iwalk(linucs_parse_cases, function(case, case_name) {
     expect_s3_class(parsed, "glyrepr_structure")
     expect_identical(as.character(parsed), case$expected)
   })
+})
+
+test_that("LINUCS preserves root alditol status", {
+  parsed <- parse_linucs("[][D-Glc-ol]{[(?+1)][b-D-Galp]{}}")
+
+  expect_identical(unname(glyrepr::get_alditol(parsed)), TRUE)
 })
 
 test_that("LINUCS preserves NA and name semantics", {

@@ -42,6 +42,7 @@ LINUCS linkages are written as \code{"(parent+child)"}, where \code{parent} is t
 linkage position on the parent residue and \code{child} is the anomeric linkage
 position on the child residue. Residue labels are normalized to the
 monosaccharide and substituent vocabulary used by \link[glyrepr:glyrepr-package]{glyrepr::glyrepr}.
+A \code{-ol} suffix on the root residue is retained as alditol status.
 }
 \examples{
 linucs <- "[][b-D-Glcp]{[(4+1)][b-D-Galp]{}}"

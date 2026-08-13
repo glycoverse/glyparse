@@ -10,6 +10,7 @@
 #' linkage position on the parent residue and `child` is the anomeric linkage
 #' position on the child residue. Residue labels are normalized to the
 #' monosaccharide and substituent vocabulary used by [glyrepr].
+#' A `-ol` suffix on the root residue is retained as alditol status.
 #'
 #' @param x A character vector of LINUCS strings. NA values are allowed and
 #'   will be returned as NA structures.
@@ -197,6 +198,7 @@ parse_linucs_residue <- function(x) {
   }
 
   anomer <- parse_linucs_anomer(x)
+  alditol <- stringr::str_ends(anomer$label, stringr::fixed("-ol"))
   normalized <- normalize_linucs_residue_label(anomer$label)
   stem_match <- match_linucs_mono_stem(normalized)
   mono <- unname(linucs_mono_stem_map()[[stem_match$stem]])
@@ -210,6 +212,7 @@ parse_linucs_residue <- function(x) {
     mono = mono,
     anomer = paste0(anomer$value, decide_anomer_pos(mono)),
     anomer_value = anomer$value,
+    alditol = alditol,
     sub = sub
   )
 }
@@ -554,7 +557,7 @@ build_linucs_graph <- function(root) {
 
   graph <- igraph::graph_from_data_frame(edge_df, vertices = vertex_df)
   graph$anomer <- root$residue$anomer
-  graph$alditol <- FALSE
+  graph$alditol <- isTRUE(root$residue$alditol)
   graph
 }
 
@@ -569,6 +572,11 @@ build_linucs_graph <- function(root) {
 add_linucs_mono_node <- function(node, state) {
   if (!identical(node$residue$kind, "mono")) {
     cli::cli_abort("Expected a LINUCS monosaccharide node.")
+  }
+  if (isTRUE(node$residue$alditol) && length(state$vertices) > 0L) {
+    cli::cli_abort(
+      "Only the root LINUCS residue can contain an alditol marker."
+    )
   }
 
   node_id <- length(state$vertices) + 1
