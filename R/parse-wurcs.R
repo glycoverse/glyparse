@@ -1022,6 +1022,11 @@ parse_wurcs_floating_candidates <- function(x, source, context) {
 
 
 parse_wurcs_substituent_name <- function(x) {
+  x <- stringr::str_replace(
+    x,
+    "^NSO/3=O/3=O$",
+    "OSO/3=O/3=O"
+  )
   patterns <- paste0("^(?:", WURCS_SUB_REGEX, ")$")
   sub_idx <- purrr::detect_index(
     patterns,

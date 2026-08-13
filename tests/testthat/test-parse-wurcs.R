@@ -1393,12 +1393,16 @@ test_that("parse_wurcs maps floating substituent chemistry", {
   ambiguous <- parse_wurcs_floating_linkage(
     "a6|a4|b4|b6}*OSO/3=O/3=O"
   )
+  n_sulfate <- parse_wurcs_floating_linkage(
+    "a2}*NSO/3=O/3=O"
+  )
 
   expect_identical(
     unname(parsed),
     paste0("?", names(codes))
   )
   expect_identical(ambiguous$metadata$substituent, "4/6S")
+  expect_identical(n_sulfate$metadata$substituent, "2S")
 })
 
 
@@ -1415,6 +1419,18 @@ test_that("single-parent WURCS floating substituents become ordinary", {
     unname(glyrepr::has_floating_substituents(result)),
     FALSE
   )
+})
+
+
+test_that("floating WURCS N-sulfates use sulfate chemistry", {
+  wurcs <- paste0(
+    "WURCS=2.0/1,1,1/[a2112h-1a_1-5]/1/",
+    "a2}*NSO/3=O/3=O"
+  )
+
+  result <- parse_wurcs(wurcs)
+
+  expect_identical(unname(as.character(result)), "Gal2S(a1-")
 })
 
 
