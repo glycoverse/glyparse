@@ -7,7 +7,8 @@ WURCS, see [WURCS](https://github.com/glycoinfo/WURCS/wiki). Alditol
 residues are parsed as regular reducing-end glycans with unknown anomer
 configurations. Ambiguous alternative linkage groups are represented as
 floating glycan parts when their child residue or subtree is not
-localized to one parent.
+localized to one parent. Floating substituents preserve their chemistry,
+carbon-position ambiguity, and candidate parent residues.
 
 ## Usage
 

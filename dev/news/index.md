@@ -2,6 +2,12 @@
 
 ## glyparse (development version)
 
+- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
+  and
+  [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
+  now preserve floating substituents with unresolved parent residues,
+  including their chemistry, carbon positions, and candidate parents.
+  ([\#45](https://github.com/glycoverse/glyparse/issues/45))
 - Parsers now preserve unusual monosaccharide configurations using
   `glyrepr` names such as `D-Fuc`, `L-Gul`, and `D-Fucf`, while
   unprefixed names retain their natural configurations.

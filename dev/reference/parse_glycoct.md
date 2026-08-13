@@ -58,8 +58,8 @@ GlycoCT format consists of:
 
 - LIN: Contains linkage information between residues
 
-- UND: Contains floating substructures whose attachment to the main
-  glycan is unresolved
+- UND: Contains floating substructures or substituents whose attachment
+  to the main glycan is unresolved
 
 Alditol residues are parsed as regular reducing-end glycans with unknown
 anomer configurations.
