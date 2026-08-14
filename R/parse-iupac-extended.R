@@ -82,14 +82,31 @@ IUPAC_EXT_TO_CON <- local({
 # - "-?([\\u03b1\\u03b2\\\\?])": anomer (α, β, or ?), with optional leading "-". Group 1.
 # - "-[DL\\?]-": configuration (D or L, or ?), with leading and trailing "-".
 # - "([:alnum:]+?)": monosaccharide name, with non-greedy matching. Group 2.
-# - "-\\((\\d+(?:/\\d+)*|\\?)\\u2192(?:(\\d+(?:/\\d+)*|\\?)\\))?": position information, e.g. -(1→2). \\u2192 is →.
+# - "-\\((POSITION)\\u2192(?:(POSITION)\\))?": position information, e.g.
+#   -(1→2) or -(1→4/?). \\u2192 is →.
 #   Leading "-". Group 3 is the first position, and group 4 is the second position.
-RESIDUE_PATTERN <- "-?([\\u03b1\\u03b2\\?])-[DL\\?]-([[:alnum:]\\?]+?)-\\((\\d+(?:/\\d+)*|\\?)\\u2192(?:(\\d+(?:/\\d+)*|\\?)\\))?"
+POSITION_PATTERN <- "(?:\\d+|\\?)(?:/(?:\\d+|\\?))*"
+
+RESIDUE_PATTERN <- paste0(
+  "-?([\\u03b1\\u03b2\\?])-[DL\\?]-([[:alnum:]\\?]+?)-\\((",
+  POSITION_PATTERN,
+  ")\\u2192(?:(",
+  POSITION_PATTERN,
+  ")\\))?"
+)
+
+GENERIC_REDUCING_END_PATTERN <- "\\?-(HexNAc|HexN|Hex)$"
 
 # Regex pattern of a IUPAC-extended DDmanHep or LDmanHep residue:
 # "D-gro-α-D-manHepp-(1→" for "DDmanHep(a1-"
 # "L-gro-α-D-manHepp-(1→" for "LDmanHep(a1-"
-DMANHEP_PATTERN <- "-?[DL]-gro-[\\u03b1\\u03b2\\?]-D-manHepp(?:[[:alnum:]\\?]+?)?-\\((\\d+(?:/\\d+)*|\\?)\\u2192(?:(\\d+(?:/\\d+)*|\\?)\\))?"
+DMANHEP_PATTERN <- paste0(
+  "-?[DL]-gro-[\\u03b1\\u03b2\\?]-D-manHepp(?:[[:alnum:]\\?]+?)?-\\((",
+  POSITION_PATTERN,
+  ")\\u2192(?:(",
+  POSITION_PATTERN,
+  ")\\))?"
+)
 
 
 convert_ext_to_con <- function(x) {
@@ -97,6 +114,7 @@ convert_ext_to_con <- function(x) {
   token_pattern <- paste(
     RESIDUE_PATTERN,
     DMANHEP_PATTERN,
+    GENERIC_REDUCING_END_PATTERN,
     "\\[",
     "\\]",
     sep = "|"
@@ -113,6 +131,15 @@ convert_token <- function(token) {
   # Convert a single token (either a residue or a bracket).
   if (token %in% c("[", "]")) {
     return(token)
+  }
+
+  if (stringr::str_detect(token, GENERIC_REDUCING_END_PATTERN)) {
+    mono <- stringr::str_extract(
+      token,
+      GENERIC_REDUCING_END_PATTERN,
+      group = 1
+    )
+    return(paste0(mono, "(?1-"))
   }
 
   # Special case: LDmanHep and DDmanHep
