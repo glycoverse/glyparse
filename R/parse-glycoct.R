@@ -657,6 +657,7 @@ build_glycoct_floating_graph <- function(
   )
   forest$anomer <- main$graph$anomer
   forest$alditol <- isTRUE(main$graph$alditol)
+  all_vertices <- seq_len(igraph::vcount(forest))
 
   main_parent_indices <- stats::setNames(
     seq_along(main$original_ids),
@@ -690,7 +691,10 @@ build_glycoct_floating_graph <- function(
         )
         parents <- normalize_floating_part_parents(
           parents,
-          seq_along(main$original_ids),
+          setdiff(
+            all_vertices,
+            offset + seq_len(sizes[[part_id + 1L]])
+          ),
           linkage,
           occupied_slots,
           context = "GlycoCT UND part"
@@ -707,7 +711,6 @@ build_glycoct_floating_graph <- function(
   }
 
   if (length(floating_substituents) > 0L) {
-    main_vertices <- seq_along(main$original_ids)
     forest$floating_substituents <- purrr::map(
       floating_substituents,
       function(metadata) {
@@ -727,7 +730,7 @@ build_glycoct_floating_graph <- function(
         )
         domain <- normalize_floating_substituent_parents(
           parents,
-          main_vertices,
+          all_vertices,
           substituent,
           occupied_carbon_slots,
           context = "GlycoCT UND substituent"
@@ -881,25 +884,25 @@ collapse_floating_substituent_positions <- function(positions) {
 
 #' Normalize floating-substituent candidate parents
 #'
-#' @param parents Declared main-tree candidate vertex indices.
-#' @param main_vertices Every main-tree vertex index.
+#' @param parents Declared candidate vertex indices.
+#' @param implicit_parents Every vertex represented by an implicit domain.
 #' @param substituent A floating substituent token.
-#' @param occupied_slots Definitely occupied main-tree carbon slots.
+#' @param occupied_slots Definitely occupied candidate carbon slots.
 #' @param context Input-format context for error messages.
 #'
 #' @return A list containing the normalized substituent and candidate parents.
-#'   An empty parent vector represents an implicit all-main candidate set.
+#'   An empty parent vector represents the complete implicit candidate set.
 #' @noRd
 normalize_floating_substituent_parents <- function(
   parents,
-  main_vertices,
+  implicit_parents,
   substituent,
   occupied_slots,
   context
 ) {
   positions <- floating_substituent_positions(substituent)
   if (length(positions) == 0L) {
-    if (setequal(parents, main_vertices)) {
+    if (setequal(parents, implicit_parents)) {
       parents <- integer()
     }
     return(list(substituent = substituent, parents = parents))
@@ -936,7 +939,7 @@ normalize_floating_substituent_parents <- function(
     "^[?0-9/]+",
     position
   )
-  if (setequal(parents, main_vertices)) {
+  if (setequal(parents, implicit_parents)) {
     parents <- integer()
   }
   list(substituent = substituent, parents = parents)
@@ -944,23 +947,23 @@ normalize_floating_substituent_parents <- function(
 
 #' Normalize floating-part candidate parents
 #'
-#' @param parents Declared main-tree candidate vertex indices.
-#' @param main_vertices Every main-tree vertex index.
+#' @param parents Declared candidate vertex indices.
+#' @param implicit_parents Every vertex represented by an implicit domain.
 #' @param linkage The floating part's attachment linkage.
-#' @param occupied_slots Definitely occupied main-tree acceptor slots.
+#' @param occupied_slots Definitely occupied candidate acceptor slots.
 #' @param context Input-format context for error messages.
 #'
-#' @return An empty vector for an implicit all-main candidate set, otherwise
+#' @return An empty vector for the complete implicit candidate set, otherwise
 #'   the feasible explicit candidate parents.
 #' @noRd
 normalize_floating_part_parents <- function(
   parents,
-  main_vertices,
+  implicit_parents,
   linkage,
   occupied_slots,
   context
 ) {
-  if (setequal(parents, main_vertices)) {
+  if (setequal(parents, implicit_parents)) {
     return(integer())
   }
 

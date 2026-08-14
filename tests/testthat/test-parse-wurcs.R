@@ -1329,10 +1329,39 @@ test_that("parse_wurcs preserves multiple floating subtrees", {
 
   expect_identical(
     unname(as.character(result)),
-    "{Fuc(a1-6)}{Gal(b1-4)GlcNAc(b1-3)}Gal(b1-4)Glc(?1-"
+    paste0(
+      "{Fuc(a1-6)|4,5}",
+      "{Gal(b1-4)GlcNAc(b1-3)|4,5}",
+      "Gal(b1-4)Glc(?1-"
+    )
   )
   expect_equal(floating$nodes, list(1L, c(2L, 3L)))
-  expect_equal(floating$parents, list(integer(), integer()))
+  expect_equal(floating$parents, list(c(4L, 5L), c(4L, 5L)))
+})
+
+
+test_that("parse_wurcs preserves cross-component floating parents", {
+  wurcs <- paste0(
+    "WURCS=2.0/4,5,4/",
+    "[a2122h-1x_1-5][a2112h-1b_1-5]",
+    "[a2122h-1b_1-5_2*NCC/3=O][a1221m-1a_1-5]/",
+    "1-2-3-2-4/a4-b1_c4-d1_c1-a3|e3}_e1-a6|b6}"
+  )
+
+  result <- parse_wurcs(wurcs)
+
+  expect_identical(
+    unname(as.character(result)),
+    paste0(
+      "{Fuc(a1-6)|4,5}",
+      "{Gal(b1-4)GlcNAc(b1-3)|1,5}",
+      "Gal(b1-4)Glc(?1-"
+    )
+  )
+  expect_equal(
+    glyrepr::structure_floating_parts(result)$parents,
+    list(c(4L, 5L), c(1L, 5L))
+  )
 })
 
 
@@ -1381,7 +1410,7 @@ test_that("parse_wurcs supports floating parts and substituents together", {
 
   expect_identical(
     unname(as.character(result)),
-    "{?S}{Neu5Ac(a2-6)}Gal(b1-4)Glc(?1-"
+    "{?S|2,3}{Neu5Ac(a2-6)}Gal(b1-4)Glc(?1-"
   )
   expect_identical(
     glyrepr::structure_floating_substituents(result)$substituent,
@@ -1390,6 +1419,31 @@ test_that("parse_wurcs supports floating parts and substituents together", {
   expect_identical(
     glyrepr::structure_floating_parts(result)$linkage,
     "a2-6"
+  )
+  expect_equal(
+    glyrepr::structure_floating_substituents(result)$parents,
+    list(c(2L, 3L))
+  )
+})
+
+
+test_that("parse_wurcs preserves floating substituent parents across components", {
+  wurcs <- paste0(
+    "WURCS=2.0/3,3,3/",
+    "[a2122h-1x_1-5][a2112h-1b_1-5]",
+    "[Aad21122h-2a_2-6_5*NCC/3=O]/",
+    "1-2-3/a4-b1_a?|c?}*OSO/3=O/3=O_c2-a6|b6}"
+  )
+
+  result <- parse_wurcs(wurcs)
+
+  expect_identical(
+    unname(as.character(result)),
+    "{?S|1,3}{Neu5Ac(a2-6)}Gal(b1-4)Glc(?1-"
+  )
+  expect_equal(
+    glyrepr::structure_floating_substituents(result)$parents,
+    list(c(1L, 3L))
   )
 })
 

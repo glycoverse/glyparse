@@ -7,8 +7,10 @@
 #' unknown anomer configuration.
 #' Ambiguous alternative linkage groups are represented as floating glycan
 #' parts when their child residue or subtree is not localized to one parent.
+#' Candidate parents may belong to the main glycan or another floating
+#' component.
 #' Floating substituents preserve their chemistry, carbon-position ambiguity,
-#' and candidate parent residues.
+#' and candidate parent residues across the complete structure.
 #'
 #' @param x A character vector of WURCS strings. NA values are allowed and will be returned as NA structures.
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
@@ -1165,7 +1167,6 @@ build_glycan_graph <- function(
   if (length(floating_substituents) > 0) {
     graph <- annotate_wurcs_floating_substituents(
       graph,
-      floating,
       floating_substituents
     )
   }
@@ -1195,35 +1196,21 @@ find_wurcs_core_node <- function(graph, floating = list()) {
 
 annotate_wurcs_floating_substituents <- function(
   graph,
-  floating,
   substituents
 ) {
-  components <- igraph::components(graph, mode = "weak")$membership
-  floating_components <- components[purrr::map_int(floating, "root")]
-  floating_nodes <- which(components %in% floating_components)
-  main_vertices <- as.integer(setdiff(
-    seq_len(igraph::vcount(graph)),
-    floating_nodes
-  ))
+  all_vertices <- seq_len(igraph::vcount(graph))
   occupied_slots <- definitely_occupied_carbon_slots(
     graph,
-    main_vertices
+    all_vertices
   )
 
   graph$floating_substituents <- purrr::map(
     substituents,
     function(metadata) {
-      non_main_parents <- setdiff(metadata$parents, main_vertices)
-      if (length(non_main_parents) > 0L) {
-        cli::cli_abort(c(
-          "WURCS floating substituent candidate parents must be main-tree monosaccharides.",
-          "x" = "Candidate node{?s} {.val {non_main_parents}} belong{?s/} to a floating subtree."
-        ))
-      }
       parents <- metadata$parents
       domain <- normalize_floating_substituent_parents(
         parents,
-        main_vertices,
+        all_vertices,
         metadata$substituent,
         occupied_slots,
         context = "WURCS floating substituent"
@@ -1247,24 +1234,20 @@ annotate_wurcs_floating_parts <- function(graph, vertex_df, floating) {
     floating_components,
     ~ as.integer(which(components == .x))
   )
-  main_vertices <- as.integer(setdiff(
-    seq_len(igraph::vcount(graph)),
-    unlist(floating_nodes, use.names = FALSE)
-  ))
+  all_vertices <- seq_len(igraph::vcount(graph))
   occupied_slots <- definitely_occupied_acceptor_slots(
     graph,
-    main_vertices
+    all_vertices
   )
 
   graph$floating_parts <- purrr::map2(
     floating,
     floating_nodes,
     function(metadata, nodes) {
-      parents <- metadata$parents
-      parents <- intersect(parents, main_vertices)
+      parents <- setdiff(metadata$parents, nodes)
       if (length(parents) == 0) {
         cli::cli_abort(
-          "A WURCS floating part has no candidate parent in the main tree."
+          "A WURCS floating part has no candidate parent outside its own component."
         )
       }
 
@@ -1276,7 +1259,7 @@ annotate_wurcs_floating_parts <- function(graph, vertex_df, floating) {
       )
       parents <- normalize_floating_part_parents(
         parents,
-        main_vertices,
+        setdiff(all_vertices, nodes),
         linkage,
         occupied_slots,
         context = "WURCS floating part"

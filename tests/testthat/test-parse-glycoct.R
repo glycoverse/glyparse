@@ -764,11 +764,15 @@ test_that("GlycoCT UND sections become floating glycan parts", {
 
   expect_identical(
     unname(as.character(result)),
-    "{Fuc(a1-2)}{Gal(b1-4)GlcNAc(b1-6)}Glc(b1-3)Gal(a1-"
+    paste0(
+      "{Fuc(a1-2)|4,5}",
+      "{Gal(b1-4)GlcNAc(b1-6)|4,5}",
+      "Glc(b1-3)Gal(a1-"
+    )
   )
   expect_identical(floating$linkage, c("a1-2", "b1-6"))
   expect_equal(floating$nodes, list(1L, c(2L, 3L)))
-  expect_equal(floating$parents, list(integer(), integer()))
+  expect_equal(floating$parents, list(c(4L, 5L), c(4L, 5L)))
 })
 
 test_that("substituent-only GlycoCT UND sections become floating", {
@@ -894,7 +898,7 @@ test_that("GlycoCT supports floating parts and substituents together", {
 
   expect_identical(
     unname(as.character(result)),
-    "{?S}{Fuc(a1-6)}Glc(b1-3)Gal(a1-"
+    "{?S|2,3}{Fuc(a1-6)}Glc(b1-3)Gal(a1-"
   )
   expect_identical(
     glyrepr::structure_floating_substituents(result)$substituent,
@@ -903,6 +907,10 @@ test_that("GlycoCT supports floating parts and substituents together", {
   expect_identical(
     glyrepr::structure_floating_parts(result)$linkage,
     "a1-6"
+  )
+  expect_equal(
+    glyrepr::structure_floating_substituents(result)$parents,
+    list(c(2L, 3L))
   )
 })
 

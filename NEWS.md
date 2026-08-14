@@ -1,5 +1,6 @@
 # glyparse (development version)
 
+* `parse_glycoct()` and `parse_wurcs()` now preserve declared floating candidate-parent domains in global floating-parent structures: GlycoCT UND parents remain restricted to the main graph, while WURCS parents may target other floating components.
 * `parse_glycoct()`, `parse_wurcs()`, `parse_iupac_compact()`, `parse_iupac_condensed()`, `parse_linucs()`, and `auto_parse()` now preserve alditol reducing ends in parsed structures. (#46)
 * `parse_glycoct()` and `parse_wurcs()` now preserve floating substituents with unresolved parent residues, including their chemistry, carbon positions, and candidate parents. (#45)
 * Parsers now preserve unusual monosaccharide configurations using `glyrepr` names such as `D-Fuc`, `L-Gul`, and `D-Fucf`, while unprefixed names retain their natural configurations. (#43, #44)
