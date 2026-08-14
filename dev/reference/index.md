@@ -1,6 +1,6 @@
 # Package index
 
-## All functions
+## Structure parsers
 
 - [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
   : Automatic Structure Parsing
@@ -8,6 +8,8 @@
   : Parse GlyCAM IUPAC Structures
 - [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
   : Parse GlycoCT Structures
+- [`parse_gwb()`](https://glycoverse.github.io/glyparse/dev/reference/parse_gwb.md)
+  : Parse GlycoWorkbench Structures
 - [`parse_iupac_compact()`](https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_compact.md)
   : Parse IUPAC-compact Structures
 - [`parse_iupac_condensed()`](https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_condensed.md)

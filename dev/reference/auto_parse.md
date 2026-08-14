@@ -29,6 +29,8 @@ Supported types:
 
 12. LINUCS
 
+13. GlycoWorkbench
+
 ## Usage
 
 ``` r

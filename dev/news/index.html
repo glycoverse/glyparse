@@ -34,7 +34,8 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="glyparse-development-version">glyparse (development version)<a class="anchor" aria-label="anchor" href="#glyparse-development-version"></a></h2>
-<ul><li>
+<ul><li>New <code><a href="../reference/parse_gwb.html">parse_gwb()</a></code> parses GlycoWorkbench (GWB/GWS) sequences, including branches, substituents, furanose and configured residues, reducing-end alditols, and uncertain antennae. <code><a href="../reference/auto_parse.html">auto_parse()</a></code> now detects these sequences. (<a href="https://github.com/glycoverse/glyparse/issues/48" class="external-link">#48</a>)</li>
+<li>
 <code><a href="../reference/parse_glycoct.html">parse_glycoct()</a></code> now preserves repeated and alternative-position substituents, distinguishes N-acetyl and N-glycolyl from acetyl, maps generic <code>HexA</code> and <code>HexN</code> residues, and rejects unrepresentable non-alditol open-chain residues explicitly. (<a href="https://github.com/glycoverse/glyparse/issues/47" class="external-link">#47</a>)</li>
 <li>
 <code><a href="../reference/parse_wurcs.html">parse_wurcs()</a></code> now accepts direct phosphate and alternative-position substituent encodings, preserves generic-root anomer positions, and orients ambiguous linkages using alditol-aware donor semantics. (<a href="https://github.com/glycoverse/glyparse/issues/47" class="external-link">#47</a>)</li>

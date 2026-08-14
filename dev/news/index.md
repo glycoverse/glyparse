@@ -2,6 +2,14 @@
 
 ## glyparse (development version)
 
+- New
+  [`parse_gwb()`](https://glycoverse.github.io/glyparse/dev/reference/parse_gwb.md)
+  parses GlycoWorkbench (GWB/GWS) sequences, including branches,
+  substituents, furanose and configured residues, reducing-end alditols,
+  and uncertain antennae.
+  [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
+  now detects these sequences.
+  ([\#48](https://github.com/glycoverse/glyparse/issues/48))
 - [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
   now preserves repeated and alternative-position substituents,
   distinguishes N-acetyl and N-glycolyl from acetyl, maps generic `HexA`
