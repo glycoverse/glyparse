@@ -2228,13 +2228,20 @@ match_generic_glycoct_composite <- function(group, residues, linkages) {
       "amino" %in% group_subs &&
       has_glycoct_substituent_at(group, residues, linkages, "amino", "2")
   ) {
-    extra_subs <- group_subs
-    extra_subs <- extra_subs[-match("amino", extra_subs)]
-    extra_sub <- format_extra_substituents(
-      extra_subs,
+    substituent_tokens <- glycoct_substituent_tokens(
       group,
       residues,
       linkages
+    )
+    identity_index <- purrr::detect_index(
+      substituent_tokens,
+      function(token) {
+        parts <- stringr::str_split_1(token, stringr::fixed("\r"))
+        identical(parts[[1]], "amino") && identical(parts[[2]], "2")
+      }
+    )
+    extra_sub <- format_glycoct_substituent_tokens(
+      substituent_tokens[-identity_index]
     )
     return(list(mono = "HexN", sub = extra_sub))
   }

@@ -106,7 +106,27 @@ test_that("GlycoCT maps generic HEX descriptors", {
     "LIN\n",
     "1:1d(2+1)2n"
   )
+  hexn_4n <- paste0(
+    "RES\n",
+    "1b:x-HEX-1:x\n",
+    "2s:amino\n",
+    "3s:amino\n",
+    "LIN\n",
+    "1:1d(2+1)2n\n",
+    "2:1d(4+1)3n"
+  )
+  hexn_4n_reversed <- paste0(
+    "RES\n",
+    "1b:x-HEX-1:x\n",
+    "2s:amino\n",
+    "3s:amino\n",
+    "LIN\n",
+    "1:1d(4+1)2n\n",
+    "2:1d(2+1)3n"
+  )
   expect_equal(as.character(parse_glycoct(hexn)), "HexN(?1-")
+  expect_equal(as.character(parse_glycoct(hexn_4n)), "HexN4N(?1-")
+  expect_equal(as.character(parse_glycoct(hexn_4n_reversed)), "HexN4N(?1-")
   expect_equal(as.character(parse_glycoct(hexnac)), "HexNAc(?1-")
   expect_equal(as.character(parse_glycoct(hexnac_6s)), "HexNAc6S(?1-")
 })
