@@ -1040,7 +1040,13 @@ format_glycoct_reducing_anomer <- function(reducing_end) {
   if (is.null(anomer_pos) || is.na(anomer_pos)) {
     anomer_pos <- decide_anomer_pos(reducing_end$mono)
   } else if (anomer_pos == "x") {
-    anomer_pos <- "?"
+    anomer_pos <- if (
+      reducing_end$mono %in% glyrepr::available_monosaccharides("generic")
+    ) {
+      decide_anomer_pos(reducing_end$mono)
+    } else {
+      "?"
+    }
   }
 
   paste0(anomer_config, anomer_pos)
@@ -1643,12 +1649,23 @@ compile_glycoct_mapping <- function(name, mapping) {
     pattern_linkages <- pattern_linkages[!is.na(pattern_linkages)]
   }
 
+  mapping_residues <- parse_res_section(mapping$res)
+  mapping_linkages <- parse_lin_section(
+    if (is.null(mapping$lin)) character() else mapping$lin
+  )
+  pattern_substituents <- glycoct_substituent_tokens(
+    as.integer(names(mapping_residues)),
+    mapping_residues,
+    mapping_linkages
+  )
+
   c(
     list(name = name),
     glycoct_mono_signature(pattern_mono),
     list(
       subs = pattern_subs,
       linkages = pattern_linkages,
+      substituents = sort(pattern_substituents),
       single = length(mapping$res) == 1L
     )
   )
@@ -1682,13 +1699,25 @@ glycoct_signature_mono_matches <- function(signature, entry) {
     same_ring_family
 }
 
-glycoct_signature_key <- function(core, subs, linkages) {
+glycoct_signature_key <- function(core, substituents) {
   paste(
     core,
-    paste(subs, collapse = "\r"),
-    paste(linkages, collapse = "\r"),
+    paste(substituents, collapse = "\r"),
     sep = "\n"
   )
+}
+
+glycoct_signature_substituents <- function(signature) {
+  if (!is.null(signature$substituents)) {
+    return(signature$substituents)
+  }
+  if (length(signature$subs) != length(signature$linkages)) {
+    return(character())
+  }
+  purrr::map2_chr(signature$subs, signature$linkages, function(sub, linkage) {
+    positions <- stringr::str_split_1(linkage, stringr::fixed("+"))
+    paste(sub, positions[[1]], positions[[2]], sep = "\r")
+  })
 }
 
 compile_glycoct_mapping_index <- function(mappings) {
@@ -1703,8 +1732,7 @@ compile_glycoct_mapping_index <- function(mappings) {
     function(entry) {
       glycoct_signature_key(
         entry$core,
-        entry$subs,
-        entry$linkages
+        entry$substituents
       )
     },
     character(1)
@@ -1790,9 +1818,37 @@ glycoct_group_signature <- function(group, residues, linkages) {
     mono_signature,
     list(
       subs = sort(group_subs),
-      linkages = sort(group_linkages)
+      linkages = sort(group_linkages),
+      substituents = sort(glycoct_substituent_tokens(
+        group,
+        residues,
+        linkages
+      ))
     )
   )
+}
+
+glycoct_substituent_tokens <- function(group, residues, linkages) {
+  tokens <- character()
+  for (linkage in linkages) {
+    from_res <- residues[[as.character(linkage$from_res)]]
+    to_res <- residues[[as.character(linkage$to_res)]]
+    if (
+      linkage$from_res %in%
+        group &&
+        linkage$to_res %in% group &&
+        !is.null(from_res) &&
+        !is.null(to_res) &&
+        identical(from_res$type, "mono") &&
+        identical(to_res$type, "sub")
+    ) {
+      tokens <- c(
+        tokens,
+        paste(to_res$content, linkage$from_pos, linkage$to_pos, sep = "\r")
+      )
+    }
+  }
+  tokens
 }
 
 consolidate_residues <- function(residues, linkages, mono_mapping_index) {
@@ -1963,8 +2019,7 @@ match_composite_structure <- function(
 
   key <- glycoct_signature_key(
     group_signature$core,
-    group_signature$subs,
-    group_signature$linkages
+    glycoct_signature_substituents(group_signature)
   )
   candidates <- mapping_index$exact[[key]]
   if (is.null(candidates)) {
@@ -1995,7 +2050,8 @@ match_partial_composite_structure <- function(
 
   # Try to find the best partial match and identify extra substituents
   best_match <- NULL
-  best_extra_subs <- c()
+  best_extra_substituents <- character()
+  group_substituents <- group_signature$substituents
   group_subs <- group_signature$subs
   group_mono <- group_signature$mono
 
@@ -2010,33 +2066,35 @@ match_partial_composite_structure <- function(
   # Try to find a known composite that uses a subset of our substituents
   for (idx in candidate_indices) {
     entry <- mapping_index$entries[[idx]]
-    pattern_subs <- entry$subs
+    pattern_substituents <- entry$substituents
 
     # Check if pattern substituents are a subset of group substituents
-    if (length(pattern_subs) > 0 && all(pattern_subs %in% group_subs)) {
+    extra_substituents <- glycoct_multiset_difference(
+      group_substituents,
+      pattern_substituents
+    )
+    if (length(pattern_substituents) > 0 && !is.null(extra_substituents)) {
       if (
         !is.null(group_mono) &&
           glycoct_signature_mono_matches(group_signature, entry)
       ) {
-        exact_match <- identical(pattern_subs, group_signature$subs) &&
-          identical(entry$linkages, group_signature$linkages)
+        exact_match <- length(extra_substituents) == 0L
         if (exact_match) {
           next
         }
 
         # For partial matching, only consider if there are extra substituents
-        if (length(pattern_subs) < length(group_subs)) {
-          extra_subs <- setdiff(group_subs, pattern_subs)
-
+        if (length(pattern_substituents) < length(group_substituents)) {
           if (
             is.null(best_match) ||
-              length(pattern_subs) > length(best_match$pattern_subs)
+              length(pattern_substituents) >
+                length(best_match$pattern_substituents)
           ) {
             best_match <- list(
               mono_name = entry$name,
-              pattern_subs = pattern_subs
+              pattern_substituents = pattern_substituents
             )
-            best_extra_subs <- extra_subs
+            best_extra_substituents <- extra_substituents
           }
         }
       }
@@ -2045,11 +2103,8 @@ match_partial_composite_structure <- function(
 
   if (!is.null(best_match)) {
     # Format extra substituents with position information
-    formatted_extra_subs <- format_extra_substituents(
-      best_extra_subs,
-      group,
-      residues,
-      linkages
+    formatted_extra_subs <- format_glycoct_substituent_tokens(
+      best_extra_substituents
     )
 
     return(list(
@@ -2074,6 +2129,49 @@ match_partial_composite_structure <- function(
   }
 
   return(list(mono = "Unk", sub = ""))
+}
+
+glycoct_multiset_difference <- function(x, y) {
+  remaining <- x
+  for (value in y) {
+    index <- match(value, remaining)
+    if (is.na(index)) {
+      return(NULL)
+    }
+    remaining <- remaining[-index]
+  }
+  remaining
+}
+
+format_glycoct_substituent_tokens <- function(tokens) {
+  if (length(tokens) == 0L) {
+    return("")
+  }
+  formatted <- purrr::map_chr(tokens, function(token) {
+    parts <- stringr::str_split_1(token, stringr::fixed("\r"))
+    position <- parts[[2]]
+    if (position == "-1") {
+      position <- "?"
+    }
+    position <- stringr::str_replace_all(position, "\\|", "/")
+    paste0(position, glycoct_substituent_abbreviation(parts[[1]]))
+  })
+  formatted <- sort_glycoct_substituents(formatted)
+  paste(formatted, collapse = ",")
+}
+
+sort_glycoct_substituents <- function(substituents) {
+  if (length(substituents) == 0L) {
+    return(character())
+  }
+  positions <- stringr::str_extract(substituents, "^[?0-9/]+")
+  first_position <- purrr::map_dbl(positions, function(position) {
+    if (is.na(position) || position == "?") {
+      return(Inf)
+    }
+    min(as.numeric(stringr::str_split_1(position, stringr::fixed("/"))))
+  })
+  substituents[order(first_position, substituents)]
 }
 
 #' Match generic GlycoCT monosaccharide composites
@@ -2122,6 +2220,23 @@ match_generic_glycoct_composite <- function(group, residues, linkages) {
       sub <- paste(c("2S", extra_sub[extra_sub != ""]), collapse = ",")
       return(list(mono = amino_mono, sub = sub))
     }
+  }
+
+  if (
+    is_generic_glycoct_hex(group_mono$content) &&
+      !is_generic_glycoct_dhex(group_mono$content) &&
+      "amino" %in% group_subs &&
+      has_glycoct_substituent_at(group, residues, linkages, "amino", "2")
+  ) {
+    extra_subs <- group_subs
+    extra_subs <- extra_subs[-match("amino", extra_subs)]
+    extra_sub <- format_extra_substituents(
+      extra_subs,
+      group,
+      residues,
+      linkages
+    )
+    return(list(mono = "HexN", sub = extra_sub))
   }
 
   if (
@@ -2270,13 +2385,14 @@ has_glycoct_substituent_at <- function(
 format_extra_substituents <- function(extra_subs, group, residues, linkages) {
   # Format substituents with position information (e.g., "6S" for sulfate at position 6)
   formatted <- c()
+  used_substituents <- integer()
 
   for (sub_content in extra_subs) {
     # Find the position of this substituent
     position <- "?"
 
     for (linkage in linkages) {
-      if (linkage$to_res %in% group) {
+      if (linkage$to_res %in% group && !linkage$to_res %in% used_substituents) {
         to_res <- residues[[as.character(linkage$to_res)]]
         if (
           !is.null(to_res) &&
@@ -2284,6 +2400,7 @@ format_extra_substituents <- function(extra_subs, group, residues, linkages) {
             to_res$content == sub_content
         ) {
           position <- as.character(linkage$from_pos)
+          used_substituents <- c(used_substituents, linkage$to_res)
           break
         }
       }
@@ -2293,6 +2410,7 @@ format_extra_substituents <- function(extra_subs, group, residues, linkages) {
     if (position == "-1") {
       position <- "?"
     }
+    position <- stringr::str_replace_all(position, "\\|", "/")
 
     # Format the substituent with position
     formatted <- c(
@@ -2302,6 +2420,7 @@ format_extra_substituents <- function(extra_subs, group, residues, linkages) {
   }
 
   # Join multiple substituents
+  formatted <- sort_glycoct_substituents(formatted)
   paste(formatted, collapse = ",")
 }
 
@@ -2309,7 +2428,8 @@ glycoct_substituent_abbreviation <- function(x) {
   switch(
     x,
     sulfate = "S",
-    `n-acetyl` = "Ac",
+    `n-acetyl` = "NAc",
+    `n-glycolyl` = "NGc",
     acetyl = "Ac",
     methyl = "Me",
     amino = "N",
@@ -2412,6 +2532,14 @@ map_single_mono_ringless <- function(content) {
   # Extract monosaccharide name from content like "dglc-HEX-1:5" or "lgal-HEX-1:5|6:d"
 
   is_alditol <- is_glycoct_alditol_mono(content)
+  if (
+    identical(extract_glycoct_ring_bounds(content), "0:0") &&
+      !is_alditol
+  ) {
+    cli::cli_abort(
+      "Open-chain GlycoCT residues without an alditol modification are not representable."
+    )
+  }
   mapping_index <- glycoct_mapping_index(alditol = is_alditol)
   mono_signature <- glycoct_mono_signature(content)
   candidates <- mapping_index$by_core[[mono_signature$core]]
@@ -2433,6 +2561,9 @@ map_single_mono_ringless <- function(content) {
 
   if (is_generic_glycoct_dhex(content)) {
     return("dHex")
+  }
+  if (is_generic_glycoct_hexa(content)) {
+    return("HexA")
   }
   if (is_generic_glycoct_hex(content)) {
     return("Hex")
@@ -2529,6 +2660,19 @@ is_generic_glycoct_dhex <- function(content) {
   isTRUE(stringr::str_detect(
     content,
     "^HEX-(?:\\d+|x):(?:\\d+|x)\\|6:d$"
+  ))
+}
+
+#' Check whether a GlycoCT content string is a generic hexuronic acid
+#'
+#' @param content GlycoCT monosaccharide content without the leading anomer.
+#'
+#' @return A logical scalar.
+#' @noRd
+is_generic_glycoct_hexa <- function(content) {
+  isTRUE(stringr::str_detect(
+    content,
+    "^HEX-(?:\\d+|x):(?:\\d+|x)\\|6:a$"
   ))
 }
 
