@@ -40,6 +40,7 @@ Supported types:
 \item StrucGP
 \item KCF
 \item LINUCS
+\item GlycoWorkbench
 }
 }
 \examples{

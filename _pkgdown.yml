@@ -4,3 +4,9 @@ template:
 
 development:
   mode: auto
+
+reference:
+- title: Structure parsers
+  contents:
+  - auto_parse
+  - starts_with("parse_")
