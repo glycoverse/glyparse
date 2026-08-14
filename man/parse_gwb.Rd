@@ -36,6 +36,8 @@ The parser normalizes the glycan tree to IUPAC-condensed notation before
 constructing the glycan structure. GlycoWorkbench substituent nodes such as
 \code{"--6S"} and \code{"--9Ac"} are retained as monosaccharide substituents. Mass
 options are ignored because they are not part of the glycan graph.
+Explicit open-chain residues (\verb{,o}) are supported only for a reduced
+\code{redEnd} root; other open-chain forms cannot be represented by \code{glyrepr}.
 }
 \examples{
 gwb <- paste0(

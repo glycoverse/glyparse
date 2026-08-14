@@ -13,6 +13,8 @@
 #' constructing the glycan structure. GlycoWorkbench substituent nodes such as
 #' `"--6S"` and `"--9Ac"` are retained as monosaccharide substituents. Mass
 #' options are ignored because they are not part of the glycan graph.
+#' Explicit open-chain residues (`,o`) are supported only for a reduced
+#' `redEnd` root; other open-chain forms cannot be represented by `glyrepr`.
 #'
 #' @param x A character vector of GlycoWorkbench strings. NA values are allowed
 #'   and will be returned as NA structures.
@@ -359,7 +361,8 @@ parse_gwb_residue_token <- local({
       } else {
         NA_character_
       },
-      anomer = normalize_gwb_anomer(anomer)
+      anomer = normalize_gwb_anomer(anomer),
+      ring = ring
     )
     cache[[token]] <- residue
     residue
@@ -445,6 +448,11 @@ normalize_gwb_anomer <- function(x) {
 format_gwb_iupac <- function(node, root = FALSE, alditol = FALSE) {
   if (!identical(node$residue$kind, "mono")) {
     cli::cli_abort("A GlycoWorkbench glycan root must be a monosaccharide.")
+  }
+  if (identical(node$residue$ring, "o") && !(root && alditol)) {
+    cli::cli_abort(
+      "A non-alditol open-chain GlycoWorkbench residue is not representable."
+    )
   }
 
   substituent_children <- purrr::keep(

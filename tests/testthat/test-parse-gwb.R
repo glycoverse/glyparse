@@ -104,6 +104,22 @@ test_that("GlycoWorkbench preserves reducing-end chemistry", {
   )
 })
 
+test_that("GlycoWorkbench rejects unrepresentable open-chain residues", {
+  expect_error(
+    parse_gwb("freeEnd--?D-Glc,o$MONO,Und,0,0,freeEnd"),
+    "Can't parse"
+  )
+  expect_error(
+    parse_gwb(
+      paste0(
+        "freeEnd--1a1D-Gal,p--6D-Glc,o",
+        "$MONO,Und,0,0,freeEnd"
+      )
+    ),
+    "Can't parse"
+  )
+})
+
 test_that("GlycoWorkbench parses uncertain antennae", {
   input <- c(
     one_part = paste0(
