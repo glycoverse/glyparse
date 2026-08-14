@@ -75,8 +75,13 @@ test_that("GlycoCT accepts space-separated records", {
 })
 
 test_that("GlycoCT maps generic HEX descriptors", {
-  expect_equal(as.character(parse_glycoct("RES\n1b:x-HEX-x:x")), "Hex(??-")
+  expect_equal(as.character(parse_glycoct("RES\n1b:x-HEX-x:x")), "Hex(?1-")
   expect_equal(as.character(parse_glycoct("RES\n1b:x-HEX-1:x|6:d")), "dHex(?1-")
+
+  expect_equal(
+    as.character(parse_glycoct("RES\n1b:x-HEX-1:5|6:a")),
+    "HexA(?1-"
+  )
 
   hexnac <- paste0(
     "RES\n",
@@ -94,12 +99,40 @@ test_that("GlycoCT maps generic HEX descriptors", {
     "1:1d(2+1)2n\n",
     "2:1o(6+1)3n"
   )
+  hexn <- paste0(
+    "RES\n",
+    "1b:x-HEX-1:x\n",
+    "2s:amino\n",
+    "LIN\n",
+    "1:1d(2+1)2n"
+  )
+  hexn_4n <- paste0(
+    "RES\n",
+    "1b:x-HEX-1:x\n",
+    "2s:amino\n",
+    "3s:amino\n",
+    "LIN\n",
+    "1:1d(2+1)2n\n",
+    "2:1d(4+1)3n"
+  )
+  hexn_4n_reversed <- paste0(
+    "RES\n",
+    "1b:x-HEX-1:x\n",
+    "2s:amino\n",
+    "3s:amino\n",
+    "LIN\n",
+    "1:1d(4+1)2n\n",
+    "2:1d(2+1)3n"
+  )
+  expect_equal(as.character(parse_glycoct(hexn)), "HexN(?1-")
+  expect_equal(as.character(parse_glycoct(hexn_4n)), "HexN4N(?1-")
+  expect_equal(as.character(parse_glycoct(hexn_4n_reversed)), "HexN4N(?1-")
   expect_equal(as.character(parse_glycoct(hexnac)), "HexNAc(?1-")
   expect_equal(as.character(parse_glycoct(hexnac_6s)), "HexNAc6S(?1-")
 })
 
 test_that("GlycoCT maps generic PEN descriptors", {
-  expect_equal(as.character(parse_glycoct("RES\n1b:x-PEN-x:x")), "Pen(??-")
+  expect_equal(as.character(parse_glycoct("RES\n1b:x-PEN-x:x")), "Pen(?1-")
   expect_equal(as.character(parse_glycoct("RES\n1b:x-PEN-1:4")), "Pen(?1-")
 })
 
@@ -281,7 +314,7 @@ test_that("GlycoCT substituents", {
   sub_Me <- "RES\n1b:a-dglc-HEX-1:5\n2s:acetyl\nLIN\n1:1o(3+1)2n\n"
   expect_sub_equal(sub_Me, "3Ac")
   sub_NAc <- "RES\n1b:a-dglc-HEX-1:5\n2s:n-acetyl\nLIN\n1:1d(3+1)2n\n"
-  expect_sub_equal(sub_NAc, "3Ac")
+  expect_sub_equal(sub_NAc, "3NAc")
   sub_P <- "RES\n1b:a-dglc-HEX-1:5\n2s:phosphate\nLIN\n1:1o(3+1)2n\n"
   expect_sub_equal(sub_P, "3P")
   sub_S <- "RES\n1b:a-dglc-HEX-1:5\n2s:sulfate\nLIN\n1:1o(3+1)2n\n"
@@ -290,6 +323,58 @@ test_that("GlycoCT substituents", {
   expect_sub_equal(sub_PPEtn, "3PPEtn")
   sub_PEtn <- "RES\n1b:a-dglc-HEX-1:5\n2s:phospho-ethanolamine\nLIN\n1:1o(3+1)2n\n"
   expect_sub_equal(sub_PEtn, "3PEtn")
+})
+
+test_that("GlycoCT keeps repeated and alternative substituent positions", {
+  repeated_sulfate <- paste0(
+    "RES\n",
+    "1b:x-dglc-HEX-1:5\n",
+    "2s:sulfate\n",
+    "3s:sulfate\n",
+    "LIN\n",
+    "1:1o(3+1)2n\n",
+    "2:1o(6+1)3n"
+  )
+  alternative_sulfate <- paste0(
+    "RES\n",
+    "1b:x-dglc-HEX-1:5\n",
+    "2s:sulfate\n",
+    "LIN\n",
+    "1:1o(3|4+1)2n"
+  )
+  neu5ac_1n <- paste0(
+    "RES\n",
+    "1b:a-dgro-dgal-NON-2:6|1:a|2:keto|3:d\n",
+    "2s:amino\n",
+    "3s:n-acetyl\n",
+    "LIN\n",
+    "1:1d(1+1)2n\n",
+    "2:1d(5+1)3n"
+  )
+  neu5ac_9nac <- paste0(
+    "RES\n",
+    "1b:a-dgro-dgal-NON-2:6|1:a|2:keto|3:d\n",
+    "2s:n-acetyl\n",
+    "3s:n-acetyl\n",
+    "LIN\n",
+    "1:1d(5+1)2n\n",
+    "2:1d(9+1)3n"
+  )
+
+  expect_equal(as.character(parse_glycoct(repeated_sulfate)), "Glc3S6S(?1-")
+  expect_equal(
+    as.character(parse_glycoct(alternative_sulfate)),
+    "Glc3/4S(?1-"
+  )
+  expect_equal(as.character(parse_glycoct(neu5ac_1n)), "Neu5Ac1N(a2-")
+  expect_equal(as.character(parse_glycoct(neu5ac_9nac)), "Neu5Ac9NAc(a2-")
+})
+
+test_that("GlycoCT rejects unrepresentable open-chain residues explicitly", {
+  expect_error(
+    map_single_mono_ringless("dglc-HEX-0:0"),
+    "Open-chain GlycoCT residues without an alditol modification"
+  )
 })
 
 test_that("GlycoCT: GlcA3S(?1-?)Gal(?1-?)GlcNAc(?1-, (Unknown linkages and anomers)", {

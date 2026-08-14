@@ -497,7 +497,7 @@ WURCS_SUB_REGEX <- c(
   "Me" = "OC",
   "Ac" = "OCC/3=O",
   "NAc" = "NCC/3=O",
-  "P" = "OPO/3O/3=O",
+  "P" = "(?:OPO/3O/3=O|PO/2O/2=O)",
   "S" = "OSO/3=O/3=O",
   "Pyr" = "OCCC/4=O/3=O",
   "PC" = "OP(\\^X)?OCCNC/7C/7C/3O/3=O",
@@ -687,7 +687,11 @@ parse_residue_details <- function(residue) {
         }
         mono <- names(WURCS_AMBIGUOUS_MONO_REGEX)[[ambiguous_mono_idx]]
         mono_pattern <- WURCS_AMBIGUOUS_MONO_REGEX[[ambiguous_mono_idx]]
-        anomer <- "??"
+        anomer <- if (mono %in% c("Hex", "HexNAc", "HexN")) {
+          paste0("?", wurcs_anomer_pos(mono))
+        } else {
+          "??"
+        }
       }
     }
   } else {
@@ -790,7 +794,9 @@ parse_residue_details <- function(residue) {
       # Add back the leading "_" for pattern matching
       sub_part_with_underscore <- paste0("_", sub_part)
 
-      sub_patterns <- stringr::str_glue("^_(\\d+|\\?)\\*{WURCS_SUB_REGEX}$")
+      sub_patterns <- stringr::str_glue(
+        "^_((?:\\d+(?:\\|\\d+)*)|\\?)\\*{WURCS_SUB_REGEX}$"
+      )
       sub_idx <- purrr::detect_index(
         sub_patterns,
         ~ stringr::str_detect(sub_part_with_underscore, .x)
@@ -803,9 +809,10 @@ parse_residue_details <- function(residue) {
       sub_name <- names(WURCS_SUB_REGEX)[[sub_idx]]
       sub_pos <- stringr::str_extract(
         sub_part_with_underscore,
-        "_(\\d+|\\?)",
+        "_((?:\\d+(?:\\|\\d+)*)|\\?)",
         group = 1
       )
+      sub_pos <- stringr::str_replace_all(sub_pos, "\\|", "/")
       paste0(sub_pos, sub_name)
     })
 
@@ -910,7 +917,11 @@ parse_linkages <- function(x) {
 }
 
 
-parse_wurcs_linkages <- function(x, residues) {
+parse_wurcs_linkages <- function(
+  x,
+  residues,
+  alditols = rep(FALSE, length(residues))
+) {
   linkages <- stringr::str_split_1(x, "_")
   is_floating <- stringr::str_detect(linkages, stringr::fixed("}"))
   floating <- purrr::map(
@@ -923,7 +934,8 @@ parse_wurcs_linkages <- function(x, residues) {
     ordinary = purrr::map(
       linkages[!is_floating],
       parse_one_linkage,
-      anomers = purrr::map_chr(residues, "anomer")
+      anomers = purrr::map_chr(residues, "anomer"),
+      alditols = alditols
     ),
     floating = purrr::map(
       floating[floating_types == "part"],
@@ -1049,7 +1061,7 @@ parse_wurcs_linkage_endpoint <- function(x) {
 }
 
 
-parse_one_linkage <- function(x, anomers = NULL) {
+parse_one_linkage <- function(x, anomers = NULL, alditols = NULL) {
   # Input: a string of one WURCS linkage, e.g. "a4-b1"
   # Output: a named list of `from`, `to`, and `linkage`
   spl <- stringr::str_split_1(x, "-")
@@ -1059,8 +1071,16 @@ parse_one_linkage <- function(x, anomers = NULL) {
       stringr::fixed("|")
     )
   } else {
-    left_donor <- wurcs_endpoint_can_be_donor(spl[[1]], anomers)
-    right_donor <- wurcs_endpoint_can_be_donor(spl[[2]], anomers)
+    left_donor <- wurcs_endpoint_can_be_donor(
+      spl[[1]],
+      anomers,
+      alditols
+    )
+    right_donor <- wurcs_endpoint_can_be_donor(
+      spl[[2]],
+      anomers,
+      alditols
+    )
     swap_endpoints <- left_donor &&
       !right_donor ||
       !left_donor &&
@@ -1076,7 +1096,11 @@ parse_one_linkage <- function(x, anomers = NULL) {
       parts <- stringr::str_split_1(part, stringr::fixed("|"))
       pos <- stringr::str_sub(parts, 2, -1)
       idx_part <- stringr::str_sub(part, 1, 1)
-      pos_part <- stringr::str_c(pos, collapse = "/")
+      pos_part <- if ("?" %in% pos) {
+        "?"
+      } else {
+        stringr::str_c(pos, collapse = "/")
+      }
       stringr::str_c(idx_part, pos_part)
     } else {
       part
@@ -1097,13 +1121,17 @@ parse_one_linkage <- function(x, anomers = NULL) {
 }
 
 
-wurcs_endpoint_can_be_donor <- function(endpoint, anomers) {
+wurcs_endpoint_can_be_donor <- function(endpoint, anomers, alditols = NULL) {
   alternatives <- stringr::str_split_1(endpoint, stringr::fixed("|"))
   node <- letter_to_int(stringr::str_sub(alternatives[[1]], 1, 1))
+  if (!is.null(alditols) && isTRUE(alditols[[node]])) {
+    return(FALSE)
+  }
   positions <- stringr::str_sub(alternatives, 2, -1)
   anomer_position <- stringr::str_sub(anomers[[node]], 2, -1)
 
-  any(positions == "?" | positions == anomer_position)
+  any(anomer_position != "?" & positions == anomer_position) ||
+    all(positions == "?")
 }
 
 letter_to_int <- function(letter) {
@@ -1321,7 +1349,11 @@ do_parse_wurcs <- function(x, residue_cache = NULL) {
     floating <- list()
     floating_substituents <- list()
   } else {
-    linkage_data <- parse_wurcs_linkages(linkage_part, residues)
+    linkage_data <- parse_wurcs_linkages(
+      linkage_part,
+      residues,
+      alditols = alditols
+    )
     linkages <- linkage_data$ordinary
     floating <- linkage_data$floating
     floating_substituents <- linkage_data$floating_substituents
