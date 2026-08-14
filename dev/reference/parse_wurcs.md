@@ -7,8 +7,10 @@ WURCS, see [WURCS](https://github.com/glycoinfo/WURCS/wiki). Main
 reducing-end alditol residues retain their alditol status and use an
 unknown anomer configuration. Ambiguous alternative linkage groups are
 represented as floating glycan parts when their child residue or subtree
-is not localized to one parent. Floating substituents preserve their
-chemistry, carbon-position ambiguity, and candidate parent residues.
+is not localized to one parent. Candidate parents may belong to the main
+glycan or another floating component. Floating substituents preserve
+their chemistry, carbon-position ambiguity, and candidate parent
+residues across the complete structure.
 
 ## Usage
 

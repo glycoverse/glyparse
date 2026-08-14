@@ -2,6 +2,13 @@
 
 ## glyparse (development version)
 
+- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
+  and
+  [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
+  now preserve declared floating candidate-parent domains in global
+  floating-parent structures: GlycoCT UND parents remain restricted to
+  the main graph, while WURCS parents may target other floating
+  components.
 - [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md),
   [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md),
   [`parse_iupac_compact()`](https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_compact.md),
