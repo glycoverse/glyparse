@@ -149,6 +149,29 @@ test_that("GlycoWorkbench parses uncertain antennae", {
   )
 })
 
+test_that("GlycoWorkbench excludes occupied uncertain-antenna parents", {
+  input <- c(
+    monosaccharide = paste0(
+      "freeEnd--1b1D-GlcNAc,p(--6a1L-Fuc,p)--4b1D-Gal,p}",
+      "--6a1D-Man,p$MONO,Und,0,0,freeEnd"
+    ),
+    substituent = paste0(
+      "freeEnd--1b1D-GlcNAc,p(--6a1L-Fuc,p)--4b1D-Gal,p}",
+      "--6S$MONO,Und,0,0,freeEnd"
+    )
+  )
+
+  expect_identical(
+    as.character(parse_gwb(input)),
+    c(
+      monosaccharide = paste0(
+        "{Man(a1-6)|2,3}Gal(b1-4)[Fuc(a1-6)]GlcNAc(b1-"
+      ),
+      substituent = "{6S|1,2}Gal(b1-4)[Fuc(a1-6)]GlcNAc(b1-"
+    )
+  )
+})
+
 test_that("GlycoWorkbench supports parser wrapper semantics", {
   input <- c(
     valid = "freeEnd--1b1D-Glc,p$MONO,Und,0,0,freeEnd",

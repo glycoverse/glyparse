@@ -138,11 +138,12 @@ convert_one_gwb_to_condensed <- function(x) {
         main_nodes,
         main_indices
       )
-      needs_explicit_parents <- if (identical(node$residue$kind, "mono")) {
-        floating_mono_count > 1L
-      } else {
-        floating_mono_count > 0L
-      }
+      needs_explicit_parents <- !identical(parents, main_indices) ||
+        if (identical(node$residue$kind, "mono")) {
+          floating_mono_count > 1L
+        } else {
+          floating_mono_count > 0L
+        }
       format_gwb_floating_iupac(
         node,
         parents = parents,
