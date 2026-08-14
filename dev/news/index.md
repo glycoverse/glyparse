@@ -3,6 +3,17 @@
 ## glyparse (development version)
 
 - [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
+  now preserves repeated and alternative-position substituents,
+  distinguishes N-acetyl and N-glycolyl from acetyl, maps generic `HexA`
+  and `HexN` residues, and rejects unrepresentable non-alditol
+  open-chain residues explicitly.
+  ([\#47](https://github.com/glycoverse/glyparse/issues/47))
+- [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
+  now accepts direct phosphate and alternative-position substituent
+  encodings, preserves generic-root anomer positions, and orients
+  ambiguous linkages using alditol-aware donor semantics.
+  ([\#47](https://github.com/glycoverse/glyparse/issues/47))
+- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
   and
   [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
   now preserve declared floating candidate-parent domains in global
