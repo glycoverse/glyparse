@@ -44,29 +44,35 @@ test_that("struc_parser_wrapper treats invalid parsed graphs as failures", {
   expect_identical(as.character(result), c("Hex(??-", NA_character_))
 })
 
-test_that("struc_parser_wrapper drops generic glycans by input position", {
+test_that("struc_parser_wrapper preserves mixed monosaccharide types", {
   input <- c(
     generic = "Hex(??-",
     concrete = "Glc(?1-",
     generic_duplicate = "Hex(??-",
+    mixed = "Gal(?1-?)HexNAc(?1-",
     missing = NA_character_
   )
 
-  expect_snapshot(
-    error = TRUE,
-    struc_parser_wrapper(input, do_parse_iupac_condensed)
-  )
-  expect_snapshot(
-    result <- struc_parser_wrapper(
-      input,
-      do_parse_iupac_condensed,
-      drop_generic = TRUE
-    )
-  )
+  result <- struc_parser_wrapper(input, do_parse_iupac_condensed)
 
   expect_identical(
-    unname(as.character(result)),
-    c(NA_character_, "Glc(?1-", NA_character_, NA_character_)
+    as.character(result),
+    c(
+      generic = "Hex(??-",
+      concrete = "Glc(?1-",
+      generic_duplicate = "Hex(??-",
+      mixed = "Gal(?1-?)HexNAc(?1-",
+      missing = NA_character_
+    )
   )
-  expect_identical(names(result), names(input))
+  expect_identical(
+    glyrepr::get_mono_type(result),
+    c(
+      generic = "generic",
+      concrete = "concrete",
+      generic_duplicate = "generic",
+      mixed = "mixed",
+      missing = NA_character_
+    )
+  )
 })

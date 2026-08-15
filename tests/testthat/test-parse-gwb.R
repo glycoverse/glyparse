@@ -188,20 +188,21 @@ test_that("GlycoWorkbench supports parser wrapper semantics", {
   )
 })
 
-test_that("GlycoWorkbench supports dropping generic structures", {
+test_that("GlycoWorkbench supports mixed structure vectors", {
   input <- c(
     generic = "freeEnd--1?1Hex$MONO,Und,0,0,freeEnd",
     concrete = "freeEnd--1b1D-Glc,p$MONO,Und,0,0,freeEnd"
   )
 
-  expect_error(parse_gwb(input), "same monosaccharide type")
-  expect_message(
-    parsed <- parse_gwb(input, drop_generic = TRUE),
-    "Dropped 1 generic glycan"
-  )
+  parsed <- parse_gwb(input)
+
   expect_identical(
     as.character(parsed),
-    c(generic = NA_character_, concrete = "Glc(b1-")
+    c(generic = "Hex(?1-", concrete = "Glc(b1-")
+  )
+  expect_identical(
+    glyrepr::get_mono_type(parsed),
+    c(generic = "generic", concrete = "concrete")
   )
 })
 
