@@ -107,11 +107,12 @@ test_that("graph parsers expose validate", {
   }
 })
 
-test_that("all parsers expose drop_generic", {
+test_that("no parser exposes drop_generic", {
   parsers <- c(
     "auto_parse",
     "parse_glycam_iupac",
     "parse_glycoct",
+    "parse_gwb",
     "parse_iupac_compact",
     "parse_iupac_condensed",
     "parse_iupac_extended",
@@ -125,7 +126,7 @@ test_that("all parsers expose drop_generic", {
   )
 
   for (parser in parsers) {
-    expect_identical(formals(get(parser))$drop_generic, FALSE, info = parser)
+    expect_null(formals(get(parser))$drop_generic, info = parser)
   }
 })
 

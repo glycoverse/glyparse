@@ -4,12 +4,7 @@
 \alias{parse_iupac_extended}
 \title{Parse IUPAC-extended Structures}
 \usage{
-parse_iupac_extended(
-  x,
-  on_failure = "error",
-  progress = FALSE,
-  drop_generic = FALSE
-)
+parse_iupac_extended(x, on_failure = "error", progress = FALSE)
 }
 \arguments{
 \item{x}{A character vector of IUPAC-extended strings. NA values are allowed and will be returned as NA structures.}
@@ -18,10 +13,6 @@ parse_iupac_extended(
 structure cannot be parsed. \code{"na"} returns \code{NA} at invalid positions.}
 
 \item{progress}{Whether to show a progress bar while parsing.}
-
-\item{drop_generic}{Whether to replace parsed generic glycans with \code{NA}. A
-message reports the number replaced. By default, mixing generic and
-concrete glycans raises an error.}
 }
 \value{
 A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.

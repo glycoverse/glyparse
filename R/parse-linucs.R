@@ -19,9 +19,6 @@
 #' @param progress Whether to show a progress bar while parsing.
 #' @param validate Whether to validate parsed glycan graphs before constructing
 #'   the result.
-#' @param drop_generic Whether to replace parsed generic glycans with `NA`. A
-#'   message reports the number replaced. By default, mixing generic and
-#'   concrete glycans raises an error.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
@@ -34,16 +31,14 @@ parse_linucs <- function(
   x,
   on_failure = "error",
   progress = FALSE,
-  validate = TRUE,
-  drop_generic = FALSE
+  validate = TRUE
 ) {
   struc_parser_wrapper(
     x,
     do_parse_linucs,
     on_failure = on_failure,
     progress = progress,
-    validate = validate,
-    drop_generic = drop_generic
+    validate = validate
   )
 }
 

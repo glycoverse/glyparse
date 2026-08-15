@@ -23,33 +23,23 @@ test_that("IUPAC-condensed preserves alditols", {
   expect_identical(unname(glyrepr::get_alditol(parsed)), TRUE)
 })
 
-test_that("IUPAC-condensed can drop generic glycans", {
-  input <- c("Hex(??-", "Glc(?1-", "HexNAc(??-")
-
-  expect_snapshot(
-    error = TRUE,
-    parse_iupac_condensed(input)
+test_that("IUPAC-condensed preserves mixed monosaccharide types", {
+  input <- c(
+    mixed = "Gal(?1-?)HexNAc(?1-",
+    generic = "Hex(??-",
+    concrete = "Glc(?1-",
+    missing = NA_character_
   )
-  expect_snapshot(
-    result <- parse_iupac_condensed(
-      input,
-      drop_generic = TRUE
-    )
-  )
+  result <- parse_iupac_condensed(input)
 
+  expect_identical(as.character(result), input)
   expect_identical(
-    as.character(result),
-    c(NA_character_, "Glc(?1-", NA_character_)
-  )
-})
-
-test_that("drop_generic drops generic-only parser output", {
-  expect_snapshot(
-    result <- parse_pglyco_struc(
-      c("(N)", "(H)"),
-      drop_generic = TRUE
+    glyrepr::get_mono_type(result),
+    c(
+      mixed = "mixed",
+      generic = "generic",
+      concrete = "concrete",
+      missing = NA_character_
     )
   )
-
-  expect_identical(as.character(result), rep(NA_character_, 2))
 })

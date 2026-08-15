@@ -4,13 +4,7 @@
 \alias{parse_pglyco_struc}
 \title{Parse pGlyco Structures}
 \usage{
-parse_pglyco_struc(
-  x,
-  on_failure = "error",
-  progress = FALSE,
-  validate = TRUE,
-  drop_generic = FALSE
-)
+parse_pglyco_struc(x, on_failure = "error", progress = FALSE, validate = TRUE)
 }
 \arguments{
 \item{x}{A character vector of pGlyco-style structure strings. NA values are allowed and will be returned as NA structures.}
@@ -22,10 +16,6 @@ structure cannot be parsed. \code{"na"} returns \code{NA} at invalid positions.}
 
 \item{validate}{Whether to validate parsed glycan graphs before constructing
 the result.}
-
-\item{drop_generic}{Whether to replace parsed generic glycans with \code{NA}. A
-message reports the number replaced. By default, mixing generic and
-concrete glycans raises an error.}
 }
 \value{
 A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.
