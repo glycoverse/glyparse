@@ -34,7 +34,7 @@ Supported types:
 ## Usage
 
 ``` r
-auto_parse(x, on_failure = "error", progress = FALSE, drop_generic = FALSE)
+auto_parse(x, on_failure = "error", progress = FALSE)
 ```
 
 ## Arguments
@@ -52,12 +52,6 @@ auto_parse(x, on_failure = "error", progress = FALSE, drop_generic = FALSE)
 - progress:
 
   Whether to show a progress bar while parsing.
-
-- drop_generic:
-
-  Whether to replace parsed generic glycans with `NA`. A message reports
-  the number replaced. By default, mixing generic and concrete glycans
-  raises an error.
 
 ## Value
 

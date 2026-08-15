@@ -8,12 +8,7 @@ For more information about IUPAC-extended format, see
 ## Usage
 
 ``` r
-parse_iupac_extended(
-  x,
-  on_failure = "error",
-  progress = FALSE,
-  drop_generic = FALSE
-)
+parse_iupac_extended(x, on_failure = "error", progress = FALSE)
 ```
 
 ## Arguments
@@ -31,12 +26,6 @@ parse_iupac_extended(
 - progress:
 
   Whether to show a progress bar while parsing.
-
-- drop_generic:
-
-  Whether to replace parsed generic glycans with `NA`. A message reports
-  the number replaced. By default, mixing generic and concrete glycans
-  raises an error.
 
 ## Value
 

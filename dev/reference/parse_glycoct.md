@@ -7,13 +7,7 @@ GlycoCT is a format used by databases like GlyTouCan and GlyGen.
 ## Usage
 
 ``` r
-parse_glycoct(
-  x,
-  on_failure = "error",
-  progress = FALSE,
-  validate = TRUE,
-  drop_generic = FALSE
-)
+parse_glycoct(x, on_failure = "error", progress = FALSE, validate = TRUE)
 ```
 
 ## Arguments
@@ -36,12 +30,6 @@ parse_glycoct(
 
   Whether to validate parsed glycan graphs before constructing the
   result.
-
-- drop_generic:
-
-  Whether to replace parsed generic glycans with `NA`. A message reports
-  the number replaced. By default, mixing generic and concrete glycans
-  raises an error.
 
 ## Value
 

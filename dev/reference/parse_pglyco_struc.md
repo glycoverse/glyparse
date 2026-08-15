@@ -7,13 +7,7 @@ See example below for the structure format.
 ## Usage
 
 ``` r
-parse_pglyco_struc(
-  x,
-  on_failure = "error",
-  progress = FALSE,
-  validate = TRUE,
-  drop_generic = FALSE
-)
+parse_pglyco_struc(x, on_failure = "error", progress = FALSE, validate = TRUE)
 ```
 
 ## Arguments
@@ -36,12 +30,6 @@ parse_pglyco_struc(
 
   Whether to validate parsed glycan graphs before constructing the
   result.
-
-- drop_generic:
-
-  Whether to replace parsed generic glycans with `NA`. A message reports
-  the number replaced. By default, mixing generic and concrete glycans
-  raises an error.
 
 ## Value
 

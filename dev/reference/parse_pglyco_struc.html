@@ -42,13 +42,7 @@ See example below for the structure format.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">parse_pglyco_struc</span><span class="op">(</span></span>
-<span>  <span class="va">x</span>,</span>
-<span>  on_failure <span class="op">=</span> <span class="st">"error"</span>,</span>
-<span>  progress <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  validate <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  drop_generic <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">parse_pglyco_struc</span><span class="op">(</span><span class="va">x</span>, on_failure <span class="op">=</span> <span class="st">"error"</span>, progress <span class="op">=</span> <span class="cn">FALSE</span>, validate <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -71,12 +65,6 @@ structure cannot be parsed. <code>"na"</code> returns <code>NA</code> at invalid
 <dt id="arg-validate">validate<a class="anchor" aria-label="anchor" href="#arg-validate"></a></dt>
 <dd><p>Whether to validate parsed glycan graphs before constructing
 the result.</p></dd>
-
-
-<dt id="arg-drop-generic">drop_generic<a class="anchor" aria-label="anchor" href="#arg-drop-generic"></a></dt>
-<dd><p>Whether to replace parsed generic glycans with <code>NA</code>. A
-message reports the number replaced. By default, mixing generic and
-concrete glycans raises an error.</p></dd>
 
 </dl></div>
     <div class="section level2">

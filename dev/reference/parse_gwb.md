@@ -6,7 +6,7 @@ Parse GlycoWorkbench (GWB/GWS) structure strings into a
 ## Usage
 
 ``` r
-parse_gwb(x, on_failure = "error", progress = FALSE, drop_generic = FALSE)
+parse_gwb(x, on_failure = "error", progress = FALSE)
 ```
 
 ## Arguments
@@ -24,12 +24,6 @@ parse_gwb(x, on_failure = "error", progress = FALSE, drop_generic = FALSE)
 - progress:
 
   Whether to show a progress bar while parsing.
-
-- drop_generic:
-
-  Whether to replace parsed generic glycans with `NA`. A message reports
-  the number replaced. By default, mixing generic and concrete glycans
-  raises an error.
 
 ## Value
 

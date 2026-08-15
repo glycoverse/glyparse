@@ -56,10 +56,9 @@
   IUPAC, GlyCAM IUPAC, GlycoCT, WURCS, LINUCS, Linear Code, and KCF
   inputs. ([\#41](https://github.com/glycoverse/glyparse/issues/41))
 - [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
-  and all format-specific parsers gain `drop_generic` to replace generic
-  glycans with `NA` when generic and concrete glycans coexist, with a
-  message reporting the number dropped.
-  ([\#39](https://github.com/glycoverse/glyparse/issues/39))
+  and all format-specific parsers now preserve generic and concrete
+  residues mixed within a glycan and across parsed vectors.
+  ([\#50](https://github.com/glycoverse/glyparse/issues/50))
 - [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
   now supports floating glycan substructures represented by `UND`
   sections, uses implicit floating parts when every main-tree node is a
