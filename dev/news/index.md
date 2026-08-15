@@ -2,6 +2,9 @@
 
 ## glyparse (development version)
 
+- [`parse_glycam_iupac()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycam_iupac.md)
+  now parses large input vectors about five times faster.
+  ([\#49](https://github.com/glycoverse/glyparse/issues/49))
 - New
   [`parse_gwb()`](https://glycoverse.github.io/glyparse/dev/reference/parse_gwb.md)
   parses GlycoWorkbench (GWB/GWS) sequences, including branches,
