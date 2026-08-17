@@ -379,6 +379,19 @@ test_that("parse_residue recognizes GlycanFormatConverter alternate codes", {
   )
 })
 
+test_that("parse_residue recognizes the xylHex encoding of Fuc", {
+  residues <- c(
+    a = "a12d1m-1a_1-5",
+    b = "a12d1m-1b_1-5",
+    unknown = "a12d1m-1x_1-5"
+  )
+
+  expect_identical(
+    purrr::map_chr(residues, ~ parse_residue(.x)[["mono"]]),
+    c(a = "Fuc", b = "Fuc", unknown = "Fuc")
+  )
+})
+
 test_that("specific unusual WURCS patterns take priority over generic fallbacks", {
   expect_identical(
     parse_residue("a2112m-1x_1-5_2*NCC/3=O")[["mono"]],

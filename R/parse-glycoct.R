@@ -1056,7 +1056,7 @@ format_glycoct_reducing_anomer <- function(reducing_end) {
 #' @noRd
 add_unusual_glycoct_mappings <- function(mappings) {
   unusual_map <- unusual_configuration_monosaccharide_map()
-  natural <- intersect(names(mappings), names(unusual_map))
+  natural <- names(mappings) %in% names(unusual_map)
   unusual <- mappings[natural]
 
   unusual <- purrr::map(unusual, function(mapping) {
@@ -1067,7 +1067,7 @@ add_unusual_glycoct_mappings <- function(mappings) {
     )
     mapping
   })
-  names(unusual) <- unname(unusual_map[natural])
+  names(unusual) <- unname(unusual_map[names(mappings)[natural]])
   duplicates <- purrr::map_lgl(
     unusual,
     \(mapping) any(purrr::map_lgl(mappings, identical, mapping))
@@ -1210,6 +1210,10 @@ load_mono_mappings <- function() {
     ),
     "Fuc" = list(
       res = c("1b:a-lgal-HEX-1:5|6:d"),
+      lin = NULL
+    ),
+    "Fuc" = list(
+      res = c("1b:a-lxyl-HEX-1:5|4:d|6:d"),
       lin = NULL
     ),
     "Qui" = list(

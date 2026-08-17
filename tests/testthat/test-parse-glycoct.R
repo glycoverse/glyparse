@@ -58,6 +58,19 @@ test_that("GlycoCT preserves unusual configurations", {
   )
 })
 
+test_that("GlycoCT recognizes the xylHex encoding of Fuc", {
+  glycoct <- c(
+    "RES\n1b:a-lxyl-HEX-1:5|4:d|6:d",
+    "RES\n1b:b-lxyl-HEX-1:5|4:d|6:d",
+    "RES\n1b:x-lxyl-HEX-1:5|4:d|6:d"
+  )
+
+  expect_identical(
+    unname(as.character(parse_glycoct(glycoct))),
+    c("Fuc(a1-", "Fuc(b1-", "Fuc(?1-")
+  )
+})
+
 test_that("GlycoCT accepts space-separated records", {
   glycoct <- paste(
     "RES",

@@ -113,6 +113,7 @@ WURCS_MONO_REGEX <- c(
 
   # From Fuc to 6dTal, we have to exclude the "NAc" part.
   "Fuc" = "^a1221m-1[abx]_1-5(?!_2\\*NCC/3=O)",
+  "Fuc" = "^a12d1m-1[abx]_1-5(?!_2\\*NCC/3=O)",
   # For Qui, we have to differentiate it from Bac.
   "Qui" = "^a2122m-1[abx]_1-5(?!_2\\*NCC/3=O|_2\\*N_4\\*N)",
   "Rha" = "^a2211m-1[abx]_1-5(?!_2\\*NCC/3=O)",
