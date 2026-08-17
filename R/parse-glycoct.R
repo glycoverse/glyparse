@@ -488,6 +488,7 @@ build_glycoct_graph_data <- function(residues, linkages) {
     linkages,
     mono_mapping_index
   )
+  consolidated <- normalize_glycoct_man_alditol_orientation(consolidated)
 
   # Build igraph
   if (length(consolidated$vertices) == 0) {
@@ -2694,6 +2695,81 @@ find_group_containing <- function(groups, res_id) {
     }
   }
   return(NULL)
+}
+
+#' Normalize the attachment orientation of a symmetric Man alditol
+#'
+#' GlycoCT can number an unsubstituted Man alditol from either end. Prefer the
+#' orientation with the lexicographically larger decreasing attachment
+#' positions, matching the canonical orientation used by paired WURCS and GWB
+#' records.
+#'
+#' @param consolidated Consolidated GlycoCT vertices and edges.
+#'
+#' @return Consolidated graph data with reducing-end attachment positions
+#'   normalized.
+#' @noRd
+normalize_glycoct_man_alditol_orientation <- function(consolidated) {
+  reducing_end <- find_reducing_end(
+    consolidated$vertices,
+    consolidated$edges
+  )
+  if (
+    is.null(reducing_end) ||
+      !isTRUE(reducing_end$is_alditol) ||
+      !identical(reducing_end$mono, "Man") ||
+      !identical(reducing_end$sub, "")
+  ) {
+    return(consolidated)
+  }
+
+  root_edges <- purrr::map_lgl(
+    consolidated$edges,
+    ~ identical(.x$from_res, reducing_end$original_id)
+  )
+  if (!any(root_edges)) {
+    return(consolidated)
+  }
+
+  positions <- purrr::map(
+    consolidated$edges[root_edges],
+    ~ stringr::str_split_1(.x$from_pos, stringr::fixed("|"))
+  )
+  positions <- as.integer(unlist(positions, use.names = FALSE))
+  explicit <- positions >= 1L & positions <= 6L
+  if (anyNA(positions) || !any(explicit)) {
+    return(consolidated)
+  }
+
+  original_order <- sort(positions[explicit], decreasing = TRUE)
+  reflected_order <- sort(7L - positions[explicit], decreasing = TRUE)
+  differences <- which(original_order != reflected_order)
+  if (length(differences) == 0L) {
+    return(consolidated)
+  }
+  first_difference <- differences[[1]]
+  if (
+    reflected_order[[first_difference]] < original_order[[first_difference]]
+  ) {
+    return(consolidated)
+  }
+
+  consolidated$edges[root_edges] <- purrr::map(
+    consolidated$edges[root_edges],
+    function(edge) {
+      edge_positions <- stringr::str_split_1(
+        edge$from_pos,
+        stringr::fixed("|")
+      )
+      reflect <- edge_positions %in% as.character(1:6)
+      edge_positions[reflect] <- as.character(
+        7L - as.integer(edge_positions[reflect])
+      )
+      edge$from_pos <- paste(edge_positions, collapse = "|")
+      edge
+    }
+  )
+  consolidated
 }
 
 find_reducing_end <- function(vertices, edges) {

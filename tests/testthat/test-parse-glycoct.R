@@ -491,6 +491,23 @@ test_that("GlycoCT preserves alditols with unknown reducing-end anomers", {
   linked_structure <- parse_glycoct(linked_alditol)
   expect_equal(as.character(linked_structure), "Gal(b1-4)GlcNAc-ol(?1-")
   expect_identical(unname(glyrepr::get_alditol(linked_structure)), TRUE)
+
+  symmetric_man_alditol <- paste0(
+    "RES\n",
+    "1b:o-dman-HEX-0:0|1:aldi\n",
+    "2b:a-lgal-HEX-1:5|6:d\n",
+    "LIN\n",
+    "1:1o(2+1)2d"
+  )
+  symmetric_man_structure <- parse_glycoct(symmetric_man_alditol)
+  expect_equal(
+    as.character(symmetric_man_structure),
+    "Fuc(a1-5)Man-ol(?1-"
+  )
+  expect_identical(
+    unname(glyrepr::get_alditol(symmetric_man_structure)),
+    TRUE
+  )
 })
 
 test_that("GlycoCT warns when non-reducing alditols are normalized", {
