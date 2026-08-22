@@ -31,7 +31,7 @@ linkage token, a residue token, and a braced child list, for example
 LINUCS linkages are written as \code{"(parent+child)"}, where \code{parent} is the
 linkage position on the parent residue and \code{child} is the anomeric linkage
 position on the child residue. Residue labels are normalized to the
-monosaccharide and substituent vocabulary used by \link[glyrepr:glyrepr]{glyrepr::glyrepr}.
+monosaccharide and substituent vocabulary used by \link[glyrepr:glyrepr-package]{glyrepr::glyrepr}.
 A \code{-ol} suffix on the root residue is retained as alditol status.
 }
 \examples{
