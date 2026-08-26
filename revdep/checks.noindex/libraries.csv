@@ -1,4 +1,0 @@
-package,old,new,delta
-glyparse,0.7.1,0.7.1.9000,*
-glyrepr,NA,1.0.0,*
-stringi,NA,1.8.9,*
