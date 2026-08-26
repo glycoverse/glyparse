@@ -7,7 +7,7 @@ GlycoCT is a format used by databases like GlyTouCan and GlyGen.
 ## Usage
 
 ``` r
-parse_glycoct(x, on_failure = "error", progress = FALSE)
+parse_glycoct(x, on_failure = "error", progress = FALSE, validate = TRUE)
 ```
 
 ## Arguments
@@ -26,6 +26,11 @@ parse_glycoct(x, on_failure = "error", progress = FALSE)
 
   Whether to show a progress bar while parsing.
 
+- validate:
+
+  Whether to validate parsed glycan graphs before constructing the
+  result.
+
 ## Value
 
 A
@@ -34,15 +39,18 @@ object.
 
 ## Details
 
-GlycoCT format consists of two parts:
+GlycoCT format consists of:
 
 - RES: Contains monosaccharides (lines starting with 'b:') and
   substituents (lines starting with 's:')
 
 - LIN: Contains linkage information between residues
 
-Alditol residues are parsed as regular reducing-end glycans with unknown
-anomer configurations.
+- UND: Contains floating substructures or substituents whose attachment
+  to the main glycan is unresolved
+
+Main reducing-end alditol residues retain their alditol status and use
+an unknown anomer configuration.
 
 For more information about GlycoCT format, see the glycoct.md
 documentation.

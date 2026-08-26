@@ -14,28 +14,30 @@ You can install the latest release of glyparse from
 
 ``` r
 
-install.packages("glyparse")
+pak::pkg_install("glyparse")
 ```
 
 Or from [r-universe](https://glycoverse.r-universe.dev/glyparse):
 
 ``` r
 
-install.packages('glyparse', repos = c('https://glycoverse.r-universe.dev', 'https://cloud.r-project.org'))
+pak::repo_add(glycoverse = "https://glycoverse.r-universe.dev")
+pak::pkg_install("glyparse")
 ```
 
-Or from [GitHub](https://github.com/glycoverse/glyparse):
+Or install the latest GitHub release:
 
 ``` r
 
-remotes::install_github("glycoverse/glyparse@*release")
+pak::pkg_install("glycoverse/glyparse@*release")
 ```
 
-Or install the development version:
+Or install the development version from
+[GitHub](https://github.com/glycoverse/glyparse):
 
 ``` r
 
-remotes::install_github("glycoverse/glyparse")
+pak::pkg_install("glycoverse/glyparse")
 ```
 
 ## Documentation
@@ -102,7 +104,7 @@ parse_wurcs("WURCS=2.0/3,5,4/[a2122h-1b_1-5_2*NCC/3=O][a1122h-1b_1-5][a1122h-1a_
 
 # Package index
 
-## All functions
+## Structure parsers
 
 - [`auto_parse()`](https://glycoverse.github.io/glyparse/reference/auto_parse.md)
   : Automatic Structure Parsing
@@ -110,6 +112,8 @@ parse_wurcs("WURCS=2.0/3,5,4/[a2122h-1b_1-5_2*NCC/3=O][a1122h-1b_1-5][a1122h-1a_
   : Parse GlyCAM IUPAC Structures
 - [`parse_glycoct()`](https://glycoverse.github.io/glyparse/reference/parse_glycoct.md)
   : Parse GlycoCT Structures
+- [`parse_gwb()`](https://glycoverse.github.io/glyparse/reference/parse_gwb.md)
+  : Parse GlycoWorkbench Structures
 - [`parse_iupac_compact()`](https://glycoverse.github.io/glyparse/reference/parse_iupac_compact.md)
   : Parse IUPAC-compact Structures
 - [`parse_iupac_condensed()`](https://glycoverse.github.io/glyparse/reference/parse_iupac_condensed.md)

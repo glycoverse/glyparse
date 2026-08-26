@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">glyparse</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.7.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.8.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,46 @@
       <small>Source: <a href="https://github.com/glycoverse/glyparse/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.8.1" id="glyparse-081">glyparse 0.8.1<a class="anchor" aria-label="anchor" href="#glyparse-081"></a></h2>
+<div class="section level3">
+<h3 id="new-features-0-8-1">New features<a class="anchor" aria-label="anchor" href="#new-features-0-8-1"></a></h3>
+<ul><li>Graph-based parsers gain a <code>validate</code> argument to skip graph validation for trusted inputs. (<a href="https://github.com/glycoverse/glyparse/issues/36" class="external-link">#36</a>)</li>
+<li>
+<code><a href="../reference/parse_glycoct.html">parse_glycoct()</a></code> now supports floating glycan substructures represented by <code>UND</code> sections, uses implicit floating parts when every main-tree node is a candidate parent, and excludes explicit candidates whose acceptor positions are already occupied. (<a href="https://github.com/glycoverse/glyparse/issues/40" class="external-link">#40</a>)</li>
+<li>New <code><a href="../reference/parse_gwb.html">parse_gwb()</a></code> parses GlycoWorkbench (GWB/GWS) sequences, including branches, substituents, furanose and configured residues, reducing-end alditols, and uncertain antennae. <code><a href="../reference/auto_parse.html">auto_parse()</a></code> now detects these sequences. (<a href="https://github.com/glycoverse/glyparse/issues/48" class="external-link">#48</a>)</li>
+<li>
+<code><a href="../reference/parse_wurcs.html">parse_wurcs()</a></code> now supports floating monosaccharides and subtrees, including implicit all-main attachment domains and filtered explicit candidate parents. It also recognizes generic nonulosonic acids and sialic acids with unknown ring closure. (<a href="https://github.com/glycoverse/glyparse/issues/40" class="external-link">#40</a>)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="minor-improvements-and-bug-fixes-0-8-1">Minor improvements and bug fixes<a class="anchor" aria-label="anchor" href="#minor-improvements-and-bug-fixes-0-8-1"></a></h3>
+<ul><li>Parsers now preserve explicit furanose forms as <code>glyrepr</code> monosaccharide names such as <code>Galf</code>, <code>GlcfNAc</code>, and <code>Neuf5Ac</code> across IUPAC, GlyCAM IUPAC, GlycoCT, WURCS, LINUCS, Linear Code, and KCF inputs. (<a href="https://github.com/glycoverse/glyparse/issues/41" class="external-link">#41</a>)</li>
+<li>Parsers now preserve unusual monosaccharide configurations using <code>glyrepr</code> names such as <code>D-Fuc</code>, <code>L-Gul</code>, and <code>D-Fucf</code>, while unprefixed names retain their natural configurations. (<a href="https://github.com/glycoverse/glyparse/issues/43" class="external-link">#43</a>, <a href="https://github.com/glycoverse/glyparse/issues/44" class="external-link">#44</a>)</li>
+<li>
+<code><a href="../reference/auto_parse.html">auto_parse()</a></code> and all format-specific parsers now preserve generic and concrete residues mixed within a glycan and across parsed vectors. (<a href="https://github.com/glycoverse/glyparse/issues/50" class="external-link">#50</a>)</li>
+<li>
+<code><a href="../reference/parse_glycoct.html">parse_glycoct()</a></code> and <code><a href="../reference/parse_wurcs.html">parse_wurcs()</a></code> now preserve declared floating candidate-parent domains in global floating-parent structures: GlycoCT <code>UND</code> parents remain restricted to the main graph, while WURCS parents may target other floating components.</li>
+<li>
+<code><a href="../reference/parse_glycoct.html">parse_glycoct()</a></code> and <code><a href="../reference/parse_wurcs.html">parse_wurcs()</a></code> now preserve floating substituents with unresolved parent residues, including their chemistry, carbon positions, and candidate parents. (<a href="https://github.com/glycoverse/glyparse/issues/45" class="external-link">#45</a>)</li>
+<li>
+<code><a href="../reference/parse_glycoct.html">parse_glycoct()</a></code> and <code><a href="../reference/parse_wurcs.html">parse_wurcs()</a></code> now recognize the <code>xylHex</code> encoding of fucose.</li>
+<li>
+<code><a href="../reference/parse_glycoct.html">parse_glycoct()</a></code>, <code><a href="../reference/parse_wurcs.html">parse_wurcs()</a></code>, <code><a href="../reference/parse_iupac_compact.html">parse_iupac_compact()</a></code>, <code><a href="../reference/parse_iupac_condensed.html">parse_iupac_condensed()</a></code>, <code><a href="../reference/parse_linucs.html">parse_linucs()</a></code>, and <code><a href="../reference/auto_parse.html">auto_parse()</a></code> now preserve alditol reducing ends in parsed structures. (<a href="https://github.com/glycoverse/glyparse/issues/46" class="external-link">#46</a>)</li>
+<li>
+<code><a href="../reference/parse_glycoct.html">parse_glycoct()</a></code> now normalizes symmetric <code>Man-ol</code> acceptor positions so equivalent GlycoCT linkages parse consistently.</li>
+<li>
+<code><a href="../reference/parse_glycoct.html">parse_glycoct()</a></code> now preserves repeated and alternative-position substituents, distinguishes N-acetyl and N-glycolyl from acetyl, maps generic <code>HexA</code> and <code>HexN</code> residues, and rejects unrepresentable non-alditol open-chain residues explicitly. (<a href="https://github.com/glycoverse/glyparse/issues/47" class="external-link">#47</a>)</li>
+<li>
+<code><a href="../reference/parse_iupac_extended.html">parse_iupac_extended()</a></code> now accepts abbreviated generic reducing ends such as <code>?-Hex</code>, <code>?-HexNAc</code>, and <code>?-HexN</code>, as well as slash-ambiguous acceptor positions such as <code>4/?</code>.</li>
+<li>
+<code><a href="../reference/parse_wurcs.html">parse_wurcs()</a></code> now accepts direct phosphate and alternative-position substituent encodings, preserves generic-root anomer positions, and orients ambiguous linkages using alditol-aware donor semantics. (<a href="https://github.com/glycoverse/glyparse/issues/47" class="external-link">#47</a>)</li>
+<li>Parser functions now batch vector normalization and structure construction, improving performance for repeated and distinct inputs. (<a href="https://github.com/glycoverse/glyparse/issues/36" class="external-link">#36</a>)</li>
+<li>
+<code><a href="../reference/parse_glycam_iupac.html">parse_glycam_iupac()</a></code> now parses large input vectors about five times faster. (<a href="https://github.com/glycoverse/glyparse/issues/49" class="external-link">#49</a>)</li>
+<li>
+<code><a href="../reference/parse_glycoct.html">parse_glycoct()</a></code> and <code><a href="../reference/parse_wurcs.html">parse_wurcs()</a></code> now reuse indexed residue matching and cached classification to improve parsing performance. (<a href="https://github.com/glycoverse/glyparse/issues/37" class="external-link">#37</a>)</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.7.1" id="glyparse-071">glyparse 0.7.1<a class="anchor" aria-label="anchor" href="#glyparse-071"></a></h2><p class="text-muted">CRAN release: 2026-07-08</p>
 <div class="section level3">

@@ -3,14 +3,19 @@
 This function parses WURCS strings into a
 [`glyrepr::glycan_structure()`](https://glycoverse.github.io/glyrepr/reference/glycan_structure.html).
 Currently, only WURCS 2.0 is supported. For more information about
-WURCS, see [WURCS](https://github.com/glycoinfo/WURCS/wiki). Alditol
-residues are parsed as regular reducing-end glycans with unknown anomer
-configurations.
+WURCS, see [WURCS](https://github.com/glycoinfo/WURCS/wiki). Main
+reducing-end alditol residues retain their alditol status and use an
+unknown anomer configuration. Ambiguous alternative linkage groups are
+represented as floating glycan parts when their child residue or subtree
+is not localized to one parent. Candidate parents may belong to the main
+glycan or another floating component. Floating substituents preserve
+their chemistry, carbon-position ambiguity, and candidate parent
+residues across the complete structure.
 
 ## Usage
 
 ``` r
-parse_wurcs(x, on_failure = "error", progress = FALSE)
+parse_wurcs(x, on_failure = "error", progress = FALSE, validate = TRUE)
 ```
 
 ## Arguments
@@ -28,6 +33,11 @@ parse_wurcs(x, on_failure = "error", progress = FALSE)
 - progress:
 
   Whether to show a progress bar while parsing.
+
+- validate:
+
+  Whether to validate parsed glycan graphs before constructing the
+  result.
 
 ## Value
 

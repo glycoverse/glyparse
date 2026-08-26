@@ -9,7 +9,7 @@ linkage token, a residue token, and a braced child list, for example
 ## Usage
 
 ``` r
-parse_linucs(x, on_failure = "error", progress = FALSE)
+parse_linucs(x, on_failure = "error", progress = FALSE, validate = TRUE)
 ```
 
 ## Arguments
@@ -28,6 +28,11 @@ parse_linucs(x, on_failure = "error", progress = FALSE)
 
   Whether to show a progress bar while parsing.
 
+- validate:
+
+  Whether to validate parsed glycan graphs before constructing the
+  result.
+
 ## Value
 
 A
@@ -41,6 +46,7 @@ linkage position on the parent residue and `child` is the anomeric
 linkage position on the child residue. Residue labels are normalized to
 the monosaccharide and substituent vocabulary used by
 [glyrepr::glyrepr](https://glycoverse.github.io/glyrepr/reference/glyrepr-package.html).
+A `-ol` suffix on the root residue is retained as alditol status.
 
 ## Examples
 
