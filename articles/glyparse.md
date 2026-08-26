@@ -1,83 +1,62 @@
 # Getting Started with glyparse
 
-## Your Universal Glycan Text Translator 🔄
+## Parsing glycan text
 
-Welcome to the world of glycan text parsing! If you’ve ever worked with
-glycan data from different sources, you know the frustration: every
-database, software tool, and research group seems to have their own way
-of representing glycan structures in text format.
+Glycan structures appear in several text formats. If you work with data
+from different sources, you may find that each database, software tool,
+or research group uses its own conventions for representing structures
+as text.
 
-That’s where `glyparse` comes to the rescue! 🚀
-
-Think of `glyparse` as your **universal glycan translator** — it can
-read glycan structures written in many different “languages” and convert
-them all into a unified format that your computer can understand and
-work with.
-
-**Note:** All functions in `glyparse` return
+`glyparse` provides a parser for each supported format and converts the
+results to a common
 [`glyrepr::glycan_structure`](https://glycoverse.github.io/glyrepr/reference/glycan_structure.html)
-objects. If you are unfamiliar with `glyrepr`, you can read the
-documentation
-[here](https://glycoverse.github.io/glyrepr/articles/glyrepr.html).
+representation.
+
+This gives you a consistent starting point for structure comparison and
+downstream analysis, without rewriting every input by hand.
+
+All public parsers return
+[`glyrepr::glycan_structure`](https://glycoverse.github.io/glyrepr/reference/glycan_structure.html)
+objects. If you are unfamiliar with `glyrepr`, see the [`glyrepr`
+vignette](https://glycoverse.github.io/glyrepr/articles/glyrepr.html).
 
 ``` r
 
 library(glyparse)
 ```
 
-## The Babel Tower of Glycan Text Formats 🗼
+## Supported formats
 
-Before we dive in, let’s see what we’re dealing with. Here’s the same
-N-glycan core structure written in different formats:
+Here is a quick overview of the formats supported by the package:
 
-| Format | Example | Where You’ll See It |
+| Format | Parser | Common sources |
 |----|----|----|
-| **IUPAC-condensed** | `Man(a1-3)[Man(a1-6)]Man(b1-4)GlcNAc(b1-4)GlcNAc` | Literature, UniCarbKB |
-| **IUPAC-short** | `Mana3(Mana6)Manb4GlcNAcb4GlcNAc` | Literature, UniCarbKB |
-| **IUPAC-extended** | `alpha-D-Man-(1->3)-[alpha-D-Man-(1->6)]-beta-D-Man-(1->4)-beta-D-GlcNAc-(1->4)-D-GlcNAc` | Literature, UniCarbKB |
-| **GlycoCT** | Complex multi-line format | Literature, GlycomeDB |
-| **WURCS** | `WURCS=2.0/3,5,4/[...]/1-1-2-3-3/a4-b1_b4-c1...` | Literature, GlyTouCan |
-| **Linear Code** | `Ma3(Ma6)Mb4GNb4GNb` | Literature |
-| **pGlyco** | `(N(N(H(H(H)))))` | pGlyco software results |
-| **StrucGP** | `A2B2C1D1E2fedcba` | StrucGP software results |
+| **IUPAC-condensed** | [`parse_iupac_condensed()`](https://glycoverse.github.io/glyparse/reference/parse_iupac_condensed.md) | Literature, UniCarbKB |
+| **IUPAC-short** | [`parse_iupac_short()`](https://glycoverse.github.io/glyparse/reference/parse_iupac_short.md) | Literature, UniCarbKB |
+| **IUPAC-extended** | [`parse_iupac_extended()`](https://glycoverse.github.io/glyparse/reference/parse_iupac_extended.md) | Literature, UniCarbKB |
+| **IUPAC-compact** | [`parse_iupac_compact()`](https://glycoverse.github.io/glyparse/reference/parse_iupac_compact.md) | Compact database and literature notation |
+| **GlyCAM IUPAC** | [`parse_glycam_iupac()`](https://glycoverse.github.io/glyparse/reference/parse_glycam_iupac.md) | GlyCAM workflows |
+| **GlycoCT** | [`parse_glycoct()`](https://glycoverse.github.io/glyparse/reference/parse_glycoct.md) | Literature, GlycomeDB |
+| **WURCS** | [`parse_wurcs()`](https://glycoverse.github.io/glyparse/reference/parse_wurcs.md) | Literature, GlyTouCan |
+| **Linear Code** | [`parse_linear_code()`](https://glycoverse.github.io/glyparse/reference/parse_linear_code.md) | Literature |
+| **LINUCS** | [`parse_linucs()`](https://glycoverse.github.io/glyparse/reference/parse_linucs.md) | Glycan structure software |
+| **KCF** | [`parse_kcf()`](https://glycoverse.github.io/glyparse/reference/parse_kcf.md) | KEGG GLYCAN |
+| **GlycoWorkbench** | [`parse_gwb()`](https://glycoverse.github.io/glyparse/reference/parse_gwb.md) | GlycoWorkbench and GWS files |
+| **pGlyco** | [`parse_pglyco_struc()`](https://glycoverse.github.io/glyparse/reference/parse_pglyco_struc.md) | pGlyco software results |
+| **StrucGP** | [`parse_strucgp_struc()`](https://glycoverse.github.io/glyparse/reference/parse_strucgp_struc.md) | StrucGP software results |
 
-Confusing, right? 😵‍💫 `glyparse` understands them all!
+The package includes an automatic parser and 13 format-specific parsers.
+Each parser accepts a character vector of structure strings and returns
+a
+[`glyrepr::glycan_structure`](https://glycoverse.github.io/glyrepr/reference/glycan_structure.html)
+object.
 
-## Your Parsing Toolkit 🛠️
+## Part 1: Automatic parsing
 
-`glyparse` provides seven specialized parsers, each optimized for a
-specific format:
-
-- **[`parse_iupac_condensed()`](https://glycoverse.github.io/glyparse/reference/parse_iupac_condensed.md)**:
-  The most common format
-- **[`parse_iupac_short()`](https://glycoverse.github.io/glyparse/reference/parse_iupac_short.md)**:
-  Compact literature format  
-- **[`parse_iupac_extended()`](https://glycoverse.github.io/glyparse/reference/parse_iupac_extended.md)**:
-  Verbose formal format
-- **[`parse_glycoct()`](https://glycoverse.github.io/glyparse/reference/parse_glycoct.md)**:
-  Database standard format
-- **[`parse_wurcs()`](https://glycoverse.github.io/glyparse/reference/parse_wurcs.md)**:
-  Modern standardized format
-- **[`parse_linear_code()`](https://glycoverse.github.io/glyparse/reference/parse_linear_code.md)**:
-  Linear Code format
-- **[`parse_pglyco_struc()`](https://glycoverse.github.io/glyparse/reference/parse_pglyco_struc.md)**:
-  pGlyco software format
-- **[`parse_strucgp_struc()`](https://glycoverse.github.io/glyparse/reference/parse_strucgp_struc.md)**:
-  StrucGP software format
-
-All parsers follow the same pattern:
-
-- **Input**: Character vector of structure strings
-- **Output**: A
-  [`glyrepr::glycan_structure`](https://glycoverse.github.io/glyrepr/reference/glycan_structure.html)
-  object that you can analyze
-
-## Part 0: `auto_parse()`
-
-Don’t know what you’re dealing with? Give it to
-[`auto_parse()`](https://glycoverse.github.io/glyparse/reference/auto_parse.md)!
-This function tries to identify the format automatically and use the
-appropriate parser. Even input with mixed formats is supported.
+When the input format is not known in advance, use
+[`auto_parse()`](https://glycoverse.github.io/glyparse/reference/auto_parse.md).
+It detects the format one element at a time, so a vector can contain
+mixed formats.
 
 ``` r
 
@@ -94,17 +73,15 @@ auto_parse(x)
 #> # Unique structures: 3
 ```
 
-## Part 1: IUPAC Family — The Popular Kids 🌟
+## Part 2: IUPAC notation
 
-Let’s start with the IUPAC formats.
-
-### IUPAC-Condensed: The Literature Standard
+### IUPAC-condensed
 
 This format is widely used in scientific literature and databases like
 UniCarbKB.
 
-Want to know more about IUPAC-condensed format? Check
-[this](https://glycoverse.github.io/glyrepr/articles/iupac.html) out!
+For more detail about this notation, see the [`glyrepr` IUPAC
+vignette](https://glycoverse.github.io/glyrepr/articles/iupac.html).
 
 ``` r
 
@@ -132,7 +109,7 @@ parse_iupac_condensed(glycans)
 #> # Unique structures: 3
 ```
 
-### IUPAC-Short: Literature’s Favorite
+### IUPAC-short
 
 This compact format is popular in research papers because it saves
 space:
@@ -153,31 +130,59 @@ parse_iupac_short(iupac_short)
 #> # Unique structures: 3
 ```
 
-Notice how much more compact this is! The parser is smart enough to
-infer common linkage positions (like Neu5Ac always being a2-linked).
+The parser infers common linkage positions when they are omitted.
 
-### IUPAC-Extended: The Formal One
+### IUPAC-extended
 
 This verbose format includes full chemical names and stereochemistry:
 
 ``` r
 
 iupac_extended <- paste0(
-  "α-D-Manp-(1→3)[α-D-Manp-(1→6)]-β-D-Manp-(1→4)",
-  "-β-D-GlcpNAc-(1→4)-β-D-GlcpNAc-(1→"
+  "alpha-D-Galp-(1->3)-",
+  "beta-D-Galp-(1->"
 )
 parse_iupac_extended(iupac_extended)
 #> <glycan_structure[1]>
-#> [1] Man(a1-3)[Man(a1-6)]Man(b1-4)GlcNAc(b1-4)GlcNAc(b1-
+#> [1] Gal(a1-3)Gal(b1-
 #> # Unique structures: 1
 ```
 
-## Part 2: Database Formats — The Heavy Hitters 💪
+### IUPAC-compact
 
-### GlycoCT: The Precision Format
+IUPAC-compact notation places the linkage immediately after each residue
+and uses parentheses for branches.
 
-GlycoCT is used in literature for precise representation and in
-databases like GlycomeDB. It’s more complex but extremely precise:
+``` r
+
+iupac_compact <- "Mana1-3(Mana1-6)Manb1-4GlcNAcb"
+parse_iupac_compact(iupac_compact)
+#> <glycan_structure[1]>
+#> [1] Man(a1-3)[Man(a1-6)]Man(b1-4)GlcNAc(b1-
+#> # Unique structures: 1
+```
+
+### GlyCAM IUPAC
+
+GlyCAM IUPAC strings include configuration and ring markers such as
+`DManp` and use a terminal `-OH` marker for the reducing end. The parser
+normalizes these strings before parsing them.
+
+``` r
+
+glycam <- "DManpa1-3[DManpa1-6]DManpb1-4DGlcpNAcb1-OH"
+parse_glycam_iupac(glycam)
+#> <glycan_structure[1]>
+#> [1] Man(a1-3)[Man(a1-6)]Man(b1-4)GlcNAc(b1-
+#> # Unique structures: 1
+```
+
+## Part 3: Database and exchange formats
+
+### GlycoCT
+
+GlycoCT uses separate `RES` and `LIN` sections. It is verbose, but
+records residue and linkage information explicitly.
 
 ``` r
 
@@ -196,10 +201,11 @@ parse_glycoct(glycoct)
 #> # Unique structures: 1
 ```
 
-### WURCS: The Complex Structure Format
+### WURCS
 
-WURCS (Web3 Unique Representation of Carbohydrate Structures) is used in
-literature for complex structures and in databases like GlyTouCan:
+WURCS (Web3 Unique Representation of Carbohydrate Structures) is a
+compact standardised exchange format used by resources such as
+GlyTouCan.
 
 ``` r
 
@@ -214,10 +220,40 @@ parse_wurcs(wurcs)
 #> # Unique structures: 1
 ```
 
-### Linear Code: The Simplified Format
+### KCF
 
-Linear Code is a simplified format used in literature for complex
-structures:
+KCF represents a glycan as a graph with `NODE` and `EDGE` sections. It
+is used by KEGG GLYCAN.
+
+``` r
+
+kcf <- paste0(
+  "ENTRY       G00066                      Glycan\n",
+  "NODE        6\n",
+  "            1   Cer        18     0\n",
+  "            2   Glc        12     0\n",
+  "            3   Gal         6     0\n",
+  "            4   GlcNAc     -2     0\n",
+  "            5   Gal       -10     0\n",
+  "            6   GlcNAc    -18     0\n",
+  "EDGE        5\n",
+  "            1     2:b1    1:1\n",
+  "            2     3:b1    2:4\n",
+  "            3     4:b1    3:3\n",
+  "            4     5:b1    4:4\n",
+  "            5     6:b1    5:3\n",
+  "///"
+)
+parse_kcf(kcf)
+#> <glycan_structure[1]>
+#> [1] GlcNAc(b1-3)Gal(b1-4)GlcNAc(b1-3)Gal(b1-4)Glc(b1-
+#> # Unique structures: 1
+```
+
+### Linear Code
+
+Linear Code is a compact notation used in literature and glycan
+software:
 
 ``` r
 
@@ -228,11 +264,44 @@ parse_linear_code(linear_code)
 #> # Unique structures: 1
 ```
 
-## Part 3: Software-Specific Formats — The Specialists 🔬
+### LINUCS
 
-### pGlyco Format: Proteomics Tool
+LINUCS expresses each residue as a token followed by a braced child
+list. A linkage such as `[(4+1)]` records the parent and child
+positions.
 
-If you work with glycoproteomics, you might encounter pGlyco’s
+``` r
+
+linucs <- "[][b-D-Glcp]{[(4+1)][b-D-Galp]{}}"
+parse_linucs(linucs)
+#> <glycan_structure[1]>
+#> [1] Gal(b1-4)Glc(b1-
+#> # Unique structures: 1
+```
+
+## Part 4: Software-specific formats
+
+### GlycoWorkbench
+
+GlycoWorkbench strings describe the structure from the reducing end and
+may include mass options after `$`. Those options are ignored because
+they are not part of the glycan graph.
+
+``` r
+
+gwb <- paste0(
+  "freeEnd--1b1D-GlcNAc,p(--6a1L-Fuc,p)",
+  "--4b1D-Gal,p--3a2D-NeuAc,p$MONO,Und,0,0,freeEnd"
+)
+parse_gwb(gwb)
+#> <glycan_structure[1]>
+#> [1] Neu5Ac(a2-3)Gal(b1-4)[Fuc(a1-6)]GlcNAc(b1-
+#> # Unique structures: 1
+```
+
+### pGlyco
+
+If you work with glycoproteomics, you may encounter pGlyco’s
 parenthetical notation:
 
 ``` r
@@ -244,13 +313,13 @@ parse_pglyco_struc(pglyco)
 #> # Unique structures: 1
 ```
 
-This cryptic notation actually represents a complex N-glycan:
+In this notation:
 
 - N = HexNAc
-- F = Fuc  
+- F = Fuc
 - H = Hex (Man or Gal)
 
-### StrucGP Format: Alphabetical System
+### StrucGP
 
 StrucGP uses a letter-based encoding system:
 
@@ -263,21 +332,21 @@ parse_strucgp_struc(strucgp)
 #> # Unique structures: 1
 ```
 
-## The Bottom Line 🎯
+## Handling parsing failures
 
-`glyparse` transforms the chaos of glycan text formats into order. No
-matter where your glycan data comes from, databases, literature, or
-software tools, you can now parse it into
-[`glyrepr::glycan_structure()`](https://glycoverse.github.io/glyrepr/reference/glycan_structure.html)
-for further analysis. In fact, `glyread` package uses these parsing
-functions internally when reading output from common glycopeptide
-identification softwares.
+By default, a malformed structure stops the call with an informative
+error. When processing a larger collection, `on_failure = "na"`
+preserves the input positions and returns `NA` for records that cannot
+be parsed.
 
-**Next steps:**
+``` r
 
-- Explore the `glyrepr` package for structure manipulation
-- Try `glymotif` for motif analysis of your parsed structures  
-- Use `glyexp` for experimental data analysis
-- Check out the rest of the `glycoverse` ecosystem!
-
-Happy parsing! 🧬✨
+parse_iupac_compact(
+  c(valid = "Galb1-3GalNAca", invalid = "not a glycan"),
+  on_failure = "na"
+)
+#> <glycan_structure[2]>
+#> [1] valid    Gal(b1-3)GalNAc(a1-
+#> [2] invalid  NA
+#> # Unique structures: 1
+```
