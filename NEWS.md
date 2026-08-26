@@ -1,4 +1,4 @@
-# glyparse 0.8.0
+# glyparse 0.8.1
 
 ## New features
 
