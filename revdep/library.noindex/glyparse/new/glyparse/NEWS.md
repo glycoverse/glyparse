@@ -1,0 +1,222 @@
+# glyparse 0.8.0
+
+## New features
+
+* Graph-based parsers gain a `validate` argument to skip graph validation for trusted inputs. (#36)
+* `parse_glycoct()` now supports floating glycan substructures represented by `UND` sections, uses implicit floating parts when every main-tree node is a candidate parent, and excludes explicit candidates whose acceptor positions are already occupied. (#40)
+* New `parse_gwb()` parses GlycoWorkbench (GWB/GWS) sequences, including branches, substituents, furanose and configured residues, reducing-end alditols, and uncertain antennae. `auto_parse()` now detects these sequences. (#48)
+* `parse_wurcs()` now supports floating monosaccharides and subtrees, including implicit all-main attachment domains and filtered explicit candidate parents. It also recognizes generic nonulosonic acids and sialic acids with unknown ring closure. (#40)
+
+## Minor improvements and bug fixes
+
+* Parsers now preserve explicit furanose forms as `glyrepr` monosaccharide names such as `Galf`, `GlcfNAc`, and `Neuf5Ac` across IUPAC, GlyCAM IUPAC, GlycoCT, WURCS, LINUCS, Linear Code, and KCF inputs. (#41)
+* Parsers now preserve unusual monosaccharide configurations using `glyrepr` names such as `D-Fuc`, `L-Gul`, and `D-Fucf`, while unprefixed names retain their natural configurations. (#43, #44)
+* `auto_parse()` and all format-specific parsers now preserve generic and concrete residues mixed within a glycan and across parsed vectors. (#50)
+* `parse_glycoct()` and `parse_wurcs()` now preserve declared floating candidate-parent domains in global floating-parent structures: GlycoCT `UND` parents remain restricted to the main graph, while WURCS parents may target other floating components.
+* `parse_glycoct()` and `parse_wurcs()` now preserve floating substituents with unresolved parent residues, including their chemistry, carbon positions, and candidate parents. (#45)
+* `parse_glycoct()` and `parse_wurcs()` now recognize the `xylHex` encoding of fucose.
+* `parse_glycoct()`, `parse_wurcs()`, `parse_iupac_compact()`, `parse_iupac_condensed()`, `parse_linucs()`, and `auto_parse()` now preserve alditol reducing ends in parsed structures. (#46)
+* `parse_glycoct()` now normalizes symmetric `Man-ol` acceptor positions so equivalent GlycoCT linkages parse consistently.
+* `parse_glycoct()` now preserves repeated and alternative-position substituents, distinguishes N-acetyl and N-glycolyl from acetyl, maps generic `HexA` and `HexN` residues, and rejects unrepresentable non-alditol open-chain residues explicitly. (#47)
+* `parse_iupac_extended()` now accepts abbreviated generic reducing ends such as `?-Hex`, `?-HexNAc`, and `?-HexN`, as well as slash-ambiguous acceptor positions such as `4/?`.
+* `parse_wurcs()` now accepts direct phosphate and alternative-position substituent encodings, preserves generic-root anomer positions, and orients ambiguous linkages using alditol-aware donor semantics. (#47)
+* Parser functions now batch vector normalization and structure construction, improving performance for repeated and distinct inputs. (#36)
+* `parse_glycam_iupac()` now parses large input vectors about five times faster. (#49)
+* `parse_glycoct()` and `parse_wurcs()` now reuse indexed residue matching and cached classification to improve parsing performance. (#37)
+
+# glyparse 0.7.1
+
+## Minor improvements and bug fixes
+
+* Parser output now uses `glyrepr`'s public structure constructor, preventing tidyverse joins on parsed structures from failing with `glyrepr` 0.13.0. (#33)
+
+# glyparse 0.7.0
+
+## New features
+
+* `auto_parse()` now detects GlyCAM IUPAC, IUPAC-compact, KCF, and LINUCS structures and routes them to the corresponding parser (#26, #28, #30, #31).
+* Parser functions gain a `progress` argument for opt-in progress bars when parsing large inputs (#29).
+* New `parse_glycam_iupac()` parses GlyCAM IUPAC structures (#25, #27).
+* New `parse_iupac_compact()` parses IUPAC-compact structures (#28).
+* New `parse_kcf()` parses KCF structures (#30).
+* New `parse_linucs()` parses LINUCS structures (#31).
+
+## Minor improvements and bug fixes
+
+* `parse_glycoct()` now accepts space-separated GlycoCT records, such as records stored in CSV exports (#24).
+* `parse_glycoct()` now parses GlycoCT alditol residues as regular reducing-end glycans with unknown anomer configurations (#22).
+* `parse_glycoct()` now supports generic GlycoCT `HEX`, N-acetylated `HEX`, deoxy-`HEX`, and sialic acid descriptors, including direct `n-sulfate` substituents on amino sugars (#24).
+* `parse_wurcs()` now parses WURCS alditol residues as regular reducing-end glycans with unknown anomer configurations (#21).
+* `parse_wurcs()` now supports additional generic residue descriptors, ambiguous sialic acid descriptors, and uppercase residue IDs for large structures (#23).
+
+# glyparse 0.6.1
+
+## Minor improvements and bug fixes
+
+* `parse_wurcs()` now supports ambiguous `u` residues and unknown ring closure residues (`?` ring position).
+* `parse_wurcs()` now correctly handles WURCS N-sulfate substituent codes (`*NSO/3=O/3=O`).
+* `parse_glycoct()` now preserves unknown reducing-end ring positions and matches amino sugars with unknown ring bounds.
+
+# glyparse 0.6.0
+
+## New features
+
+* Add a `on_failure` parameter to all parser functions. When `on_failure = "error"`, the parser will throw an error when it encounters an unparsable string. When `on_failure = "na"`, the parser will return NA for unparsable strings. The default is "error", for backwards compatibility.
+
+# glyparse 0.5.7
+
+## Minor improvements and bug fixes
+
+* `parse_iupac_extended()` now accepts input with plain text equivalents ("alpha", "beta", "->"). (#10)
+
+# glyparse 0.5.6
+
+## Minor improvements and bug fixes
+
+* Parser functions are now significantly faster (10-30x) for large inputs.
+* Replaced deprecated `dplyr::case_match()` with `dplyr::recode_values()` in parsers to prevent warnings.
+
+# glyparse 0.5.5
+
+## Minor improvements and bug fixes
+
+* All parser functions now preserve names of input character vectors.
+* All parser functions now supports NA values in the input character vectors.
+
+# glyparse 0.5.4
+
+## Minor improvements and fixes
+
+* Adapt to glyrepr 0.10.0.
+
+# glyparse 0.5.3
+
+## Minor improvements and fixes
+
+* Prepare for release on CRAN.
+
+# glyparse 0.5.2
+
+## Minor improvements and fixes
+
+* glyaprse now depends on the CRAN version of glyrepr.
+
+# glyparse 0.5.1
+
+## Minor improvements and fixes
+
+* `parse_iupac_extended()` and `parse_iupac_short()` now support generic monosaccharides, e.g. "Hex", "HexNAc", "HexN".
+
+# glyparse 0.5.0
+
+## New features
+
+* Add `parse_linear_code()` to parse Linear Code strings.
+* `auto_parse()` now supports Linear Code strings.
+
+## Minor improvements and fixes
+
+* Revise the documentations of all parsers to be more accurate about return value type.
+
+# glyparse 0.4.5
+
+## Minor improvements and fixes
+
+* Fix the bug that linkages like "1→3/4" cannot be parsed by `parse_iupac_extended()`.
+* Fix the bug that linkages like "b1-a3|a4" cannot be parsed by `parse_wurcs()`.
+* Fix the bug that linkages like "a3/4" cannot be parsed by `parse_iupac_short()`.
+* Fix the bug that linkages like "3:3o(3|6+1)4d" cannot be parsed by `parse_glycoct()`.
+
+# glyparse 0.4.4
+
+## Minor improvements and bug fixes
+
+* Update dependencies to depend on release versions of glycoverse packages.
+
+# glyparse 0.4.3
+
+## Minor improvements and fixes
+
+* Fix bugs introduced by the breaking changes in `glyrepr` v0.7.0.
+
+# glyparse 0.4.2
+
+## Minor improvements and fixes
+
+* Fix some incorrect structure strings in vignettes.
+
+# glyparse 0.4.1
+
+## Minor improvements and fixes
+
+* Fix some incorrect structure strings in tests and documentations.
+* Remove some legacy documentations.
+
+# glyparse 0.4.0
+
+## Breaking changes
+
+* `parse_iupac_condensed()` and `parse_iupac_short()` now require the reducing-end monosaccharide to have anomer information. For example, "Neu5Ac(a2-" and "Neu5Aca-" are valid, but "Neu5Ac" is not.
+
+# glyparse 0.3.1
+
+## Minor improvements and fixes
+
+* `parse_pglyco_struc()` now support "aH" and "pH" monosaccharides.
+
+# glyparse 0.3.0
+
+## New features
+
+* Add `auto_parse()` to automatically detect and parse different glycan structure string formats.
+
+## Minor improvements and fixes
+
+* Better error messages.
+  Before:
+
+  ```r
+  > parse_iupac_condensed("bad_glycan")
+  ```
+
+  ```
+  Error in `purrr::map()` at glyparse/R/struc-parser-wrapper.R:13:3:
+  ℹ In index: 1.
+  Caused by error in `value[[3L]]()`:
+  ! Could not parse IUPAC-condensed string: {.val {x}}
+  ℹ Invalid characters or format in IUPAC-condensed string
+  Run `rlang::last_trace()` to see where the error occurred.
+  ```
+
+  Now:
+
+  ```r
+  > parse_iupac_condensed("bad_glycan")
+  ```
+
+  ```
+  Error in `parse_iupac_condensed()`:
+  ! Can't parse: "bad_glycan"
+  Run `rlang::last_trace()` to see where the error occurred.
+  ```
+
+# glyparse 0.2.1
+
+## Minor improvements and fixes
+
+* Update README.
+* A "Get Started" vignette is added.
+
+# glyparse 0.2.0
+
+## Major improvements
+
+* Add `parse_glycoct()` to parse glycans in GlycoCT format.
+
+# glyparse 0.1.2
+
+## Minor improvements
+
+* `parse_iupac_short()`, `parse_iupac_extended()`, `parse_iupac_condensed()`,
+  `parse_wurcs()` now support multiple substituents on the same monosaccharide,
+  to align with the updates in `glyrepr` v0.5.0.

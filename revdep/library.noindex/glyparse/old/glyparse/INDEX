@@ -1,0 +1,13 @@
+auto_parse              Automatic Structure Parsing
+parse_glycam_iupac      Parse GlyCAM IUPAC Structures
+parse_glycoct           Parse GlycoCT Structures
+parse_iupac_compact     Parse IUPAC-compact Structures
+parse_iupac_condensed   Parse IUPAC-condensed Structures
+parse_iupac_extended    Parse IUPAC-extended Structures
+parse_iupac_short       Parse IUPAC-short Structures
+parse_kcf               Parse KCF Structures
+parse_linear_code       Parse Linear Code Structures
+parse_linucs            Parse LINUCS Structures
+parse_pglyco_struc      Parse pGlyco Structures
+parse_strucgp_struc     Parse StrucGP Structures
+parse_wurcs             Parse WURCS Structures

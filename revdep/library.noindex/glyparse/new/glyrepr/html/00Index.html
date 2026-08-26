@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head><title>R: Representation for Glycan Compositions and Structures</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<link rel="stylesheet" type="text/css" href="R.css">
+</head><body><div class="container">
+<h1> Representation for Glycan Compositions and Structures
+<img class="toplogo" src="figures/logo.png" alt="[R logo]">
+</h1>
+<hr>
+<div style="text-align: center;">
+<a href="../../../doc/html/packages.html"><img class="arrow" src="../../../doc/html/left.jpg" alt="[Up]"></a>
+<a href="../../../doc/html/index.html"><img class="arrow" src="../../../doc/html/up.jpg" alt="[Top]"></a>
+</div><h2>Documentation for package &lsquo;glyrepr&rsquo; version 1.0.0</h2>
+
+<ul><li><a href="../DESCRIPTION" type="text/plain; charset=utf-8">DESCRIPTION file</a></li>
+<li><a href="../doc/index.html">User guides, package vignettes and other documentation</a></li>
+<li><a href="../NEWS.md">Package NEWS</a></li>
+<li><a href="../README.md">Package README</a></li>
+</ul>
+
+<h2>Help Pages</h2>
+
+
+<table style="width: 100%;">
+<tr><td style="width: 25%;"><a href="as_glycan_composition.html">as_glycan_composition</a></td>
+<td>Convert to Glycan Composition</td></tr>
+<tr><td style="width: 25%;"><a href="as_glycan_structure.html">as_glycan_structure</a></td>
+<td>Convert to Glycan Structure Vector</td></tr>
+<tr><td style="width: 25%;"><a href="available_monosaccharides.html">available_monosaccharides</a></td>
+<td>Get Available Monosaacharides</td></tr>
+<tr><td style="width: 25%;"><a href="available_substituents.html">available_substituents</a></td>
+<td>Available Substituents</td></tr>
+<tr><td style="width: 25%;"><a href="canonicalize_glycan_graph.html">canonicalize_glycan_graph</a></td>
+<td>Canonicalize a Glycan Graph</td></tr>
+<tr><td style="width: 25%;"><a href="convert_to_generic.html">convert_to_generic</a></td>
+<td>Convert Monosaccharides to Generic Type</td></tr>
+<tr><td style="width: 25%;"><a href="convert_to_generic.html">convert_to_generic.character</a></td>
+<td>Convert Monosaccharides to Generic Type</td></tr>
+<tr><td style="width: 25%;"><a href="convert_to_generic.html">convert_to_generic.glyrepr_composition</a></td>
+<td>Convert Monosaccharides to Generic Type</td></tr>
+<tr><td style="width: 25%;"><a href="convert_to_generic.html">convert_to_generic.glyrepr_structure</a></td>
+<td>Convert Monosaccharides to Generic Type</td></tr>
+<tr><td style="width: 25%;"><a href="convert_to_generic.html">convert_to_generic.igraph</a></td>
+<td>Convert Monosaccharides to Generic Type</td></tr>
+<tr><td style="width: 25%;"><a href="count_mono.html">count_mono</a></td>
+<td>Get the Number of Monosaccharides</td></tr>
+<tr><td style="width: 25%;"><a href="count_mono.html">count_mono.glyrepr_composition</a></td>
+<td>Get the Number of Monosaccharides</td></tr>
+<tr><td style="width: 25%;"><a href="count_mono.html">count_mono.glyrepr_structure</a></td>
+<td>Get the Number of Monosaccharides</td></tr>
+<tr><td style="width: 25%;"><a href="count_mono.html">count_mono.igraph</a></td>
+<td>Get the Number of Monosaccharides</td></tr>
+<tr><td style="width: 25%;"><a href="enumerate_floating_graph_localizations.html">enumerate_floating_graph_localizations</a></td>
+<td>Enumerate Floating Graph Localizations</td></tr>
+<tr><td style="width: 25%;"><a href="enumerate_floating_localizations.html">enumerate_floating_localizations</a></td>
+<td>Enumerate Floating Localizations</td></tr>
+<tr><td style="width: 25%;"><a href="fill_anomer_pos.html">fill_anomer_pos</a></td>
+<td>Fill Anomer Positions</td></tr>
+<tr><td style="width: 25%;"><a href="get_alditol.html">get_alditol</a></td>
+<td>Get Alditol Status</td></tr>
+<tr><td style="width: 25%;"><a href="get_anomer.html">get_anomer</a></td>
+<td>Get the Anomeric information</td></tr>
+<tr><td style="width: 25%;"><a href="infer_anomer_pos.html">get_anomer_pos</a></td>
+<td>Infer Anomer Positions</td></tr>
+<tr><td style="width: 25%;"><a href="get_mono_type.html">get_mono_type</a></td>
+<td>Get Monosaccharide Types</td></tr>
+<tr><td style="width: 25%;"><a href="get_mono_type.html">get_mono_type.character</a></td>
+<td>Get Monosaccharide Types</td></tr>
+<tr><td style="width: 25%;"><a href="get_mono_type.html">get_mono_type.glyrepr_composition</a></td>
+<td>Get Monosaccharide Types</td></tr>
+<tr><td style="width: 25%;"><a href="get_mono_type.html">get_mono_type.glyrepr_structure</a></td>
+<td>Get Monosaccharide Types</td></tr>
+<tr><td style="width: 25%;"><a href="get_mono_type.html">get_mono_type.igraph</a></td>
+<td>Get Monosaccharide Types</td></tr>
+<tr><td style="width: 25%;"><a href="get_structure_graphs.html">get_structure_graphs</a></td>
+<td>Access Individual Glycan Structures</td></tr>
+<tr><td style="width: 25%;"><a href="get_structure_level.html">get_structure_level</a></td>
+<td>Get the Structure Resolution Levels</td></tr>
+<tr><td style="width: 25%;"><a href="glycan_composition.html">glycan_composition</a></td>
+<td>Create a Glycan Composition</td></tr>
+<tr><td style="width: 25%;"><a href="glycan_structure.html">glycan_structure</a></td>
+<td>Create a Glycan Structure Vector</td></tr>
+<tr><td style="width: 25%;"><a href="graph_to_iupac.html">graph_to_iupac</a></td>
+<td>Generate IUPAC-Condensed from a Glycan Graph</td></tr>
+<tr><td style="width: 25%;"><a href="has_floating_parts.html">has_floating_parts</a></td>
+<td>Detect Floating Glycan Parts</td></tr>
+<tr><td style="width: 25%;"><a href="has_floating_substituents.html">has_floating_substituents</a></td>
+<td>Detect Floating Substituents</td></tr>
+<tr><td style="width: 25%;"><a href="has_linkages.html">has_linkages</a></td>
+<td>Determine if a Glycan Structure has Linkages</td></tr>
+<tr><td style="width: 25%;"><a href="infer_anomer_pos.html">infer_anomer_pos</a></td>
+<td>Infer Anomer Positions</td></tr>
+<tr><td style="width: 25%;"><a href="glycan_composition.html">is_glycan_composition</a></td>
+<td>Create a Glycan Composition</td></tr>
+<tr><td style="width: 25%;"><a href="glycan_structure.html">is_glycan_structure</a></td>
+<td>Create a Glycan Structure Vector</td></tr>
+<tr><td style="width: 25%;"><a href="is_known_monosaccharide.html">is_known_monosaccharide</a></td>
+<td>Check if a Monosaccharide is Known</td></tr>
+<tr><td style="width: 25%;"><a href="localize_floating_parts.html">localize_floating_parts</a></td>
+<td>Localize Floating Glycan Parts</td></tr>
+<tr><td style="width: 25%;"><a href="new_glycan_structure.html">new_glycan_structure</a></td>
+<td>Construct a Glycan Structure Vector from Trusted Data</td></tr>
+<tr><td style="width: 25%;"><a href="n_glycan_core.html">n_glycan_core</a></td>
+<td>Example Glycan Structures</td></tr>
+<tr><td style="width: 25%;"><a href="n_glycan_core.html">o_glycan_core_1</a></td>
+<td>Example Glycan Structures</td></tr>
+<tr><td style="width: 25%;"><a href="n_glycan_core.html">o_glycan_core_2</a></td>
+<td>Example Glycan Structures</td></tr>
+<tr><td style="width: 25%;"><a href="possible_linkages.html">possible_linkages</a></td>
+<td>Generate Possible Linkages</td></tr>
+<tr><td style="width: 25%;"><a href="remove_linkages.html">remove_linkages</a></td>
+<td>Remove All Linkages from a Glycan</td></tr>
+<tr><td style="width: 25%;"><a href="remove_substituents.html">remove_substituents</a></td>
+<td>Remove All Substituents from a Glycan</td></tr>
+<tr><td style="width: 25%;"><a href="smap_predicates.html">severy</a></td>
+<td>Test Predicates on Glycan Structure Vectors</td></tr>
+<tr><td style="width: 25%;"><a href="simap.html">simap</a></td>
+<td>Map Functions Over Glycan Structure Vectors with Indices</td></tr>
+<tr><td style="width: 25%;"><a href="simap.html">simap_chr</a></td>
+<td>Map Functions Over Glycan Structure Vectors with Indices</td></tr>
+<tr><td style="width: 25%;"><a href="simap.html">simap_dbl</a></td>
+<td>Map Functions Over Glycan Structure Vectors with Indices</td></tr>
+<tr><td style="width: 25%;"><a href="simap.html">simap_int</a></td>
+<td>Map Functions Over Glycan Structure Vectors with Indices</td></tr>
+<tr><td style="width: 25%;"><a href="simap.html">simap_lgl</a></td>
+<td>Map Functions Over Glycan Structure Vectors with Indices</td></tr>
+<tr><td style="width: 25%;"><a href="simap.html">simap_structure</a></td>
+<td>Map Functions Over Glycan Structure Vectors with Indices</td></tr>
+<tr><td style="width: 25%;"><a href="simap.html">simap_vec</a></td>
+<td>Map Functions Over Glycan Structure Vectors with Indices</td></tr>
+<tr><td style="width: 25%;"><a href="smap.html">smap</a></td>
+<td>Map Functions Over Glycan Structure Vectors</td></tr>
+<tr><td style="width: 25%;"><a href="smap2.html">smap2</a></td>
+<td>Map Functions Over Two Glycan Structure Vectors</td></tr>
+<tr><td style="width: 25%;"><a href="smap2.html">smap2_chr</a></td>
+<td>Map Functions Over Two Glycan Structure Vectors</td></tr>
+<tr><td style="width: 25%;"><a href="smap2.html">smap2_dbl</a></td>
+<td>Map Functions Over Two Glycan Structure Vectors</td></tr>
+<tr><td style="width: 25%;"><a href="smap2.html">smap2_int</a></td>
+<td>Map Functions Over Two Glycan Structure Vectors</td></tr>
+<tr><td style="width: 25%;"><a href="smap2.html">smap2_lgl</a></td>
+<td>Map Functions Over Two Glycan Structure Vectors</td></tr>
+<tr><td style="width: 25%;"><a href="smap2.html">smap2_structure</a></td>
+<td>Map Functions Over Two Glycan Structure Vectors</td></tr>
+<tr><td style="width: 25%;"><a href="smap2.html">smap2_vec</a></td>
+<td>Map Functions Over Two Glycan Structure Vectors</td></tr>
+<tr><td style="width: 25%;"><a href="smap.html">smap_chr</a></td>
+<td>Map Functions Over Glycan Structure Vectors</td></tr>
+<tr><td style="width: 25%;"><a href="smap.html">smap_dbl</a></td>
+<td>Map Functions Over Glycan Structure Vectors</td></tr>
+<tr><td style="width: 25%;"><a href="smap.html">smap_int</a></td>
+<td>Map Functions Over Glycan Structure Vectors</td></tr>
+<tr><td style="width: 25%;"><a href="smap.html">smap_lgl</a></td>
+<td>Map Functions Over Glycan Structure Vectors</td></tr>
+<tr><td style="width: 25%;"><a href="smap_predicates.html">smap_predicates</a></td>
+<td>Test Predicates on Glycan Structure Vectors</td></tr>
+<tr><td style="width: 25%;"><a href="smap.html">smap_structure</a></td>
+<td>Map Functions Over Glycan Structure Vectors</td></tr>
+<tr><td style="width: 25%;"><a href="smap_unique.html">smap_unique</a></td>
+<td>Apply Function to Unique Structures Only</td></tr>
+<tr><td style="width: 25%;"><a href="smap.html">smap_vec</a></td>
+<td>Map Functions Over Glycan Structure Vectors</td></tr>
+<tr><td style="width: 25%;"><a href="smap_predicates.html">snone</a></td>
+<td>Test Predicates on Glycan Structure Vectors</td></tr>
+<tr><td style="width: 25%;"><a href="spmap.html">spmap</a></td>
+<td>Map Functions Over Glycan Structure Vectors and Multiple Arguments</td></tr>
+<tr><td style="width: 25%;"><a href="spmap.html">spmap_chr</a></td>
+<td>Map Functions Over Glycan Structure Vectors and Multiple Arguments</td></tr>
+<tr><td style="width: 25%;"><a href="spmap.html">spmap_dbl</a></td>
+<td>Map Functions Over Glycan Structure Vectors and Multiple Arguments</td></tr>
+<tr><td style="width: 25%;"><a href="spmap.html">spmap_int</a></td>
+<td>Map Functions Over Glycan Structure Vectors and Multiple Arguments</td></tr>
+<tr><td style="width: 25%;"><a href="spmap.html">spmap_lgl</a></td>
+<td>Map Functions Over Glycan Structure Vectors and Multiple Arguments</td></tr>
+<tr><td style="width: 25%;"><a href="spmap.html">spmap_structure</a></td>
+<td>Map Functions Over Glycan Structure Vectors and Multiple Arguments</td></tr>
+<tr><td style="width: 25%;"><a href="spmap.html">spmap_vec</a></td>
+<td>Map Functions Over Glycan Structure Vectors and Multiple Arguments</td></tr>
+<tr><td style="width: 25%;"><a href="smap_predicates.html">ssome</a></td>
+<td>Test Predicates on Glycan Structure Vectors</td></tr>
+<tr><td style="width: 25%;"><a href="structure_candidate_edges.html">structure_candidate_edges</a></td>
+<td>List Potential Virtual Edges for Floating Parts</td></tr>
+<tr><td style="width: 25%;"><a href="structure_component_membership.html">structure_component_membership</a></td>
+<td>Identify Main and Floating Structure Components</td></tr>
+<tr><td style="width: 25%;"><a href="structure_tables.html">structure_edges</a></td>
+<td>Convert Glycan Structures to Graph Tables</td></tr>
+<tr><td style="width: 25%;"><a href="structure_floating_candidates.html">structure_floating_candidates</a></td>
+<td>List Candidate Parents for Floating Metadata</td></tr>
+<tr><td style="width: 25%;"><a href="structure_tables.html">structure_floating_parts</a></td>
+<td>Convert Glycan Structures to Graph Tables</td></tr>
+<tr><td style="width: 25%;"><a href="structure_tables.html">structure_floating_substituents</a></td>
+<td>Convert Glycan Structures to Graph Tables</td></tr>
+<tr><td style="width: 25%;"><a href="structure_tables.html">structure_from_tibbles</a></td>
+<td>Convert Glycan Structures to Graph Tables</td></tr>
+<tr><td style="width: 25%;"><a href="structure_tables.html">structure_nodes</a></td>
+<td>Convert Glycan Structures to Graph Tables</td></tr>
+<tr><td style="width: 25%;"><a href="structure_tables.html">structure_tables</a></td>
+<td>Convert Glycan Structures to Graph Tables</td></tr>
+<tr><td style="width: 25%;"><a href="structure_to_iupac.html">structure_to_iupac</a></td>
+<td>Convert Glycan Structure to IUPAC-like Sequence</td></tr>
+<tr><td style="width: 25%;"><a href="validate_glycan_graph.html">validate_glycan_graph</a></td>
+<td>Validate a Glycan Graph</td></tr>
+<tr><td style="width: 25%;"><a href="validate_glycan_graph_vector.html">validate_glycan_graph_vector</a></td>
+<td>Validate a List of Glycan Graphs</td></tr>
+<tr><td style="width: 25%;"><a href="valid_linkages.html">valid_linkages</a></td>
+<td>Check if Linkages are Valid</td></tr>
+</table>
+</div></body></html>
