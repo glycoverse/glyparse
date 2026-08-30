@@ -2,6 +2,8 @@
 
 ## glyparse 0.8.1
 
+CRAN release: 2026-08-28
+
 ### New features
 
 - Graph-based parsers gain a `validate` argument to skip graph
