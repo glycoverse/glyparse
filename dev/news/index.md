@@ -1,6 +1,10 @@
 # Changelog
 
-## glyparse 0.8.0
+## glyparse (development version)
+
+## glyparse 0.8.1
+
+CRAN release: 2026-08-28
 
 ### New features
 
