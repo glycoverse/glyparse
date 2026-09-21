@@ -34,11 +34,15 @@ struc_parser_wrapper <- function(
     ))
   }
 
-  records <- purrr::map(
-    wrapper_input$unique_x,
-    purrr::possibly(parser, otherwise = NULL),
-    .progress = progress
-  )
+  records <- if (is.character(parser)) {
+    native_records(wrapper_input$unique_x, parser, progress)
+  } else {
+    purrr::map(
+      wrapper_input$unique_x,
+      purrr::possibly(parser, otherwise = NULL),
+      .progress = progress
+    )
+  }
   unique_result <- suppressWarnings(glyrepr::structure_from_arrays(
     records,
     on_failure = "na"

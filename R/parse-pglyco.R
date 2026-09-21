@@ -25,56 +25,9 @@ parse_pglyco_struc <- function(
 ) {
   struc_parser_wrapper(
     x,
-    parse_pglyco_struc_arrays,
+    "pglyco",
     on_failure = on_failure,
     progress = progress,
     validate = validate
-  )
-}
-
-
-# Parsing logic of `parse_pglyco_struc()`
-parse_pglyco_struc_arrays <- function(x) {
-  monos <- stringr::str_split_1(x, "[//(, \\)]")
-  monos <- monos[monos != ""]
-  parentheses <- stringr::str_split_1(
-    stringr::str_replace_all(x, "[^()]", ""),
-    ""
-  )
-  edge_count <- sum(parentheses == "(") - 1L
-  edges <- integer(edge_count * 2L)
-  edge_index <- 0L
-  current_node <- 1L
-  node_stack <- rstackdeque::rstack()
-  node_stack <- rstackdeque::insert_top(node_stack, 1L)
-  for (i in 2:length(parentheses)) {
-    if (parentheses[[i]] == "(") {
-      current_node <- current_node + 1L
-      edge_index <- edge_index + 1L
-      edges[[2L * edge_index - 1L]] <- rstackdeque::peek_top(node_stack)
-      edges[[2L * edge_index]] <- current_node
-      node_stack <- rstackdeque::insert_top(node_stack, current_node)
-    } else {
-      # must be ")"
-      node_stack <- rstackdeque::without_top(node_stack)
-    }
-  }
-  # Map pGlyco monosaccharide codes to standard names
-  mono_map <- c(
-    "H" = "Hex",
-    "N" = "HexNAc",
-    "F" = "dHex",
-    "A" = "NeuAc",
-    "G" = "NeuGc",
-    "aH" = "HexN",
-    "pH" = "Hex"
-  )
-  list(
-    mono = unname(dplyr::recode(monos, !!!mono_map, .default = monos)),
-    sub = ifelse(monos == "pH", "?P", ""),
-    edges = edges,
-    linkage = rep("??-?", length(edges) / 2L),
-    anomer = "??",
-    alditol = FALSE
   )
 }

@@ -1733,21 +1733,13 @@ test_that("glycan with only one monosacharide", {
 })
 
 test_that("parse_wurcs parses shared residue descriptors once per call", {
-  parsed_descriptors <- character()
-  original_parse <- parse_residue_details
-  testthat::local_mocked_bindings(
-    parse_residue_details = function(residue) {
-      parsed_descriptors <<- c(parsed_descriptors, residue)
-      original_parse(residue)
-    }
-  )
-
-  parse_wurcs(c(
+  input <- c(
     "WURCS=2.0/1,1,0/[a2122h-1a_1-5]/1/",
     "WURCS=2.0/1,2,1/[a2122h-1a_1-5]/1-1/a1-b1"
-  ))
-
-  expect_identical(parsed_descriptors, "a2122h-1a_1-5")
+  )
+  records <- native_records_cpp(input, "wurcs", native_vocabulary())
+  expect_identical(attr(records, "residue_parses"), 1L)
+  expect_false(any(is.na(parse_wurcs(input))))
 })
 
 

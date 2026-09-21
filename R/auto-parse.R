@@ -56,7 +56,7 @@ auto_parse <- function(
     return(make_na_glycan_structure(input$size, input$names))
   }
 
-  formats <- vapply(input$unique_x, choose_parser, character(1))
+  formats <- native_convert(input$unique_x, "detect")
   groups <- split(seq_along(input$unique_x), formats)
   parsed <- lapply(names(groups), function(format) {
     parser <- get(format, envir = environment(auto_parse))
@@ -77,41 +77,4 @@ auto_parse <- function(
     attr(result, "names") <- input$names
   }
   result
-}
-
-choose_parser <- function(x) {
-  if (stringr::str_starts(x, "freeEnd|redEnd")) {
-    return("parse_gwb")
-  } else if (stringr::str_detect(x, "ENTRY")) {
-    return("parse_kcf")
-  } else if (stringr::str_detect(x, "RES")) {
-    return("parse_glycoct")
-  } else if (stringr::str_detect(x, "WURCS")) {
-    return("parse_wurcs")
-  } else if (stringr::str_starts(x, "\\([HNAGFSap]")) {
-    return("parse_pglyco_struc")
-  } else if (stringr::str_starts(x, "A") && stringr::str_ends(x, "a")) {
-    return("parse_strucgp_struc")
-  } else if (stringr::str_ends(x, "-OH")) {
-    return("parse_glycam_iupac")
-  } else if (stringr::str_ends(x, stringr::fixed("-ol"))) {
-    return("parse_iupac_condensed")
-  } else if (
-    stringr::str_detect(x, "\\u2192") || # Unicode arrow →
-      stringr::str_detect(x, "->") || # Plain text arrow ->
-      stringr::str_detect(x, "alpha|beta") # Plain text anomers
-  ) {
-    return("parse_iupac_extended")
-  } else if (stringr::str_detect(x, "\\w+\\([ab\\?][\\d\\?]-")) {
-    return("parse_iupac_condensed")
-  } else if (is_linucs_string(x)) {
-    return("parse_linucs")
-  } else if (is_iupac_compact_string(x)) {
-    return("parse_iupac_compact")
-  } else if (stringr::str_ends(x, "-")) {
-    return("parse_iupac_short")
-  } else {
-    # Assume Linear Code
-    return("parse_linear_code")
-  }
 }

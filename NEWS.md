@@ -1,5 +1,7 @@
 # glyparse (development version)
 
+* All format parsing, IUPAC conversion, and automatic format detection now run in C++, while preserving vectorization, names, missing values, and failure handling. Installing from source requires a C++17 compiler.
+
 * `parse_glycoct()`, `parse_kcf()`, `parse_linucs()`, `parse_pglyco_struc()`, `parse_strucgp_struc()`, and `parse_wurcs()` construct structures directly from residue and edge arrays using glyrepr >= 1.0.0.9000, avoiding intermediate graphs. Array validation is mandatory; the retained `validate` argument no longer skips validation when `FALSE`.
 * `auto_parse()` processes each detected format in a batch, preserving input order, names, missing values, and failure handling.
 
