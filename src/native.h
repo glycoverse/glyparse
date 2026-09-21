@@ -100,11 +100,30 @@ inline VS longest(VS x) {
                    [](const S &a, const S &b) { return a.size() > b.size(); });
   return x;
 }
-inline S alternatives(VS x) {
-  for (auto &s : x)
-    s = escape(s);
-  return join(x, "|");
+// Factor literal alternatives into a prefix tree. Empty suffixes split groups
+// so the original alternative priority (including short names) is preserved.
+inline S alternatives(const VS &words) {
+  VS branches;
+  std::map<char, VS> groups;
+  auto flush = [&] {
+    for (const auto &group : groups)
+      branches.push_back(escape(S(1, group.first)) + alternatives(group.second));
+    groups.clear();
+  };
+  for (const auto &word : words) {
+    if (word.empty()) {
+      flush();
+      branches.push_back("");
+    } else {
+      groups[word[0]].push_back(word.substr(1));
+    }
+  }
+  flush();
+  if (branches.empty())
+    return "";
+  return branches.size() == 1 ? branches[0] : "(?:" + join(branches, "|") + ")";
 }
+
 template <class T> inline std::vector<T> unique(std::vector<T> x) {
   std::vector<T> y;
   for (auto a : x)

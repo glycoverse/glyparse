@@ -27,3 +27,135 @@ parse_linear_code <- function(
     progress = progress
   )
 }
+
+
+convert_linear_to_iupac <- function(x) {
+  # Mono mapping from IUPAC to Linear Code
+  mono_map <- c(
+    "Glc" = "G",
+    "Gal" = "A",
+    "GlcNAc" = "GN",
+    "GalNAc" = "AN",
+    "Man" = "M",
+    "Neu5Ac" = "NN",
+    "Neu" = "N",
+    "Kdn" = "K",
+    "Kdo" = "W",
+    "GalA" = "L",
+    "Ido" = "I",
+    "Rha" = "H",
+    "Fuc" = "F",
+    "Xyl" = "X",
+    "Rib" = "B",
+    "Ara" = "R",
+    "GlcA" = "U",
+    "All" = "O",
+    "Api" = "P",
+    "Fru" = "E"
+  )
+  furanose <- linear_code_furanose(names(mono_map))
+  has_furanose <- furanose != names(mono_map)
+  mono_map <- c(
+    mono_map,
+    rlang::set_names(
+      paste0(unname(mono_map[has_furanose]), "^"),
+      furanose[has_furanose]
+    )
+  )
+
+  # Substituent mapping from IUPAC to Linear Code
+  sub_map <- c(
+    "NAc" = "N",
+    "Me" = "ME",
+    "Ac" = "T",
+    "P" = "P",
+    "S" = "S"
+  )
+
+  # ===== Convert linkages =====
+  # "Ab3A[2P]b3(Ab4)Gb" will be converted to "A(b1-3)A_2P_(b1-3)[A(b1-4)]G(b1-"
+
+  # First convert "[]" (substituents) to "_"
+  x <- stringr::str_replace_all(x, stringr::fixed("["), "_")
+  x <- stringr::str_replace_all(x, stringr::fixed("]"), "_")
+  # Then convert "()" (branches) to "[]"
+  x <- stringr::str_replace_all(x, stringr::fixed("("), "[")
+  x <- stringr::str_replace_all(x, stringr::fixed(")"), "]")
+  # Finally convert "a3" to "(a1-3)"
+  # Here we assume the anomer position is always 1
+  x <- stringr::str_replace_all(
+    x,
+    "([ab\\?])(\\d+(?:/\\d+)*|\\?)",
+    "(\\11-\\2)"
+  )
+  red_anomer <- stringr::str_sub(x, -1, -1)
+  x <- paste0(stringr::str_sub(x, 1, -2), "(", red_anomer, "1-")
+
+  # ===== Convert monosaccharides =====
+  # "A(b1-3)A_2P_(b1-3)[A(b1-4)]G(b1-" will be converted to "Gal(b1-3)Gal_2P_(b1-3)[Gal(b1-4)]Glc(b1-"
+
+  mono_codes <- purrr::map_chr(unname(mono_map), stringr::str_escape)
+  mono_patterns <- stringr::str_glue(
+    "(?<![:alnum:]|\\?){mono_codes}(?=[_\\(])"
+  )
+  mono_replaces <- names(mono_map)
+  for (i in seq_along(mono_patterns)) {
+    x <- stringr::str_replace_all(x, mono_patterns[i], mono_replaces[i])
+  }
+
+  # ===== Add anomer positions =====
+  # When converting linkages, we assume the anomer positions are always 1.
+  # Here we replace some of them with 2.
+  anomer_pos <- linear_code_anomer_pos(names(mono_map))
+  anomer_patterns <- stringr::str_glue(
+    "(?<![:alnum:])({names(mono_map)})(_.*?_)?\\(([ab\\?])1-"
+  )
+  anomer_replaces <- stringr::str_glue("\\1\\2\\(\\3{anomer_pos}-")
+  for (i in seq_along(anomer_patterns)) {
+    x <- stringr::str_replace_all(x, anomer_patterns[i], anomer_replaces[i])
+  }
+
+  # ===== Convert substituents =====
+  # "Gal(b1-3)Gal_2P_(b1-3)[Gal(b1-4)]Glc(b1-" will be converted to "Gal(b1-3)Gal2P(b1-3)[Gal(b1-4)]Glc(b1-"
+
+  sub_patterns <- stringr::str_glue("_(\\d+|\\?)({sub_map})_")
+  sub_replaces <- stringr::str_glue("\\1{names(sub_map)}")
+  for (i in seq_along(sub_patterns)) {
+    x <- stringr::str_replace_all(x, sub_patterns[i], sub_replaces[i])
+  }
+
+  x
+}
+
+linear_code_furanose_map <- local({
+  map <- NULL
+
+  function() {
+    if (is.null(map)) {
+      monos <- glyrepr::available_monosaccharides("concrete")
+      furanose <- monos[stringr::str_detect(monos, stringr::fixed("f"))]
+      ringless <- stringr::str_remove(furanose, stringr::fixed("f"))
+      known_ringless <- ringless %in% monos
+      map <<- rlang::set_names(
+        furanose[known_ringless],
+        ringless[known_ringless]
+      )
+    }
+    map
+  }
+})
+
+linear_code_furanose <- function(mono) {
+  converted <- unname(linear_code_furanose_map()[mono])
+  converted[is.na(converted)] <- mono[is.na(converted)]
+  converted
+}
+
+# The anomer positions are fixed for concrete monosaccharides.
+# Generic monosaccharides default to C1.
+linear_code_anomer_pos <- function(mono) {
+  anomer_pos <- rep("1", length(mono))
+  concrete <- mono %in% glyrepr::available_monosaccharides("concrete")
+  anomer_pos[concrete] <- glyrepr::get_anomer_pos(mono[concrete])
+  anomer_pos
+}

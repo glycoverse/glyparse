@@ -14,7 +14,6 @@ Description:
 License: MIT + file LICENSE
 Suggests: 
     dplyr,
-    stringr,
     knitr,
     rmarkdown,
     glue,
@@ -30,7 +29,8 @@ Imports:
     glyrepr (>= 1.0.0.9000),
     purrr (>= 1.0.0),
     Rcpp,
-    rlang
+    rlang,
+    stringr
 Depends: 
     R (>= 4.1)
 VignetteBuilder: knitr

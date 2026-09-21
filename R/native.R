@@ -61,5 +61,4 @@ convert_iupac_compact_to_condensed <- function(x) {
 convert_glycam_iupac_to_condensed <- function(x) {
   native_convert(x, "glycam_iupac")
 }
-convert_linear_to_iupac <- function(x) native_convert(x, "linear_code")
 convert_gwb_to_condensed <- function(x) native_convert(x, "gwb")

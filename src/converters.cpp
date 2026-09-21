@@ -141,38 +141,7 @@ static S glycam(const S &x) {
   }
   return out;
 }
-static S linear(S x, const Vocab &v) {
-  Pairs maps = {{"Glc", "G"},  {"Gal", "A"},     {"GlcNAc", "GN"}, {"GalNAc", "AN"},
-                {"Man", "M"},  {"Neu5Ac", "NN"}, {"Neu", "N"},     {"Kdn", "K"},
-                {"Kdo", "W"},  {"GalA", "L"},    {"Ido", "I"},     {"Rha", "H"},
-                {"Fuc", "F"},  {"Xyl", "X"},     {"Rib", "B"},     {"Ara", "R"},
-                {"GlcA", "U"}, {"All", "O"},     {"Api", "P"},     {"Fru", "E"}};
-  auto base = maps;
-  for (auto &p : base)
-    if (v.furan(p.first) != p.first)
-      maps.push_back({v.furan(p.first), p.second + "^"});
-  x = replace(replace(x, "[", "_"), "]", "_");
-  x = replace(replace(x, "(", "["), ")", "]");
-  x = rewrite(x, "([ab?])([0-9]+(?:/[0-9]+)*|\\?)",
-              [](const VS &m) { return "(" + m[1] + "1-" + m[2] + ")"; });
-  if (x.empty())
-    fail("Empty Linear Code");
-  S red = x.substr(x.size() - 1);
-  x.resize(x.size() - 1);
-  x += "(" + red + "1-";
-  for (auto &p : maps)
-    x = rewrite(x, "(^|[^[:alnum:]?])" + escape(p.second) + "(?=[_(])",
-                [&](const VS &m) { return m[1] + p.first; });
-  for (auto &p : maps)
-    x = rewrite(x, "(^|[^[:alnum:]])(" + escape(p.first) + ")(_.*?_)?\\(([ab?])1-",
-                [&](const VS &m) {
-                  return m[1] + m[2] + m[3] + "(" + m[4] + v.pos(p.first) + "-";
-                });
-  for (auto &p : Pairs{{"NAc", "N"}, {"Me", "ME"}, {"Ac", "T"}, {"P", "P"}, {"S", "S"}})
-    x = rewrite(x, "_([0-9]+|\\?)" + p.second + "_",
-                [&](const VS &m) { return m[1] + p.first; });
-  return x;
-}
+
 S convert(const S &x, const S &format, const Vocab &v) {
   if (format == "iupac_short")
     return short_iupac(x, v);
@@ -182,8 +151,6 @@ S convert(const S &x, const S &format, const Vocab &v) {
     return compact(x, v);
   if (format == "glycam_iupac")
     return glycam(x);
-  if (format == "linear_code")
-    return linear(x, v);
   if (format == "gwb")
     return gwb_convert(x, v);
   if (format == "iupac_condensed")
