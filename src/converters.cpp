@@ -5,14 +5,18 @@ static S alias(S x) {
   x = replace(x, "NeuAc", "Neu5Ac");
   return replace(x, "NeuGc", "Neu5Gc");
 }
-static S terminal_pattern(const Vocab &v) {
-  return "(" + alternatives(longest(v.monos)) +
-         ")((?:[0-9?](?:" + alternatives(longest(v.subs)) + "))*)(-ol)?([ab?])?$";
+static const S &terminal_pattern(const Vocab &v) {
+  return v.cached("compact-terminal", [&] {
+    return "(" + alternatives(v.sorted_monos()) +
+           ")((?:[0-9?](?:" + alternatives(longest(v.subs)) + "))*)(-ol)?([ab?])?$";
+  });
 }
 static S compact(S x, const Vocab &v) {
   x = alias(x);
-  S p = "\\(([0-9?]*(?:" + alternatives(longest(v.subs)) + "))\\)(" +
-        alternatives(longest(v.monos)) + ")";
+  const S &p = v.cached("compact-modifier", [&] {
+    return "\\(([0-9?]*(?:" + alternatives(longest(v.subs)) + "))\\)(" +
+           alternatives(v.sorted_monos()) + ")";
+  });
   for (;;) {
     S y = rewrite(x, p, [](const VS &m) {
       return m[2] + (std::isalpha((unsigned char)m[1][0]) ? "?" : "") + m[1];
@@ -35,14 +39,21 @@ static S compact(S x, const Vocab &v) {
   });
 }
 static S short_iupac(const S &x, const Vocab &v) {
-  S mono = "(?:" + alternatives(v.monos) +
+  const S &mono = v.cached("short-mono", [&] {
+    return "(?:" + alternatives(v.monos) +
            ")(?:(?:[0-9]+(?:/[0-9]+)*|\\?)(?:" + alternatives(v.subs) + "))*";
-  S residue = "(" + mono + ")([ab?])-?([0-9]+(?:/[0-9]+)*|\\?)";
-  S terminal = "(" + mono + ")([ab?])-$";
+  });
+  const S &residue = v.cached("short-residue", [&] {
+    return "(" + mono + ")([ab?])-?([0-9]+(?:/[0-9]+)*|\\?)";
+  });
+  const S &terminal =
+      v.cached("short-terminal", [&] { return "(" + mono + ")([ab?])-$"; });
   auto last = match(x, terminal);
   if (last.empty())
     fail("Invalid IUPAC-short terminal");
-  VS ts = tokens(x, residue + "|\\(|\\)");
+  const S &token_pattern =
+      v.cached("short-tokens", [&] { return residue + "|\\(|\\)"; });
+  VS ts = tokens(x, token_pattern);
   if (join(ts) + last[0] != x)
     fail("Invalid IUPAC-short tokens");
   S out;

@@ -14,7 +14,9 @@ static Record pglyco(const S &x) {
     if (c == '(') {
       ++n;
       if (!stack.empty())
-        r.edge(stack.back(), n, "?" "?-?");
+        r.edge(stack.back(), n,
+               "?"
+               "?-?");
       stack.push_back(n);
     } else if (c == ')') {
       if (stack.empty())
@@ -51,7 +53,9 @@ static void strucgp_node(const S &x, Record &r, int parent, int depth = 0) {
     fail("Unknown StrucGP residue");
   int id = r.add(m);
   if (parent)
-    r.edge(parent, id, "?" "?-?");
+    r.edge(parent, id,
+           "?"
+           "?-?");
   strucgp_node(x.size() > 3 ? x.substr(2, x.size() - 3) : "", r, id, depth + 1);
 }
 struct LinResidue {
@@ -117,7 +121,9 @@ static LinResidue lin_residue(S x, const Vocab &v) {
     subs.push_back("2N");
     x.erase(0, 1);
   }
-  S pat = "^([0-9]+|\\?)(" + alternatives(longest(v.subs)) + ")";
+  const S &pat = v.cached("linucs-subs", [&] {
+    return "^([0-9]+|\\?)(" + alternatives(longest(v.subs)) + ")";
+  });
   while (!x.empty()) {
     m = match(x, pat);
     if (m.empty())
@@ -200,7 +206,7 @@ static KNode knode(const S &x, const Vocab &v) {
     cand.push_back(x.substr(1));
   for (size_t i = 0; i < cand.size(); ++i) {
     S m;
-    for (auto &n : longest(v.monos))
+    for (auto &n : v.sorted_monos())
       if (starts(cand[i], n)) {
         m = n;
         break;

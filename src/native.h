@@ -145,6 +145,20 @@ struct WResidue {
 };
 struct Vocab {
   mutable std::map<S, WResidue> wurcs_cache;
+  mutable std::map<S, S> patterns;
+  mutable VS ordered_monos;
+  // Vocabulary-derived patterns are shared by every string in this batch.
+  template <class Builder> const S &cached(const S &key, Builder build) const {
+    auto found = patterns.find(key);
+    if (found == patterns.end())
+      found = patterns.emplace(key, build()).first;
+    return found->second;
+  }
+  const VS &sorted_monos() const {
+    if (ordered_monos.empty())
+      ordered_monos = longest(monos);
+    return ordered_monos;
+  }
   std::map<S, S> source_anomers;
   VS monos, subs;
   std::map<S, S> anomers, furanose, unusual;
