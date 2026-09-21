@@ -1,0 +1,15 @@
+"parser","positions","valid","keys","graphs"
+"auto_parse",31,29,TRUE,TRUE
+"parse_iupac_condensed",230,225,TRUE,TRUE
+"parse_iupac_short",169,166,TRUE,TRUE
+"parse_iupac_extended",187,185,TRUE,TRUE
+"parse_pglyco_struc",12,9,TRUE,TRUE
+"parse_strucgp_struc",8,5,TRUE,TRUE
+"parse_linear_code",37,34,TRUE,TRUE
+"parse_linucs",160,155,TRUE,TRUE
+"parse_glycam_iupac",245,242,TRUE,TRUE
+"parse_iupac_compact",165,162,TRUE,TRUE
+"parse_kcf",291,286,TRUE,TRUE
+"parse_wurcs",48,45,TRUE,TRUE
+"parse_glycoct",319,316,TRUE,TRUE
+"parse_gwb",29,21,TRUE,TRUE
