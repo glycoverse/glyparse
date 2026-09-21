@@ -46,9 +46,3 @@ parse_iupac_condensed <- function(
     progress = progress
   )
 }
-
-do_parse_iupac_condensed <- function(x) {
-  struc <- glyrepr::as_glycan_structure(x)
-  graph <- glyrepr::get_structure_graphs(struc)
-  graph
-}

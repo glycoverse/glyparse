@@ -42,11 +42,6 @@ parse_iupac_short <- function(
 }
 
 
-do_parse_iupac_short <- function(x) {
-  do_parse_iupac_condensed(convert_short_to_condensed(x))
-}
-
-
 convert_short_to_condensed <- function(x) {
   # The pattern for monosaccharide matching is constructed by concatenating
   # all monosaccharides with "|". This is because in the IUPAC-short format,

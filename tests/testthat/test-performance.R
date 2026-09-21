@@ -17,15 +17,14 @@ test_that("struc_parser_wrapper parses each unique non-NA input once", {
   parser_calls <- character()
   parser <- function(x) {
     parser_calls <<- c(parser_calls, x)
-    graph <- igraph::make_empty_graph(n = 2, directed = TRUE)
-    igraph::V(graph)$name <- c("1", "2")
-    igraph::V(graph)$mono <- c("Hex", "Hex")
-    igraph::V(graph)$sub <- c("", "")
-    graph <- igraph::add_edges(graph, c("2", "1"))
-    igraph::E(graph)$linkage <- "a1-4"
-    graph$anomer <- "a1"
-    graph$alditol <- FALSE
-    graph
+    list(
+      mono = c("Hex", "Hex"),
+      sub = c("", ""),
+      edges = c(2L, 1L),
+      linkage = "a1-4",
+      anomer = "a1",
+      alditol = FALSE
+    )
   }
 
   input <- c("A", "B", NA, "A", "C", "B")
@@ -36,60 +35,42 @@ test_that("struc_parser_wrapper parses each unique non-NA input once", {
   expect_equal(parser_calls, c("A", "B", "C"))
 })
 
-test_that("struc_parser_wrapper checks each unique non-NA graph once", {
-  validation_calls <- 0L
-  canonicalization_calls <- 0L
-  original_validate <- glyrepr::validate_glycan_graph
-  original_canonicalize <- glyrepr::canonicalize_glycan_graph
-  testthat::local_mocked_bindings(
-    validate_glycan_graph = function(graph) {
-      validation_calls <<- validation_calls + 1L
-      original_validate(graph)
+test_that("array parsers batch unique records without graph canonicalization", {
+  batches <- list()
+  original <- glyrepr::structure_from_arrays
+  local_mocked_bindings(
+    structure_from_arrays = function(x, ...) {
+      batches[[length(batches) + 1L]] <<- x
+      original(x, ...)
     },
-    canonicalize_glycan_graph = function(graph) {
-      canonicalization_calls <<- canonicalization_calls + 1L
-      original_canonicalize(graph)
-    },
+    canonicalize_glycan_graphs = function(...) stop("Unexpected graph path"),
+    canonicalize_glycan_graph = function(...) stop("Unexpected graph path"),
     .package = "glyrepr"
   )
 
-  input <- c("(N)", "(H)", NA, "(N)", "(H)", "(N)")
-
+  input <- c(first = "(N)", second = "(H)", missing = NA, duplicate = "(N)")
   result <- parse_pglyco_struc(input)
 
+  expect_length(batches, 1L)
+  expect_length(batches[[1]], 2L)
+  expect_identical(names(result), names(input))
   expect_identical(
-    as.character(result),
-    c("HexNAc(??-", "Hex(??-", NA, "HexNAc(??-", "Hex(??-", "HexNAc(??-")
+    unname(as.character(result)),
+    c("HexNAc(??-", "Hex(??-", NA, "HexNAc(??-")
   )
-  expect_equal(validation_calls, 2L)
-  expect_equal(canonicalization_calls, 2L)
   expect_length(attr(result, "graphs"), 2L)
 })
 
-test_that("struc_parser_wrapper skips validation but canonicalizes trusted graphs", {
-  validation_calls <- 0L
-  canonicalization_calls <- 0L
-  original_canonicalize <- glyrepr::canonicalize_glycan_graph
-  testthat::local_mocked_bindings(
-    validate_glycan_graph = function(graph) {
-      validation_calls <<- validation_calls + 1L
-      graph
-    },
-    canonicalize_glycan_graph = function(graph) {
-      canonicalization_calls <<- canonicalization_calls + 1L
-      original_canonicalize(graph)
-    },
+test_that("validate compatibility flag retains the array backend", {
+  local_mocked_bindings(
+    canonicalize_glycan_graphs = function(...) stop("Unexpected graph path"),
     .package = "glyrepr"
   )
-
-  result <- parse_pglyco_struc(c("(N)", "(H)", "(N)"), validate = FALSE)
-
-  expect_identical(
-    as.character(result),
-    c("HexNAc(??-", "Hex(??-", "HexNAc(??-")
+  input <- c("(N)", "(H)", "(N)", NA_character_)
+  expect_equal(
+    as.character(parse_pglyco_struc(input, validate = FALSE)),
+    as.character(parse_pglyco_struc(input))
   )
-  expect_equal(validation_calls, 0L)
-  expect_equal(canonicalization_calls, 2L)
 })
 
 test_that("graph parsers expose validate", {
@@ -148,13 +129,13 @@ test_that("struc_parser_wrapper avoids high-level structure constructors", {
 
 test_that("struc_parser_wrapper deduplicates equivalent parsed graphs", {
   parser <- function(x) {
-    graph <- igraph::make_empty_graph(n = 1, directed = TRUE)
-    igraph::V(graph)$name <- "1"
-    igraph::V(graph)$mono <- "Hex"
-    igraph::V(graph)$sub <- ""
-    igraph::E(graph)$linkage <- character()
-    graph$anomer <- "??"
-    graph
+    list(
+      mono = "Hex",
+      sub = "",
+      edges = integer(),
+      linkage = character(),
+      anomer = "??"
+    )
   }
 
   result <- struc_parser_wrapper(c("first", "second"), parser)

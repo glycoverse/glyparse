@@ -7,8 +7,8 @@
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
 #'   structure cannot be parsed. `"na"` returns `NA` at invalid positions.
 #' @param progress Whether to show a progress bar while parsing.
-#' @param validate Whether to validate parsed glycan graphs before constructing
-#'   the result.
+#' @param validate Retained for compatibility. Array records are always validated
+#'   by [glyrepr::structure_from_arrays()], including when `FALSE`.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
@@ -25,7 +25,7 @@ parse_pglyco_struc <- function(
 ) {
   struc_parser_wrapper(
     x,
-    do_parse_pglyco_struc,
+    parse_pglyco_struc_arrays,
     on_failure = on_failure,
     progress = progress,
     validate = validate
@@ -34,14 +34,9 @@ parse_pglyco_struc <- function(
 
 
 # Parsing logic of `parse_pglyco_struc()`
-do_parse_pglyco_struc <- function(x) {
+parse_pglyco_struc_arrays <- function(x) {
   monos <- stringr::str_split_1(x, "[//(, \\)]")
   monos <- monos[monos != ""]
-  g <- igraph::make_empty_graph(n = length(monos), directed = TRUE)
-  igraph::V(g)$name <- seq_along(monos)
-  igraph::V(g)$mono <- monos
-  igraph::V(g)$sub <- ""
-
   parentheses <- stringr::str_split_1(
     stringr::str_replace_all(x, "[^()]", ""),
     ""
@@ -64,10 +59,6 @@ do_parse_pglyco_struc <- function(x) {
       node_stack <- rstackdeque::without_top(node_stack)
     }
   }
-  if (length(edges) > 0L) {
-    g <- igraph::add_edges(g, edges)
-  }
-
   # Map pGlyco monosaccharide codes to standard names
   mono_map <- c(
     "H" = "Hex",
@@ -78,15 +69,12 @@ do_parse_pglyco_struc <- function(x) {
     "aH" = "HexN",
     "pH" = "Hex"
   )
-  igraph::V(g)$sub <- dplyr::if_else(igraph::V(g)$mono == "pH", "?P", "")
-  igraph::V(g)$mono <- dplyr::recode(
-    igraph::V(g)$mono,
-    !!!mono_map,
-    .default = igraph::V(g)$mono
+  list(
+    mono = unname(dplyr::recode(monos, !!!mono_map, .default = monos)),
+    sub = ifelse(monos == "pH", "?P", ""),
+    edges = edges,
+    linkage = rep("??-?", length(edges) / 2L),
+    anomer = "??",
+    alditol = FALSE
   )
-
-  igraph::E(g)$linkage <- "??-?"
-  g$anomer <- "??"
-  g$alditol <- FALSE
-  g
 }

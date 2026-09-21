@@ -16,8 +16,8 @@
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
 #'   structure cannot be parsed. `"na"` returns `NA` at invalid positions.
 #' @param progress Whether to show a progress bar while parsing.
-#' @param validate Whether to validate parsed glycan graphs before constructing
-#'   the result.
+#' @param validate Retained for compatibility. Array records are always validated
+#'   by [glyrepr::structure_from_arrays()], including when `FALSE`.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
@@ -41,7 +41,7 @@ parse_wurcs <- function(
     if (is.null(residue_cache)) {
       residue_cache <<- build_wurcs_residue_cache(x)
     }
-    do_parse_wurcs(value, residue_cache = residue_cache)
+    parse_wurcs_arrays(value, residue_cache = residue_cache)
   }
 
   struc_parser_wrapper(
@@ -1174,16 +1174,18 @@ prepare_graph_dfs <- function(
 }
 
 
-build_glycan_graph <- function(
+build_wurcs_arrays <- function(
   edgelist_df,
   vertex_df,
   floating = list(),
   floating_substituents = list()
 ) {
   # For format of input values, see `prepare_graph_dfs`.
-  graph <- igraph::graph_from_data_frame(
-    edgelist_df,
-    vertices = vertex_df[c("name", "mono", "sub")]
+  graph <- list(
+    mono = vertex_df$mono,
+    sub = vertex_df$sub,
+    edges = as.integer(rbind(edgelist_df$from, edgelist_df$to)),
+    linkage = edgelist_df$linkage
   )
   if (length(floating) > 0) {
     graph <- annotate_wurcs_floating_parts(graph, vertex_df, floating)
@@ -1211,10 +1213,7 @@ build_glycan_graph <- function(
 #' @noRd
 find_wurcs_core_node <- function(graph, floating = list()) {
   floating_roots <- purrr::map_int(floating, "root")
-  as.integer(igraph::V(graph)[
-    igraph::degree(graph, mode = "in") == 0 &
-      !seq_len(igraph::vcount(graph)) %in% floating_roots
-  ])
+  setdiff(array_roots(graph), floating_roots)
 }
 
 
@@ -1222,7 +1221,7 @@ annotate_wurcs_floating_substituents <- function(
   graph,
   substituents
 ) {
-  all_vertices <- seq_len(igraph::vcount(graph))
+  all_vertices <- seq_along(graph$mono)
   occupied_slots <- definitely_occupied_carbon_slots(
     graph,
     all_vertices
@@ -1252,13 +1251,13 @@ annotate_wurcs_floating_substituents <- function(
 
 
 annotate_wurcs_floating_parts <- function(graph, vertex_df, floating) {
-  components <- igraph::components(graph, mode = "weak")$membership
+  components <- array_components(graph)
   floating_components <- components[purrr::map_int(floating, "root")]
   floating_nodes <- purrr::map(
     floating_components,
     ~ as.integer(which(components == .x))
   )
-  all_vertices <- seq_len(igraph::vcount(graph))
+  all_vertices <- seq_along(graph$mono)
   occupied_slots <- definitely_occupied_acceptor_slots(
     graph,
     all_vertices
@@ -1302,7 +1301,7 @@ annotate_wurcs_floating_parts <- function(graph, vertex_df, floating) {
 }
 
 
-do_parse_wurcs <- function(x, residue_cache = NULL) {
+parse_wurcs_arrays <- function(x, residue_cache = NULL) {
   wurcs_regex <- stringr::regex(
     "
     ^WURCS=2\\.0         # WURCS version
@@ -1356,7 +1355,7 @@ do_parse_wurcs <- function(x, residue_cache = NULL) {
   }
 
   graph_dfs <- prepare_graph_dfs(residues, linkages, alditols = alditols)
-  graph <- build_glycan_graph(
+  graph <- build_wurcs_arrays(
     graph_dfs$edgelist,
     graph_dfs$vertex,
     floating = floating,

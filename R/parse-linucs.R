@@ -17,8 +17,8 @@
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
 #'   structure cannot be parsed. `"na"` returns `NA` at invalid positions.
 #' @param progress Whether to show a progress bar while parsing.
-#' @param validate Whether to validate parsed glycan graphs before constructing
-#'   the result.
+#' @param validate Retained for compatibility. Array records are always validated
+#'   by [glyrepr::structure_from_arrays()], including when `FALSE`.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
@@ -35,7 +35,7 @@ parse_linucs <- function(
 ) {
   struc_parser_wrapper(
     x,
-    do_parse_linucs,
+    parse_linucs_arrays,
     on_failure = on_failure,
     progress = progress,
     validate = validate
@@ -47,11 +47,11 @@ parse_linucs <- function(
 #'
 #' @param x A single LINUCS string.
 #'
-#' @return A glycan graph.
+#' @return A structure array record.
 #' @noRd
-do_parse_linucs <- function(x) {
+parse_linucs_arrays <- function(x) {
   record <- parse_linucs_record(x)
-  build_linucs_graph(record)
+  build_linucs_arrays(record)
 }
 
 
@@ -526,9 +526,9 @@ map_linucs_substituent_token <- function(x) {
 #'
 #' @param root A parsed LINUCS root node.
 #'
-#' @return An igraph glycan graph.
+#' @return A structure array record.
 #' @noRd
-build_linucs_graph <- function(root) {
+build_linucs_arrays <- function(root) {
   state <- new.env(parent = emptyenv())
   state$vertices <- list()
   state$edges <- list()
@@ -550,10 +550,14 @@ build_linucs_graph <- function(root) {
     purrr::list_rbind(purrr::map(state$edges, data.frame))
   }
 
-  graph <- igraph::graph_from_data_frame(edge_df, vertices = vertex_df)
-  graph$anomer <- root$residue$anomer
-  graph$alditol <- isTRUE(root$residue$alditol)
-  graph
+  list(
+    mono = vertex_df$mono,
+    sub = vertex_df$sub,
+    edges = as.integer(rbind(edge_df$from, edge_df$to)),
+    linkage = edge_df$linkage,
+    anomer = root$residue$anomer,
+    alditol = isTRUE(root$residue$alditol)
+  )
 }
 
 

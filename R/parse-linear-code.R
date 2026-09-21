@@ -28,9 +28,6 @@ parse_linear_code <- function(
   )
 }
 
-do_parse_linear_code <- function(x) {
-  do_parse_iupac_condensed(convert_linear_to_iupac(x))
-}
 
 convert_linear_to_iupac <- function(x) {
   # Mono mapping from IUPAC to Linear Code

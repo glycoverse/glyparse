@@ -12,13 +12,13 @@ test_that("A2B2C1D1E1F1fedD1E1F1feE1F1fedcba", {
 })
 
 
-test_that("StrucGP graph assembly preserves branched topology", {
-  graph <- do_parse_strucgp_struc(
+test_that("StrucGP array assembly preserves branched topology", {
+  graph <- parse_strucgp_struc_arrays(
     "A2B2C1D1E2F1fedD1E2edcbB5ba"
   )
 
   expect_identical(
-    igraph::as_edgelist(graph, names = TRUE),
+    matrix(as.character(graph$edges), ncol = 2, byrow = TRUE),
     matrix(
       c(
         "1",
@@ -43,7 +43,7 @@ test_that("StrucGP graph assembly preserves branched topology", {
     )
   )
   expect_identical(
-    igraph::vertex_attr(graph, "mono"),
+    graph$mono,
     c(
       "HexNAc",
       "HexNAc",
@@ -57,7 +57,7 @@ test_that("StrucGP graph assembly preserves branched topology", {
     )
   )
   expect_identical(
-    igraph::edge_attr(graph, "linkage"),
+    graph$linkage,
     rep("??-?", 8)
   )
 })

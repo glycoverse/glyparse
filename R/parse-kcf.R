@@ -7,8 +7,8 @@
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
 #'   structure cannot be parsed. `"na"` returns `NA` at invalid positions.
 #' @param progress Whether to show a progress bar while parsing.
-#' @param validate Whether to validate parsed glycan graphs before constructing
-#'   the result.
+#' @param validate Retained for compatibility. Array records are always validated
+#'   by [glyrepr::structure_from_arrays()], including when `FALSE`.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
@@ -41,22 +41,22 @@ parse_kcf <- function(
 ) {
   struc_parser_wrapper(
     x,
-    do_parse_kcf,
+    parse_kcf_arrays,
     on_failure = on_failure,
     progress = progress,
     validate = validate
   )
 }
 
-#' Parse one KCF string into an igraph glycan graph
+#' Parse one KCF string into a structure array record
 #'
 #' @param x A single KCF string.
 #'
-#' @return An igraph glycan graph.
+#' @return A structure array record.
 #' @noRd
-do_parse_kcf <- function(x) {
+parse_kcf_arrays <- function(x) {
   record <- parse_kcf_record(x)
-  build_kcf_graph(record$nodes, record$edges)
+  build_kcf_arrays(record$nodes, record$edges)
 }
 
 #' Parse KCF NODE and EDGE sections
@@ -209,9 +209,9 @@ parse_kcf_endpoint <- function(endpoint) {
 #' @param nodes A named list of parsed KCF nodes.
 #' @param edges A list of parsed KCF edges.
 #'
-#' @return An igraph glycan graph.
+#' @return A structure array record.
 #' @noRd
-build_kcf_graph <- function(nodes, edges) {
+build_kcf_arrays <- function(nodes, edges) {
   unknown_nodes <- nodes[purrr::map_chr(nodes, "kind") == "unknown"]
   if (length(unknown_nodes) > 0) {
     unknown_labels <- purrr::map_chr(unknown_nodes, "label")
@@ -254,7 +254,7 @@ build_kcf_graph <- function(nodes, edges) {
     )
   })
 
-  graph <- make_kcf_igraph(vertices, glycan_edges)
+  graph <- make_kcf_arrays(vertices, glycan_edges)
   reducing_end <- find_reducing_end(vertices, glycan_edges)
   root_id <- as.character(reducing_end$original_id)
   graph$anomer <- root_anomers[[root_id]]
@@ -344,15 +344,14 @@ classify_kcf_edge <- function(edge, nodes) {
   NULL
 }
 
-#' Build the final igraph object for KCF parsing
+#' Build residue and edge arrays for KCF parsing
 #'
 #' @param vertices A list of parsed mono vertices.
 #' @param glycan_edges A list of parsed glycosidic edges.
 #'
-#' @return An igraph glycan graph without graph-level anomer set.
+#' @return A structure array record without its reducing-end anomer.
 #' @noRd
-make_kcf_igraph <- function(vertices, glycan_edges) {
-  vertex_names <- seq_along(vertices)
+make_kcf_arrays <- function(vertices, glycan_edges) {
   edge_indices <- integer(0)
   linkage_values <- character(0)
 
@@ -366,23 +365,12 @@ make_kcf_igraph <- function(vertices, glycan_edges) {
     }
   }
 
-  if (length(edge_indices) == 0) {
-    graph <- igraph::make_empty_graph(n = length(vertices), directed = TRUE)
-    graph <- igraph::set_edge_attr(graph, "linkage", value = character(0))
-  } else {
-    graph <- igraph::make_graph(
-      edge_indices,
-      n = length(vertices),
-      directed = TRUE
-    )
-    igraph::E(graph)$linkage <- linkage_values
-  }
-
-  igraph::V(graph)$name <- as.character(vertex_names)
-  igraph::V(graph)$mono <- purrr::map_chr(vertices, "mono")
-  igraph::V(graph)$sub <- purrr::map_chr(vertices, "sub")
-
-  graph
+  list(
+    mono = unname(purrr::map_chr(vertices, "mono")),
+    sub = unname(purrr::map_chr(vertices, "sub")),
+    edges = as.integer(edge_indices),
+    linkage = linkage_values
+  )
 }
 
 #' Parse a KCF monosaccharide label

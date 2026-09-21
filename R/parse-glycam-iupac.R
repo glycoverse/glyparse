@@ -44,17 +44,6 @@ parse_glycam_iupac <- function(
 }
 
 
-#' Parse one GlyCAM IUPAC string
-#'
-#' @param x A single GlyCAM IUPAC string.
-#'
-#' @return A glycan graph.
-#' @noRd
-do_parse_glycam_iupac <- function(x) {
-  do_parse_iupac_condensed(convert_glycam_iupac_to_condensed(x))
-}
-
-
 #' Convert GlyCAM IUPAC to IUPAC-condensed notation
 #'
 #' @param x A character vector of GlyCAM IUPAC strings.

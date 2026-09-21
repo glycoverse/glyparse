@@ -48,17 +48,6 @@ parse_gwb <- function(
 }
 
 
-#' Parse one GlycoWorkbench string
-#'
-#' @param x A single GlycoWorkbench string.
-#'
-#' @return A glycan graph.
-#' @noRd
-do_parse_gwb <- function(x) {
-  do_parse_iupac_condensed(convert_gwb_to_condensed(x))
-}
-
-
 #' Convert GlycoWorkbench strings to IUPAC-condensed notation
 #'
 #' @param x A character vector of GlycoWorkbench strings.

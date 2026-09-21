@@ -7,8 +7,8 @@
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
 #'   structure cannot be parsed. `"na"` returns `NA` at invalid positions.
 #' @param progress Whether to show a progress bar while parsing.
-#' @param validate Whether to validate parsed glycan graphs before constructing
-#'   the result.
+#' @param validate Retained for compatibility. Array records are always validated
+#'   by [glyrepr::structure_from_arrays()], including when `FALSE`.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
@@ -25,7 +25,7 @@ parse_strucgp_struc <- function(
 ) {
   struc_parser_wrapper(
     x,
-    do_parse_strucgp_struc,
+    parse_strucgp_struc_arrays,
     on_failure = on_failure,
     progress = progress,
     validate = validate
@@ -34,7 +34,7 @@ parse_strucgp_struc <- function(
 
 
 # Parsing logic of `parse_strucgp_struc()`
-do_parse_strucgp_struc <- function(x) {
+parse_strucgp_struc_arrays <- function(x) {
   node_capacity <- stringr::str_count(x, "[A-Z]")
   state <- new.env(parent = emptyenv())
   state$count <- 0L
@@ -42,11 +42,10 @@ do_parse_strucgp_struc <- function(x) {
   state$parents <- integer(node_capacity)
   recur_parse_strucgp(x, state, 0L)
 
-  graph <- igraph::make_empty_graph(n = state$count, directed = TRUE)
+  edges <- integer()
   if (state$count > 1L) {
     child <- seq.int(2L, state$count)
     edges <- as.vector(rbind(state$parents[child], child))
-    graph <- igraph::add_edges(graph, edges)
   }
 
   mono_map <- c(
@@ -56,13 +55,14 @@ do_parse_strucgp_struc <- function(x) {
     "4" = "NeuGc",
     "5" = "dHex"
   )
-  igraph::V(graph)$name <- as.character(seq_len(state$count))
-  igraph::V(graph)$mono <- mono_map[state$monos[seq_len(state$count)]]
-  igraph::V(graph)$sub <- ""
-  igraph::E(graph)$linkage <- "??-?"
-  graph$anomer <- "??"
-  graph$alditol <- FALSE
-  graph
+  list(
+    mono = unname(mono_map[state$monos[seq_len(state$count)]]),
+    sub = rep("", state$count),
+    edges = edges,
+    linkage = rep("??-?", length(edges) / 2L),
+    anomer = "??",
+    alditol = FALSE
+  )
 }
 
 

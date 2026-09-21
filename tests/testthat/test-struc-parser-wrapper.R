@@ -19,20 +19,15 @@ test_that("struc_parser_wrapper returns glyrepr-compatible vectors", {
   )
 })
 
-test_that("struc_parser_wrapper treats invalid parsed graphs as failures", {
+test_that("struc_parser_wrapper treats invalid parsed arrays as failures", {
   parser <- function(x) {
-    graph <- igraph::make_empty_graph(n = 1, directed = TRUE)
-    igraph::V(graph)$name <- "1"
-    igraph::V(graph)$mono <- "Hex"
-    igraph::V(graph)$sub <- ""
-    igraph::E(graph)$linkage <- character()
-    graph$anomer <- "??"
-
-    if (x == "invalid") {
-      graph <- igraph::as_undirected(graph)
-    }
-
-    graph
+    list(
+      mono = "Hex",
+      sub = "",
+      anomer = "??",
+      edges = if (x == "invalid") c(1L, 1L) else integer(),
+      linkage = if (x == "invalid") "??-?" else character()
+    )
   }
 
   result <- struc_parser_wrapper(
@@ -53,7 +48,7 @@ test_that("struc_parser_wrapper preserves mixed monosaccharide types", {
     missing = NA_character_
   )
 
-  result <- struc_parser_wrapper(input, do_parse_iupac_condensed)
+  result <- normalized_struc_parser_wrapper(input)
 
   expect_identical(
     as.character(result),

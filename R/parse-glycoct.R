@@ -19,8 +19,8 @@
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
 #'   structure cannot be parsed. `"na"` returns `NA` at invalid positions.
 #' @param progress Whether to show a progress bar while parsing.
-#' @param validate Whether to validate parsed glycan graphs before constructing
-#'   the result.
+#' @param validate Retained for compatibility. Array records are always validated
+#'   by [glyrepr::structure_from_arrays()], including when `FALSE`.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
@@ -52,26 +52,26 @@ parse_glycoct <- function(
   )
   struc_parser_wrapper(
     x,
-    do_parse_glycoct,
+    parse_glycoct_arrays,
     on_failure = on_failure,
     progress = progress,
     validate = validate
   )
 }
 
-do_parse_glycoct <- function(x) {
+parse_glycoct_arrays <- function(x) {
   lines <- split_glycoct_lines(x)
   blocks <- split_glycoct_blocks(lines)
 
   main <- parse_glycoct_block(blocks$main)
   floating <- purrr::map(blocks$floating, parse_glycoct_und_block)
-  main_graph <- build_glycoct_graph_data(main$residues, main$linkages)
+  main_data <- build_glycoct_array_data(main$residues, main$linkages)
   main_alditol_count <- sum(purrr::map_lgl(
-    main_graph$vertices,
+    main_data$vertices,
     ~ isTRUE(.x$is_alditol)
   ))
   has_unrepresented_main_alditol <- main_alditol_count >
-    as.integer(isTRUE(main_graph$graph$alditol))
+    as.integer(isTRUE(main_data$record$alditol))
   has_floating_alditol <- any(purrr::map_lgl(
     floating,
     ~ has_glycoct_alditol_residue(.x$residues)
@@ -81,7 +81,7 @@ do_parse_glycoct <- function(x) {
   }
 
   if (length(blocks$floating) == 0) {
-    return(main_graph$graph)
+    return(main_data$record)
   }
 
   floating_substituents <- purrr::keep(
@@ -92,14 +92,14 @@ do_parse_glycoct <- function(x) {
     floating,
     is_glycoct_floating_substituent
   )
-  floating_graphs <- purrr::map(
+  floating_data <- purrr::map(
     floating,
-    ~ build_glycoct_graph_data(.x$residues, .x$linkages)
+    ~ build_glycoct_array_data(.x$residues, .x$linkages)
   )
 
-  build_glycoct_floating_graph(
-    main_graph,
-    floating_graphs,
+  build_glycoct_floating_arrays(
+    main_data,
+    floating_data,
     floating,
     floating_substituents
   )
@@ -475,11 +475,7 @@ parse_lin_section <- function(lin_lines) {
   linkages
 }
 
-build_glycoct_graph <- function(residues, linkages) {
-  build_glycoct_graph_data(residues, linkages)$graph
-}
-
-build_glycoct_graph_data <- function(residues, linkages) {
+build_glycoct_array_data <- function(residues, linkages) {
   mono_mapping_index <- glycoct_mapping_index()
 
   # Consolidate monosaccharides with their substituents
@@ -490,13 +486,10 @@ build_glycoct_graph_data <- function(residues, linkages) {
   )
   consolidated <- normalize_glycoct_man_alditol_orientation(consolidated)
 
-  # Build igraph
+  # Assemble residue and edge arrays
   if (length(consolidated$vertices) == 0) {
     cli::cli_abort("No monosaccharides found in GlycoCT string")
   }
-
-  # Create vertex names
-  vertex_names <- seq_along(consolidated$vertices)
 
   # Create edges
   edges <- c()
@@ -525,28 +518,20 @@ build_glycoct_graph_data <- function(residues, linkages) {
     }
   }
 
-  # Create igraph
-  if (length(edges) == 0) {
-    # Single monosaccharide
-    g <- igraph::make_empty_graph(
-      n = length(consolidated$vertices),
-      directed = TRUE
-    )
-    # Add empty linkage attribute for validation
-    g <- igraph::set_edge_attr(g, "linkage", value = character(0))
-  } else {
-    g <- igraph::make_graph(
-      edges,
-      n = length(consolidated$vertices),
-      directed = TRUE
-    )
-    igraph::E(g)$linkage <- edge_attrs$linkage
-  }
-
-  # Set vertex attributes
-  igraph::V(g)$name <- as.character(vertex_names)
-  igraph::V(g)$mono <- sapply(consolidated$vertices, function(v) v$mono)
-  igraph::V(g)$sub <- sapply(consolidated$vertices, function(v) v$sub)
+  g <- list(
+    mono = unname(vapply(
+      consolidated$vertices,
+      function(v) v$mono,
+      character(1)
+    )),
+    sub = unname(vapply(
+      consolidated$vertices,
+      function(v) v$sub,
+      character(1)
+    )),
+    edges = as.integer(edges),
+    linkage = edge_attrs$linkage
+  )
 
   # Set graph attributes (reducing end properties)
   reducing_end <- find_reducing_end(consolidated$vertices, consolidated$edges)
@@ -558,7 +543,7 @@ build_glycoct_graph_data <- function(residues, linkages) {
   g$alditol <- !is.null(reducing_end) && isTRUE(reducing_end$is_alditol)
 
   list(
-    graph = g,
+    record = g,
     original_ids = purrr::map_int(
       consolidated$vertices,
       "original_id"
@@ -591,89 +576,62 @@ format_glycoct_linkage <- function(parent_pos, child_pos, child_anomer) {
 #' Combine a main GlycoCT tree with parsed UND subtree graphs
 #'
 #' @param main Main-tree graph data.
-#' @param floating_graphs Graph data for each floating subtree.
+#' @param floating_data Graph data for each floating subtree.
 #' @param floating Parsed UND metadata.
 #' @param floating_substituents Parsed substituent-only UND metadata.
 #'
 #' @return An annotated glycan forest understood by `glyrepr`.
 #' @noRd
-build_glycoct_floating_graph <- function(
+build_glycoct_floating_arrays <- function(
   main,
-  floating_graphs,
+  floating_data,
   floating,
   floating_substituents = list()
 ) {
-  graph_data <- c(list(main), floating_graphs)
-  sizes <- purrr::map_int(graph_data, ~ igraph::vcount(.x$graph))
+  array_data <- c(list(main), floating_data)
+  sizes <- purrr::map_int(array_data, ~ length(.x$record$mono))
   offsets <- c(0L, utils::head(cumsum(sizes), -1L))
 
-  forest <- igraph::make_empty_graph(sum(sizes), directed = TRUE)
-  edge_endpoints <- purrr::map2(
-    graph_data,
-    offsets,
-    function(data, offset) {
-      endpoints <- igraph::as_edgelist(data$graph, names = FALSE)
-      if (length(endpoints) == 0) {
-        return(integer())
-      }
-      as.integer(t(endpoints + offset))
-    }
-  )
-  edge_endpoints <- unlist(edge_endpoints, use.names = FALSE)
-  edge_linkages <- unlist(
-    purrr::map(
-      graph_data,
-      ~ igraph::edge_attr(.x$graph, "linkage")
-    ),
-    use.names = FALSE
-  )
-  if (length(edge_endpoints) > 0) {
-    forest <- igraph::add_edges(
-      forest,
-      edge_endpoints,
-      linkage = edge_linkages
+  forest <- list(
+    mono = unlist(purrr::map(array_data, ~ .x$record$mono), use.names = FALSE),
+    sub = unlist(purrr::map(array_data, ~ .x$record$sub), use.names = FALSE),
+    edges = as.integer(unlist(
+      purrr::map2(
+        array_data,
+        offsets,
+        ~ .x$record$edges + .y
+      ),
+      use.names = FALSE
+    )),
+    linkage = unlist(
+      purrr::map(array_data, ~ .x$record$linkage),
+      use.names = FALSE
     )
-  } else {
-    forest <- igraph::set_edge_attr(
-      forest,
-      "linkage",
-      value = character()
-    )
-  }
-
-  igraph::V(forest)$name <- as.character(seq_len(sum(sizes)))
-  igraph::V(forest)$mono <- unlist(
-    purrr::map(graph_data, ~ igraph::V(.x$graph)$mono),
-    use.names = FALSE
   )
-  igraph::V(forest)$sub <- unlist(
-    purrr::map(graph_data, ~ igraph::V(.x$graph)$sub),
-    use.names = FALSE
-  )
-  forest$anomer <- main$graph$anomer
-  forest$alditol <- isTRUE(main$graph$alditol)
-  all_vertices <- seq_len(igraph::vcount(forest))
+  forest$anomer <- main$record$anomer
+  forest$alditol <- isTRUE(main$record$alditol)
+  all_vertices <- seq_along(forest$mono)
 
   main_parent_indices <- stats::setNames(
     seq_along(main$original_ids),
     main$original_ids
   )
   occupied_slots <- definitely_occupied_acceptor_slots(
-    main$graph,
+    main$record,
     seq_along(main$original_ids)
   )
   occupied_carbon_slots <- definitely_occupied_carbon_slots(
-    main$graph,
+    main$record,
     seq_along(main$original_ids)
   )
-  if (length(floating_graphs) > 0L) {
+  if (length(floating_data) > 0L) {
     forest$floating_parts <- purrr::map2(
-      seq_along(floating_graphs),
+      seq_along(floating_data),
       floating,
       function(part_id, metadata) {
-        data <- floating_graphs[[part_id]]
+        data <- floating_data[[part_id]]
         offset <- offsets[[part_id + 1L]]
-        root <- which(igraph::degree(data$graph, mode = "in") == 0)
+        root <- array_roots(data$record)
         parents <- map_glycoct_und_parents(
           metadata$parent_ids,
           main_parent_indices
@@ -770,14 +728,14 @@ map_glycoct_und_parents <- function(parent_ids, main_parent_indices) {
 #' @noRd
 definitely_occupied_acceptor_slots <- function(
   graph,
-  vertices = seq_len(igraph::vcount(graph))
+  vertices = seq_along(graph$mono)
 ) {
-  if (igraph::ecount(graph) == 0) {
+  if (length(graph$edges) == 0) {
     return(character())
   }
 
-  endpoints <- igraph::as_edgelist(graph, names = FALSE)
-  linkages <- igraph::edge_attr(graph, "linkage")
+  endpoints <- matrix(graph$edges, ncol = 2L, byrow = TRUE)
+  linkages <- graph$linkage
   positions <- purrr::map(linkages, linkage_acceptor_positions)
   definite <- lengths(positions) == 1L &
     endpoints[, 1] %in% vertices &
@@ -814,13 +772,13 @@ linkage_acceptor_positions <- function(linkage) {
 #' @noRd
 definitely_occupied_carbon_slots <- function(
   graph,
-  vertices = seq_len(igraph::vcount(graph))
+  vertices = seq_along(graph$mono)
 ) {
   edge_slots <- definitely_occupied_acceptor_slots(graph, vertices)
   substituent_slots <- purrr::map(
     vertices,
     function(vertex) {
-      substituents <- igraph::vertex_attr(graph, "sub", index = vertex)
+      substituents <- graph$sub[[vertex]]
       if (identical(substituents, "")) {
         return(character())
       }

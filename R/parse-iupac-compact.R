@@ -41,17 +41,6 @@ parse_iupac_compact <- function(
 }
 
 
-#' Parse one IUPAC-compact string
-#'
-#' @param x A single IUPAC-compact string.
-#'
-#' @return A glycan graph.
-#' @noRd
-do_parse_iupac_compact <- function(x) {
-  do_parse_iupac_condensed(convert_iupac_compact_to_condensed(x))
-}
-
-
 #' Convert IUPAC-compact to IUPAC-condensed notation
 #'
 #' @param x A character vector of IUPAC-compact strings.

@@ -139,3 +139,41 @@ test_that("auto_parse works with mixed format vector", {
   )
   expect_equal(as.character(result), as.character(expected))
 })
+
+
+test_that("automatic parsing batches formats and restores mixed input positions", {
+  input <- c(
+    first = "(N)",
+    iupac = "Gal(b1-3)Glc(a1-",
+    missing = NA,
+    invalid = "WURCS-invalid",
+    duplicate = "(N)",
+    second = "(H)",
+    equivalent = "HexNAc(??-"
+  )
+  batches <- list()
+  original <- parse_pglyco_struc
+  local_mocked_bindings(parse_pglyco_struc = function(x, ...) {
+    batches[[length(batches) + 1L]] <<- x
+    original(x, ...)
+  })
+  result <- auto_parse(input, on_failure = "na")
+  expect_identical(batches, list(c("(N)", "(H)")))
+  expect_identical(names(result), names(input))
+  expect_identical(
+    unname(as.character(result)),
+    c(
+      "HexNAc(??-",
+      "Gal(b1-3)Glc(a1-",
+      NA,
+      NA,
+      "HexNAc(??-",
+      "Hex(??-",
+      "HexNAc(??-"
+    )
+  )
+  expect_length(attr(result, "graphs"), 3L)
+  error <- tryCatch(auto_parse(input), error = identity)
+  expect_s3_class(error, "rlang_error")
+  expect_match(conditionMessage(error), "WURCS-invalid", fixed = TRUE)
+})

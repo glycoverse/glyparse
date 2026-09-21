@@ -39,12 +39,6 @@ parse_iupac_extended <- function(
 }
 
 
-do_parse_iupac_extended <- function(x) {
-  x_normalized <- normalize_iupac_extended(x)
-  do_parse_iupac_condensed(convert_ext_to_con(x_normalized))
-}
-
-
 IUPAC_EXT_TO_CON <- local({
   monos <- glyrepr::available_monosaccharides(mono_type = "all")
   monos <- setdiff(monos, "Sia")
