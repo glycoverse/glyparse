@@ -16,8 +16,8 @@
   [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
   construct structures directly from residue and edge arrays using
   glyrepr \>= 1.0.0.9000, avoiding intermediate graphs. Array validation
-  is mandatory; the retained `validate` argument no longer skips
-  validation when `FALSE`.
+  is mandatory; the deprecated `validate` argument is ignored and warns
+  when supplied.
 
 - [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
   processes each detected format in a batch, preserving input order,

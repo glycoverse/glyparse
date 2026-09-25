@@ -69,7 +69,12 @@ and candidate parent residues across the complete structure.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">parse_wurcs</span><span class="op">(</span><span class="va">x</span>, on_failure <span class="op">=</span> <span class="st">"error"</span>, progress <span class="op">=</span> <span class="cn">FALSE</span>, validate <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">parse_wurcs</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  on_failure <span class="op">=</span> <span class="st">"error"</span>,</span>
+<span>  progress <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  validate <span class="op">=</span> <span class="fu">lifecycle</span><span class="fu">::</span><span class="fu"><a href="https://lifecycle.r-lib.org/reference/deprecated.html" class="external-link">deprecated</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -90,8 +95,8 @@ structure cannot be parsed. <code>"na"</code> returns <code>NA</code> at invalid
 
 
 <dt id="arg-validate">validate<a class="anchor" aria-label="anchor" href="#arg-validate"></a></dt>
-<dd><p>Retained for compatibility. Array records are always validated
-by <code><a href="https://glycoverse.github.io/glyrepr/reference/structure_from_arrays.html" class="external-link">glyrepr::structure_from_arrays()</a></code>, including when <code>FALSE</code>.</p></dd>
+<dd><p>Deprecated and ignored. Array records
+are always validated by <code><a href="https://glycoverse.github.io/glyrepr/reference/structure_from_arrays.html" class="external-link">glyrepr::structure_from_arrays()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

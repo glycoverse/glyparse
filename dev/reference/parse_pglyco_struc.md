@@ -7,7 +7,12 @@ See example below for the structure format.
 ## Usage
 
 ``` r
-parse_pglyco_struc(x, on_failure = "error", progress = FALSE, validate = TRUE)
+parse_pglyco_struc(
+  x,
+  on_failure = "error",
+  progress = FALSE,
+  validate = lifecycle::deprecated()
+)
 ```
 
 ## Arguments
@@ -28,9 +33,8 @@ parse_pglyco_struc(x, on_failure = "error", progress = FALSE, validate = TRUE)
 
 - validate:
 
-  Retained for compatibility. Array records are always validated by
-  [`glyrepr::structure_from_arrays()`](https://glycoverse.github.io/glyrepr/reference/structure_from_arrays.html),
-  including when `FALSE`.
+  Deprecated and ignored. Array records are always validated by
+  [`glyrepr::structure_from_arrays()`](https://glycoverse.github.io/glyrepr/reference/structure_from_arrays.html).
 
 ## Value
 
