@@ -188,7 +188,7 @@ struct KEnd {
   int id;
   S a, pos;
 };
-static KEnd kend(S x) {
+static KEnd kend(const S &x) {
   auto m = match(x, "^([0-9]+)(?::(.*))?$");
   if (m.empty())
     fail("Invalid KCF endpoint");

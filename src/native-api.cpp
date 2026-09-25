@@ -1,6 +1,6 @@
 #include "native.h"
 // [[Rcpp::export]]
-Rcpp::CharacterVector native_convert_cpp(Rcpp::CharacterVector x, std::string format,
+Rcpp::CharacterVector native_convert_cpp(Rcpp::CharacterVector x, const std::string &format,
                                          Rcpp::List vocabulary) {
   gp::Vocab v(vocabulary);
   Rcpp::CharacterVector out(x.size(), NA_STRING);
@@ -22,7 +22,7 @@ Rcpp::CharacterVector native_convert_cpp(Rcpp::CharacterVector x, std::string fo
   return out;
 }
 // [[Rcpp::export]]
-Rcpp::List native_records_cpp(Rcpp::CharacterVector x, std::string format,
+Rcpp::List native_records_cpp(Rcpp::CharacterVector x, const std::string &format,
                               Rcpp::List vocabulary) {
   gp::Vocab v(vocabulary);
   Rcpp::List out(x.size());
@@ -48,7 +48,7 @@ Rcpp::List native_records_cpp(Rcpp::CharacterVector x, std::string format,
   return out;
 }
 // [[Rcpp::export]]
-Rcpp::RObject native_aux_cpp(std::string op, Rcpp::List args, Rcpp::List vocabulary) {
+Rcpp::RObject native_aux_cpp(const std::string &op, Rcpp::List args, Rcpp::List vocabulary) {
   using namespace gp;
   Vocab v(vocabulary);
   if (starts(op, "wurcs_"))

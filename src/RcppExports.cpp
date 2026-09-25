@@ -11,38 +11,38 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // native_convert_cpp
-Rcpp::CharacterVector native_convert_cpp(Rcpp::CharacterVector x, std::string format, Rcpp::List vocabulary);
+Rcpp::CharacterVector native_convert_cpp(Rcpp::CharacterVector x, const std::string& format, Rcpp::List vocabulary);
 RcppExport SEXP _glyparse_native_convert_cpp(SEXP xSEXP, SEXP formatSEXP, SEXP vocabularySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< std::string >::type format(formatSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type format(formatSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type vocabulary(vocabularySEXP);
     rcpp_result_gen = Rcpp::wrap(native_convert_cpp(x, format, vocabulary));
     return rcpp_result_gen;
 END_RCPP
 }
 // native_records_cpp
-Rcpp::List native_records_cpp(Rcpp::CharacterVector x, std::string format, Rcpp::List vocabulary);
+Rcpp::List native_records_cpp(Rcpp::CharacterVector x, const std::string& format, Rcpp::List vocabulary);
 RcppExport SEXP _glyparse_native_records_cpp(SEXP xSEXP, SEXP formatSEXP, SEXP vocabularySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< std::string >::type format(formatSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type format(formatSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type vocabulary(vocabularySEXP);
     rcpp_result_gen = Rcpp::wrap(native_records_cpp(x, format, vocabulary));
     return rcpp_result_gen;
 END_RCPP
 }
 // native_aux_cpp
-Rcpp::RObject native_aux_cpp(std::string op, Rcpp::List args, Rcpp::List vocabulary);
+Rcpp::RObject native_aux_cpp(const std::string& op, Rcpp::List args, Rcpp::List vocabulary);
 RcppExport SEXP _glyparse_native_aux_cpp(SEXP opSEXP, SEXP argsSEXP, SEXP vocabularySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< std::string >::type op(opSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type op(opSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type args(argsSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type vocabulary(vocabularySEXP);
     rcpp_result_gen = Rcpp::wrap(native_aux_cpp(op, args, vocabulary));

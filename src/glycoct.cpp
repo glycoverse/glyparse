@@ -39,7 +39,7 @@ static bool compatible(const S &s, const CTMapping &m) {
   return core(s) == m.core && (s.find("|1:aldi") != S::npos) == m.alditol &&
          same_bounds(bounds(s), m.bounds);
 }
-static S preserve_ring(S mono, const S &s, const Vocab &v) {
+static S preserve_ring(const S &mono, const S &s, const Vocab &v) {
   auto m = match(bounds(s), "^([0-9]+):([0-9]+)$");
   return !m.empty() && std::stoi(m[2]) - std::stoi(m[1]) == 3 ? v.furan(mono) : mono;
 }

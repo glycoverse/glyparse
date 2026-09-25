@@ -294,8 +294,8 @@ inline S sort_subs(VS v, bool dedup = true) {
 }
 using Slots = std::set<std::pair<int, S>>;
 Slots occupied(const Record &, bool carbon = false, int count = -1);
-VI normalize_parents(VI, const VI &, const S &, const Slots &);
-FloatingSub normalize_sub(VI, const VI &, S, const Slots &);
+VI normalize_parents(const VI &, const VI &, const S &, const Slots &);
+FloatingSub normalize_sub(const VI &, const VI &, S, const Slots &);
 S convert(const S &, const S &, const Vocab &);
 S detect(const S &, const Vocab &);
 Record parse_direct(const S &, const S &, const Vocab &);

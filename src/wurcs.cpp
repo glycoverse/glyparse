@@ -132,7 +132,7 @@ static std::pair<VI, VS> candidates(const S &s, int n) {
   }
   return {unique(parents), common};
 }
-static S collapse(VS ps) {
+static S collapse(const VS &ps) {
   if (contains(ps, S("?")) || contains(ps, S("-1")))
     return "?";
   return join(unique(ps), "/");

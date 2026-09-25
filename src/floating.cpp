@@ -19,7 +19,7 @@ Slots occupied(const Record &r, bool carbon, int count) {
       }
   return slots;
 }
-VI normalize_parents(VI parents, const VI &implicit, const S &link,
+VI normalize_parents(const VI &parents, const VI &implicit, const S &link,
                      const Slots &slots) {
   if (seteq(parents, implicit))
     return {};
@@ -38,7 +38,7 @@ VI normalize_parents(VI parents, const VI &implicit, const S &link,
     fail("No feasible parent after excluding occupied acceptor positions");
   return out;
 }
-FloatingSub normalize_sub(VI parents, const VI &implicit, S subtoken,
+FloatingSub normalize_sub(const VI &parents, const VI &implicit, S subtoken,
                           const Slots &slots) {
   auto m = match(subtoken, "^([?0-9/]+)");
   if (m.empty() || m[1] == "?")
