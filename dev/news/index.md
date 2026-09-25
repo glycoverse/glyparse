@@ -2,6 +2,27 @@
 
 ## glyparse (development version)
 
+- Most format parsing, IUPAC conversion, and automatic format detection
+  now run in C++, while preserving vectorization, names, missing values,
+  and failure handling. Linear Code retains its faster R conversion.
+  Installing from source requires a C++17 compiler.
+
+- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md),
+  [`parse_kcf()`](https://glycoverse.github.io/glyparse/dev/reference/parse_kcf.md),
+  [`parse_linucs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_linucs.md),
+  [`parse_pglyco_struc()`](https://glycoverse.github.io/glyparse/dev/reference/parse_pglyco_struc.md),
+  [`parse_strucgp_struc()`](https://glycoverse.github.io/glyparse/dev/reference/parse_strucgp_struc.md),
+  and
+  [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
+  construct structures directly from residue and edge arrays using
+  glyrepr \>= 1.0.0.9000, avoiding intermediate graphs. Array validation
+  is mandatory; the retained `validate` argument no longer skips
+  validation when `FALSE`.
+
+- [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
+  processes each detected format in a batch, preserving input order,
+  names, missing values, and failure handling.
+
 ## glyparse 0.8.1
 
 CRAN release: 2026-08-28

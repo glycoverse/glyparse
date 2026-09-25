@@ -28,8 +28,9 @@ parse_glycoct(x, on_failure = "error", progress = FALSE, validate = TRUE)
 
 - validate:
 
-  Whether to validate parsed glycan graphs before constructing the
-  result.
+  Retained for compatibility. Array records are always validated by
+  [`glyrepr::structure_from_arrays()`](https://glycoverse.github.io/glyrepr/reference/structure_from_arrays.html),
+  including when `FALSE`.
 
 ## Value
 
