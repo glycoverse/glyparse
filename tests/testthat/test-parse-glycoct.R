@@ -436,15 +436,14 @@ test_that("GlycoCT mapping signatures index exact composite candidates", {
     glycoct_mono_signature("dglc-HEX-x:x"),
     list(subs = "n-acetyl", linkages = "2+1")
   )
-  mapping_index <- glycoct_mapping_index()
 
   expect_identical(
-    match_composite_structure(signature, mapping_index),
+    match_composite_structure(signature),
     "GlcNAc"
   )
 
   signature$linkages <- "5+1"
-  expect_null(match_composite_structure(signature, mapping_index))
+  expect_null(match_composite_structure(signature))
 })
 
 test_that("GlycoCT handles N-sulfated amino sugars with unknown ring bounds", {

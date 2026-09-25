@@ -45,52 +45,36 @@ auto_parse <- function(
   on_failure = "error",
   progress = FALSE
 ) {
-  struc_parser_wrapper(
+  on_failure <- validate_struc_parser_wrapper_args(
     x,
-    do_auto_parse,
-    on_failure = on_failure,
-    progress = progress
+    on_failure,
+    progress,
+    call = rlang::current_env()
   )
-}
-
-do_auto_parse <- function(x) {
-  parser <- choose_parser(x)
-  parser(x)
-}
-
-choose_parser <- function(x) {
-  if (stringr::str_starts(x, "freeEnd|redEnd")) {
-    return(do_parse_gwb)
-  } else if (stringr::str_detect(x, "ENTRY")) {
-    return(do_parse_kcf)
-  } else if (stringr::str_detect(x, "RES")) {
-    return(do_parse_glycoct)
-  } else if (stringr::str_detect(x, "WURCS")) {
-    return(do_parse_wurcs)
-  } else if (stringr::str_starts(x, "\\([HNAGFSap]")) {
-    return(do_parse_pglyco_struc)
-  } else if (stringr::str_starts(x, "A") && stringr::str_ends(x, "a")) {
-    return(do_parse_strucgp_struc)
-  } else if (stringr::str_ends(x, "-OH")) {
-    return(do_parse_glycam_iupac)
-  } else if (stringr::str_ends(x, stringr::fixed("-ol"))) {
-    return(do_parse_iupac_condensed)
-  } else if (
-    stringr::str_detect(x, "\\u2192") || # Unicode arrow →
-      stringr::str_detect(x, "->") || # Plain text arrow ->
-      stringr::str_detect(x, "alpha|beta") # Plain text anomers
-  ) {
-    return(do_parse_iupac_extended)
-  } else if (stringr::str_detect(x, "\\w+\\([ab\\?][\\d\\?]-")) {
-    return(do_parse_iupac_condensed)
-  } else if (is_linucs_string(x)) {
-    return(do_parse_linucs)
-  } else if (is_iupac_compact_string(x)) {
-    return(do_parse_iupac_compact)
-  } else if (stringr::str_ends(x, "-")) {
-    return(do_parse_iupac_short)
-  } else {
-    # Assume Linear Code
-    return(do_parse_linear_code)
+  input <- prepare_struc_parser_input(x)
+  if (input$all_na) {
+    return(make_na_glycan_structure(input$size, input$names))
   }
+
+  formats <- native_convert(input$unique_x, "detect")
+  groups <- split(seq_along(input$unique_x), formats)
+  parsed <- lapply(names(groups), function(format) {
+    parser <- get(format, envir = environment(auto_parse))
+    parser(
+      input$unique_x[groups[[format]]],
+      on_failure = "na",
+      progress = progress
+    )
+  })
+  unique_result <- do.call(c, parsed)[order(unlist(groups, use.names = FALSE))]
+  abort_on_invalid_parse(
+    input$unique_x[is.na(unique_result)],
+    on_failure,
+    call = rlang::current_env()
+  )
+  result <- unique_result[build_normalized_structure_indices(input)]
+  if (!is.null(input$names)) {
+    attr(result, "names") <- input$names
+  }
+  result
 }

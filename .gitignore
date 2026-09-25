@@ -10,3 +10,6 @@ inst/doc
 /Meta/
 .worktrees/
 /pkgdown/
+src/*.o
+src/*.so
+src/*.dll

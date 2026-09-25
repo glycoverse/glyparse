@@ -14,8 +14,8 @@ structure cannot be parsed. \code{"na"} returns \code{NA} at invalid positions.}
 
 \item{progress}{Whether to show a progress bar while parsing.}
 
-\item{validate}{Whether to validate parsed glycan graphs before constructing
-the result.}
+\item{validate}{Retained for compatibility. Array records are always validated
+by \code{\link[glyrepr:structure_from_arrays]{glyrepr::structure_from_arrays()}}, including when \code{FALSE}.}
 }
 \value{
 A \code{\link[glyrepr:glycan_structure]{glyrepr::glycan_structure()}} object.

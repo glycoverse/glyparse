@@ -13,9 +13,11 @@ Description:
     structure string.
 License: MIT + file LICENSE
 Suggests: 
+    dplyr,
     knitr,
     rmarkdown,
     glue,
+    igraph,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Encoding: UTF-8
@@ -24,15 +26,15 @@ URL: https://glycoverse.github.io/glyparse/, https://github.com/glycoverse/glypa
 Imports: 
     checkmate,
     cli,
-    dplyr,
-    glyrepr (>= 1.0.0),
-    igraph,
+    glyrepr (>= 1.0.0.9000),
     purrr (>= 1.0.0),
+    Rcpp,
     rlang,
-    rstackdeque,
     stringr
 Depends: 
     R (>= 4.1)
 VignetteBuilder: knitr
 BugReports: https://github.com/glycoverse/glyparse/issues
 RoxygenNote: 7.3.3
+LinkingTo: Rcpp
+SystemRequirements: C++17

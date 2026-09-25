@@ -26,13 +26,13 @@ test_that("pH and aH monosaccharides", {
 })
 
 
-test_that("pGlyco graph assembly preserves branched topology", {
-  graph <- do_parse_pglyco_struc(
+test_that("pGlyco array assembly preserves branched topology", {
+  graph <- parse_pglyco_struc_arrays(
     "(N(F)(N(H(H(N))(H(N(H))))))"
   )
 
   expect_identical(
-    igraph::as_edgelist(graph, names = FALSE),
+    matrix(as.double(graph$edges), ncol = 2, byrow = TRUE),
     matrix(
       c(
         1,
@@ -57,7 +57,7 @@ test_that("pGlyco graph assembly preserves branched topology", {
     )
   )
   expect_identical(
-    igraph::vertex_attr(graph, "mono"),
+    graph$mono,
     c(
       "HexNAc",
       "dHex",
@@ -71,7 +71,7 @@ test_that("pGlyco graph assembly preserves branched topology", {
     )
   )
   expect_identical(
-    igraph::edge_attr(graph, "linkage"),
+    graph$linkage,
     rep("??-?", 8)
   )
 })
