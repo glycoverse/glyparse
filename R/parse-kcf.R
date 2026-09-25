@@ -7,8 +7,8 @@
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
 #'   structure cannot be parsed. `"na"` returns `NA` at invalid positions.
 #' @param progress Whether to show a progress bar while parsing.
-#' @param validate Retained for compatibility. Array records are always validated
-#'   by [glyrepr::structure_from_arrays()], including when `FALSE`.
+#' @param validate Deprecated and ignored. Array records
+#'   are always validated by [glyrepr::structure_from_arrays()].
 #'
 #' @return A [glyrepr::glycan_structure()] object.
 #'
@@ -37,13 +37,15 @@ parse_kcf <- function(
   x,
   on_failure = "error",
   progress = FALSE,
-  validate = TRUE
+  validate = lifecycle::deprecated()
 ) {
+  if (!missing(validate)) {
+    warn_deprecated_validate("parse_kcf")
+  }
   struc_parser_wrapper(
     x,
     "kcf",
     on_failure = on_failure,
-    progress = progress,
-    validate = validate
+    progress = progress
   )
 }

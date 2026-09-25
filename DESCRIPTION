@@ -27,6 +27,7 @@ Imports:
     checkmate,
     cli,
     glyrepr (>= 1.0.0.9000),
+    lifecycle,
     purrr (>= 1.0.0),
     Rcpp,
     rlang,

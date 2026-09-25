@@ -5,7 +5,6 @@
 #' @param on_failure How to handle parsing failures. `"error"` aborts when a
 #'   structure cannot be parsed. `"na"` returns `NA` at invalid positions.
 #' @param progress Whether to show a progress bar while parsing.
-#' @param validate Compatibility flag; array validation is mandatory.
 #' @param call The call to report in user-facing errors.
 #'
 #' @return A [glyrepr::glycan_structure()] object.
@@ -15,14 +14,12 @@ struc_parser_wrapper <- function(
   parser,
   on_failure = "error",
   progress = FALSE,
-  validate = TRUE,
   call = rlang::caller_env()
 ) {
   on_failure <- validate_struc_parser_wrapper_args(
     x,
     on_failure,
     progress,
-    validate,
     call = call
   )
   wrapper_input <- prepare_struc_parser_input(x)
@@ -167,17 +164,26 @@ validate_struc_parser_wrapper_args <- function(
   x,
   on_failure,
   progress,
-  validate = TRUE,
   call
 ) {
   checkmate::assert_character(x)
   checkmate::assert_flag(progress)
-  checkmate::assert_flag(validate)
   rlang::arg_match(
     on_failure,
     values = c("error", "na"),
     error_call = call
   )
+}
+
+
+warn_deprecated_validate <- function(parser) {
+  lifecycle::deprecate_warn(
+    when = "0.9.0",
+    what = paste0(parser, "(validate)"),
+    details = "The `validate` argument is ignored; validation is always performed.",
+    user_env = rlang::caller_env(2)
+  )
+  invisible(NULL)
 }
 
 

@@ -61,19 +61,25 @@ test_that("array parsers batch unique records without graph canonicalization", {
   expect_length(attr(result, "graphs"), 2L)
 })
 
-test_that("validate compatibility flag retains the array backend", {
+test_that("deprecated validate does not change array parsing", {
   local_mocked_bindings(
     canonicalize_glycan_graphs = function(...) stop("Unexpected graph path"),
     .package = "glyrepr"
   )
   input <- c("(N)", "(H)", "(N)", NA_character_)
   expect_equal(
-    as.character(parse_pglyco_struc(input, validate = FALSE)),
+    as.character(suppressWarnings(parse_pglyco_struc(input, validate = FALSE))),
+    as.character(parse_pglyco_struc(input))
+  )
+  expect_equal(
+    as.character(suppressWarnings(parse_pglyco_struc(input, validate = TRUE))),
     as.character(parse_pglyco_struc(input))
   )
 })
 
-test_that("graph parsers expose validate", {
+test_that("all validate arguments are deprecated and ignored", {
+  old_options <- options(lifecycle_verbosity = "warning")
+  on.exit(options(old_options), add = TRUE)
   parsers <- c(
     "parse_glycoct",
     "parse_kcf",
@@ -84,8 +90,27 @@ test_that("graph parsers expose validate", {
   )
 
   for (parser in parsers) {
-    expect_identical(formals(get(parser))$validate, TRUE, info = parser)
+    parser_fn <- get(parser)
+    expect_identical(
+      formals(parser_fn)$validate,
+      quote(lifecycle::deprecated()),
+      info = parser
+    )
+    expect_identical(
+      as.character(suppressWarnings(parser_fn(
+        NA_character_,
+        validate = stop("validate was evaluated")
+      ))),
+      as.character(parser_fn(NA_character_)),
+      info = parser
+    )
   }
+
+  expect_snapshot({
+    for (parser in parsers) {
+      get(parser)(NA_character_, validate = FALSE)
+    }
+  })
 })
 
 test_that("no parser exposes drop_generic", {
