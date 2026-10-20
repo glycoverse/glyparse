@@ -27,7 +27,8 @@ native_convert <- function(x, format) {
 native_records <- function(x, format, progress = FALSE) {
   parse_batch <- function(values) {
     records <- native_records_cpp(values, format, native_vocabulary())
-    for (i in which(attr(records, "warnings"))) {
+    # One warning describes the same lossy conversion for the whole batch.
+    if (any(attr(records, "warnings"))) {
       if (format == "wurcs") {
         cli::cli_warn(c(
           "Only the main reducing-end WURCS residue can retain alditol status.",

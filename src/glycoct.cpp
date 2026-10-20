@@ -15,6 +15,67 @@ struct CBlock {
   VI parents;
   S parent, child;
 };
+static bool digits(const S &s, size_t &p) {
+  size_t begin = p;
+  while (p < s.size() && s[p] >= '0' && s[p] <= '9')
+    ++p;
+  return p != begin;
+}
+static VS residue_fields(const S &s) {
+  if (s.find_first_of("\r\n") != S::npos)
+    return match(s, "^([^:]*)([bs]):(.*)$");
+  auto colon = s.find(':');
+  if (colon == S::npos || colon == 0 ||
+      (s[colon - 1] != 'b' && s[colon - 1] != 's'))
+    return {};
+  return {s, s.substr(0, colon - 1), s.substr(colon - 1, 1),
+          s.substr(colon + 1)};
+}
+static VS linkage_fields(const S &s) {
+  size_t p = 0;
+  auto take = [&](char c) {
+    if (p == s.size() || s[p] != c)
+      return false;
+    ++p;
+    return true;
+  };
+  if (!digits(s, p) || !take(':'))
+    return {};
+  size_t begin = p;
+  if (!digits(s, p))
+    return {};
+  S from = s.substr(begin, p - begin);
+  if (p < s.size() && (s[p] == 'd' || s[p] == 'o'))
+    ++p;
+  if (!take('('))
+    return {};
+  auto position_token = [&]() -> S {
+    size_t start = p;
+    if (p < s.size() && s[p] == '-')
+      ++p;
+    if (!digits(s, p))
+      return "";
+    while (p < s.size() && s[p] == '|') {
+      ++p;
+      if (!digits(s, p))
+        return "";
+    }
+    return s.substr(start, p - start);
+  };
+  S parent = position_token();
+  if (parent.empty() || !take('+'))
+    return {};
+  S child = position_token();
+  if (child.empty() || !take(')'))
+    return {};
+  begin = p;
+  if (!digits(s, p))
+    return {};
+  S to = s.substr(begin, p - begin);
+  if (p < s.size() && (s[p] == 'd' || s[p] == 'n'))
+    ++p;
+  return {s.substr(0, p), from, parent, child, to};
+}
 static S bounds(const S &s) {
   auto m = match(s, "-((?:[0-9]+|x):(?:[0-9]+|x))");
   return m.empty() ? "" : m[1];
@@ -240,31 +301,41 @@ static CBlock block(const VS &lines, bool und) {
       continue;
     }
     if (section == "RES") {
-      auto m = match(s, "^([^:]*)([bs]):(.*)$");
+      auto m = residue_fields(s);
       if (m.empty()) {
         if (s.find(':') != S::npos)
           fail("Invalid GlycoCT residue");
         continue;
       }
-      auto id = match(m[1], "[0-9]+");
+      size_t first = m[1].find_first_of("0123456789"), last = first;
       // A header without an ID cannot participate in a glycan component.
-      if (id.empty())
+      if (first == S::npos)
         continue;
+      digits(m[1], last);
       S content = m[3], a, pos;
       bool aldi = false;
       if (m[2] == "b") {
-        auto t = match(content, "^([abxo])");
-        if (!t.empty()) {
-          a = t[1];
+        if (!content.empty() && S("abxo").find(content[0]) != S::npos) {
+          a = content.substr(0, 1);
           if (content.size() > 1 && content[1] == '-')
             content.erase(0, 2);
         }
-        auto bounds_match = match(content, "-([0-9]+|x):");
-        if (!bounds_match.empty())
-          pos = bounds_match[1];
+        for (size_t dash = content.find('-'); dash != S::npos;
+             dash = content.find('-', dash + 1)) {
+          size_t end = dash + 1;
+          if (end < content.size() && content[end] == 'x')
+            ++end;
+          else if (!digits(content, end))
+            continue;
+          if (end < content.size() && content[end] == ':') {
+            pos = content.substr(dash + 1, end - dash - 1);
+            break;
+          }
+        }
         aldi = content.find("|1:aldi") != S::npos;
       }
-      CResidue r{std::stoi(id[0]), m[2] == "b" ? "mono" : "sub", content, a, pos, aldi};
+      CResidue r{std::stoi(m[1].substr(first, last - first)),
+                 m[2] == "b" ? "mono" : "sub", content, a, pos, aldi};
       bool existing = false;
       for (auto &old : b.residues)
         if (old.id == r.id) {
@@ -275,8 +346,7 @@ static CBlock block(const VS &lines, bool und) {
       if (!existing)
         b.residues.push_back(r);
     } else if (section == "LIN") {
-      auto m = match(s, "^[0-9]+:([0-9]+)[do]?\\((-?[0-9]+(?:\\|[0-9]+)*)\\+(-?[0-9]+(?"
-                        ":\\|[0-9]+)*)\\)([0-9]+)[dn]?");
+      auto m = linkage_fields(s);
       if (!m.empty())
         b.edges.push_back({std::stoi(m[1]), std::stoi(m[4]), m[2], m[3]});
     }
@@ -304,11 +374,28 @@ static CData assemble(const CBlock &b, const Vocab &v) {
     for (auto &e : b.edges)
       if (e.from == r.id && residues.count(e.to) && residues[e.to].kind == "sub")
         subs.push_back(residues[e.to].content + "\r" + e.parent + "\r" + e.child);
+    // The descriptor and its ordered substituents fully determine chemistry.
+    // Keep this cache local to the vocabulary/batch, including failed residues.
+    auto key = std::make_pair(r.content, subs);
+    auto found = v.glycoct_cache.find(key);
     std::pair<S, S> m;
-    if (subs.empty())
-      m = {preserve_ring(base_mono(r.content, v), r.content, v), ""};
-    else
-      m = composite(r.content, subs, v);
+    if (found != v.glycoct_cache.end()) {
+      m = found->second;
+    } else {
+      auto failed = v.glycoct_failures.find(key);
+      if (failed != v.glycoct_failures.end())
+        fail(failed->second);
+      try {
+        if (subs.empty())
+          m = {preserve_ring(base_mono(r.content, v), r.content, v), ""};
+        else
+          m = composite(r.content, subs, v);
+        v.glycoct_cache.emplace(key, m);
+      } catch (const std::exception &e) {
+        v.glycoct_failures.emplace(key, e.what());
+        throw;
+      }
+    }
     d.record.add(m.first, m.second);
     d.ids.push_back(r.id);
     d.mono.push_back(r);
@@ -398,8 +485,19 @@ Record glycoct_parse(const S &x, const Vocab &v) {
     if (!t.empty())
       lines.push_back(t);
   }
-  if (lines.size() == 1 && has(lines[0], "^RES\\s+"))
-    lines = tokens(lines[0], "\\S+");
+  if (lines.size() == 1 && starts(lines[0], "RES") && lines[0].size() > 3 &&
+      S(" \t\n\r\f\v").find(lines[0][3]) != S::npos) {
+    S line = lines[0];
+    lines.clear();
+    size_t p = 0;
+    while ((p = line.find_first_not_of(" \t\n\r\f\v", p)) != S::npos) {
+      size_t end = line.find_first_of(" \t\n\r\f\v", p);
+      lines.push_back(line.substr(p, end == S::npos ? end : end - p));
+      if (end == S::npos)
+        break;
+      p = end;
+    }
+  }
   VS main;
   std::vector<VS> unds;
   bool in = false;

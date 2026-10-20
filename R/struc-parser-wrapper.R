@@ -40,9 +40,15 @@ struc_parser_wrapper <- function(
       .progress = progress
     )
   }
-  unique_result <- suppressWarnings(glyrepr::structure_from_arrays(
-    records,
-    on_failure = "na"
+  array_args <- list(x = records, on_failure = "na")
+  # Newer glyrepr can avoid formatting diagnostics that this wrapper replaces.
+  # Keep the public constructor and unconditional validation on older versions.
+  if ("warn" %in% names(formals(glyrepr::structure_from_arrays))) {
+    array_args$warn <- FALSE
+  }
+  unique_result <- suppressWarnings(do.call(
+    glyrepr::structure_from_arrays,
+    array_args
   ))
   abort_on_invalid_parse(
     wrapper_input$unique_x[is.na(unique_result)],

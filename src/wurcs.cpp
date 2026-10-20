@@ -71,9 +71,17 @@ static WResidue wres(const S &source, const Vocab &v) {
   auto found = v.wurcs_cache.find(source);
   if (found != v.wurcs_cache.end())
     return found->second;
-  auto residue = parse_residue(source, v);
-  v.wurcs_cache.emplace(source, residue);
-  return residue;
+  auto failed = v.wurcs_failures.find(source);
+  if (failed != v.wurcs_failures.end())
+    fail(failed->second);
+  try {
+    auto residue = parse_residue(source, v);
+    v.wurcs_cache.emplace(source, residue);
+    return residue;
+  } catch (const std::exception &e) {
+    v.wurcs_failures.emplace(source, e.what());
+    throw;
+  }
 }
 static int letter(char c) {
   if (c >= 'a' && c <= 'z')
@@ -137,14 +145,61 @@ static S collapse(const VS &ps) {
     return "?";
   return join(unique(ps), "/");
 }
+// Linear scan for the ordinary WURCS envelope. Keep the regex reference for
+// unusual bracket/newline syntax, including its historical prefix semantics.
+static VS envelope(const S &x) {
+  if (!starts(x, "WURCS=2.0/") || x.find_first_of("\r\n") != S::npos)
+    return {};
+  size_t p = 10;
+  auto number = [&] {
+    size_t begin = p;
+    while (p < x.size() && x[p] >= '0' && x[p] <= '9')
+      ++p;
+    return p > begin;
+  };
+  for (char delimiter : {',', ',', '/'})
+    if (!number() || p == x.size() || x[p++] != delimiter)
+      return {};
+  size_t begin = p;
+  while (p < x.size() && x[p] == '[') {
+    size_t end = x.find(']', p + 1);
+    if (end == S::npos || x.find('[', p + 1) < end)
+      return {};
+    p = end + 1;
+  }
+  if (p == begin || p == x.size() || x[p] != '/')
+    return {};
+  S descriptors = x.substr(begin, p - begin);
+  begin = ++p;
+  if (!number())
+    return {};
+  while (p + 1 < x.size() && x[p] == '-' && x[p + 1] >= '0' &&
+         x[p + 1] <= '9') {
+    ++p;
+    number();
+  }
+  S sequence = x.substr(begin, p - begin);
+  S links = p < x.size() && x[p] == '/' ? x.substr(p + 1) : "";
+  return {"", descriptors, sequence, links};
+}
 Record wurcs_parse(const S &x, const Vocab &v) {
-  auto m = match(x, "^WURCS=2\\.0/[0-9]+,[0-9]+,[0-9]+/((?:\\[.*?\\])+)/"
-                    "((?:[0-9]+-)*[0-9]+)(?:/(.*))?");
+  auto m = envelope(x);
+  if (m.empty())
+    m = match(x, "^WURCS=2\\.0/[0-9]+,[0-9]+,[0-9]+/((?:\\[.*?\\])+)/"
+                 "((?:[0-9]+-)*[0-9]+)(?:/(.*))?");
   if (m.empty())
     fail("Invalid WURCS");
   std::vector<WResidue> uniq;
-  for (auto &a : tokens(m[1], "\\[.*?\\]"))
-    uniq.push_back(wres(a.substr(1, a.size() - 2), v));
+  if (m[0].empty()) {
+    for (size_t p = 0; p < m[1].size();) {
+      size_t end = m[1].find(']', p + 1);
+      uniq.push_back(wres(m[1].substr(p + 1, end - p - 1), v));
+      p = end + 1;
+    }
+  } else {
+    for (auto &a : tokens(m[1], "\\[.*?\\]"))
+      uniq.push_back(wres(a.substr(1, a.size() - 2), v));
+  }
   std::vector<WResidue> residues;
   Record r;
   for (auto &s : split(m[2], '-')) {
@@ -212,7 +267,7 @@ Record wurcs_parse(const S &x, const Vocab &v) {
   };
   for (size_t i = 0; i < r.edges.size(); i += 2)
     comps[root(r.edges[i + 1]) - 1] = root(r.edges[i]);
-  auto occ = occupied(r);
+  auto occ = floats.empty() ? Slots{} : occupied(r);
   VI floatingroots;
   for (auto &f : floats) {
     VI nodes;
@@ -229,7 +284,7 @@ Record wurcs_parse(const S &x, const Vocab &v) {
     r.parts.push_back({f.root, nodes, link, parents});
     floatingroots.push_back(f.root);
   }
-  auto carbon = occupied(r, true);
+  auto carbon = subs.empty() ? Slots{} : occupied(r, true);
   for (auto &s : subs)
     r.floats.push_back(
         normalize_sub(s.parents, seq(r.mono.size()), s.substituent, carbon));

@@ -1,5 +1,7 @@
 # glyparse (development version)
 
+* `parse_glycoct()` and `parse_wurcs()` parse large batches faster through shared residue decoding and linear scanning. Repeated non-root alditol warnings are reported once per batch; newer glyrepr versions also avoid constructing suppressed failure diagnostics.
+
 * Most format parsing, IUPAC conversion, and automatic format detection now run in C++, while preserving vectorization, names, missing values, and failure handling. Linear Code retains its faster R conversion. Installing from source requires a C++17 compiler.
 
 * `parse_glycoct()`, `parse_kcf()`, `parse_linucs()`, `parse_pglyco_struc()`, `parse_strucgp_struc()`, and `parse_wurcs()` construct structures directly from residue and edge arrays using glyrepr >= 1.0.0.9000, avoiding intermediate graphs. Array validation is mandatory; the deprecated `validate` argument is ignored and warns when supplied.

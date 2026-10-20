@@ -53,7 +53,12 @@ inline S replace(S s, const S &a, const S &b) {
   }
   return s;
 }
-inline S trim(const S &s) { return sub(sub(s, "^\\s+"), "\\s+$"); }
+inline S trim(const S &s) {
+  auto first = s.find_first_not_of(" \t\n\r\f\v");
+  if (first == S::npos)
+    return "";
+  return s.substr(first, s.find_last_not_of(" \t\n\r\f\v") - first + 1);
+}
 inline VS split(const S &s, char d, bool keep = true) {
   VS out;
   size_t a = 0, b;
@@ -164,6 +169,9 @@ struct WResidue {
 };
 struct Vocab {
   mutable std::map<S, WResidue> wurcs_cache;
+  mutable std::map<S, S> wurcs_failures;
+  mutable std::map<std::pair<S, VS>, std::pair<S, S>> glycoct_cache;
+  mutable std::map<std::pair<S, VS>, S> glycoct_failures;
   mutable std::map<S, S> patterns;
   mutable VS ordered_monos;
   // Vocabulary-derived patterns are shared by every string in this batch.
