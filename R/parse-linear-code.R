@@ -30,6 +30,15 @@ parse_linear_code <- function(
 
 
 convert_linear_to_iupac <- function(x) {
+  normalized <- unname(native_convert(x, "linear_code"))
+  fallback <- is.na(normalized)
+  if (any(fallback)) {
+    normalized[fallback] <- convert_linear_to_iupac_general(x[fallback])
+  }
+  normalized
+}
+
+convert_linear_to_iupac_general <- function(x) {
   # Mono mapping from IUPAC to Linear Code
   mono_map <- c(
     "Glc" = "G",

@@ -1,10 +1,6 @@
 #include "native.h"
 namespace gp {
-struct GNode {
-  S kind, mono, sub, anomer, ring, pos;
-  std::vector<GNode> children;
-};
-static GNode gnode(const S &token, const Vocab &v) {
+static GNode decode_gnode(const S &token, const Vocab &v) {
   auto m = match(token, "^([abo?][1-9N?])?([DL]-)?([A-Za-z0-9_#=.]+)(?:,([?opf]))?$");
   if (m.empty())
     fail("Invalid GlycoWorkbench residue");
@@ -31,6 +27,12 @@ static GNode gnode(const S &token, const Vocab &v) {
   }
   return {kind, mono, subname, replace(m[1], "N", "?"), m[4], "", {}};
 }
+static GNode gnode(const S &token, const Vocab &v) {
+  auto found = v.gwb_cache.find(token);
+  if (found != v.gwb_cache.end())
+    return found->second;
+  return v.gwb_cache.emplace(token, decode_gnode(token, v)).first->second;
+}
 static GNode linked(const S &, size_t &, const Vocab &, int);
 static std::vector<GNode> children(const S &x, size_t &p, const Vocab &v, int depth) {
   int n = 0;
@@ -51,18 +53,22 @@ static std::vector<GNode> children(const S &x, size_t &p, const Vocab &v, int de
 static GNode linked(const S &x, size_t &p, const Vocab &v, int depth) {
   if (depth > 1024)
     fail("GlycoWorkbench nesting limit");
-  auto m =
-      match(x.substr(p), "^--((?:(?:[1-9N?]/)*[1-9N?]=[1-9N?],)*(?:[1-9N?]/)*[1-9N?])");
-  if (m.empty() || has(m[1], "[,=]"))
+  auto position = [](char c) { return (c >= '1' && c <= '9') || c == 'N' || c == '?'; };
+  if (x.compare(p, 2, "--") != 0 || p + 2 >= x.size() || !position(x[p + 2]))
     fail("Invalid or multi-bond GlycoWorkbench linkage");
-  p += m[0].size();
+  p += 2;
+  size_t start = p++;
+  while (p + 1 < x.size() && x[p] == '/' && position(x[p + 1])) p += 2;
+  if (p < x.size() && (x[p] == '=' || x[p] == ','))
+    fail("Invalid or multi-bond GlycoWorkbench linkage");
+  S attachment = replace(x.substr(start, p - start), "N", "?");
   size_t end = p;
   while (end < x.size() && x[end] != '(' && x[end] != ')' &&
          x.compare(end, 2, "--") != 0)
     ++end;
   auto node = gnode(x.substr(p, end - p), v);
   p = end;
-  node.pos = replace(m[1], "N", "?");
+  node.pos = attachment;
   node.children = children(x, p, v, depth);
   return node;
 }

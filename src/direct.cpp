@@ -58,11 +58,7 @@ static void strucgp_node(const S &x, Record &r, int parent, int depth = 0) {
            "?-?");
   strucgp_node(x.size() > 3 ? x.substr(2, x.size() - 3) : "", r, id, depth + 1);
 }
-struct LinResidue {
-  S kind, mono, sub, anomer;
-  bool alditol = false;
-};
-static LinResidue lin_residue(S x, const Vocab &v) {
+static LinResidue decode_lin_residue(S x, const Vocab &v) {
   if (x == "1(R)-carboxyethoxy")
     return {"implicit", "", "", ""};
   S subname = lookup({{"S", "S"},
@@ -133,6 +129,12 @@ static LinResidue lin_residue(S x, const Vocab &v) {
   }
   return {"mono", mono, join(subs, ","), a + v.pos(mono), alditol};
 }
+static LinResidue lin_residue(const S &x, const Vocab &v) {
+  auto found = v.linucs_cache.find(x);
+  if (found != v.linucs_cache.end())
+    return found->second;
+  return v.linucs_cache.emplace(x, decode_lin_residue(x, v)).first->second;
+}
 static S bracket(const S &x, size_t &p) {
   if (p >= x.size() || x[p] != '[')
     fail("Expected LINUCS bracket");
@@ -180,26 +182,24 @@ static void lin_node(const S &x, size_t &p, Record &r, int parent, const Vocab &
     fail("Unclosed LINUCS children");
   ++p;
 }
-struct KNode {
-  S kind, mono, sub;
-  int idx = 0;
-};
 struct KEnd {
   int id;
   S a, pos;
 };
 static KEnd kend(const S &x) {
-  auto m = match(x, "^([0-9]+)(?::(.*))?$");
-  if (m.empty())
+  size_t p = 0;
+  while (p < x.size() && x[p] >= '0' && x[p] <= '9') ++p;
+  if (p == 0 || (p < x.size() && x[p] != ':') ||
+      x.find_first_of("\r\n") != S::npos)
     fail("Invalid KCF endpoint");
-  S l = m[2], a;
-  if (!l.empty() && has(l, "^[abAB?]")) {
+  S l = p == x.size() ? "" : x.substr(p + 1), a;
+  if (!l.empty() && (l[0] == 'a' || l[0] == 'b' || l[0] == 'A' || l[0] == 'B' || l[0] == '?')) {
     a = S(1, std::tolower((unsigned char)l[0]));
     l.erase(0, 1);
   }
-  return {std::stoi(m[1]), a, replace(l, "|", "/")};
+  return {std::stoi(x.substr(0, p)), a, replace(l, "|", "/")};
 }
-static KNode knode(const S &x, const Vocab &v) {
+static KNode decode_knode(const S &x, const Vocab &v) {
   VS cand = {x};
   bool config = x.size() > 1 && (x[0] == 'D' || x[0] == 'L') && x[1] != '-';
   if (config)
@@ -234,6 +234,26 @@ static KNode knode(const S &x, const Vocab &v) {
   fail("Unknown KCF node");
   return {};
 }
+static KNode knode(const S &x, const Vocab &v) {
+  auto found = v.kcf_cache.find(x);
+  if (found != v.kcf_cache.end())
+    return found->second;
+  return v.kcf_cache.emplace(x, decode_knode(x, v)).first->second;
+}
+static bool decimal_digits(const S &s) {
+  return !s.empty() && s.find_first_not_of("0123456789") == S::npos;
+}
+static VS whitespace_tokens(const S &s) {
+  VS out;
+  size_t p = 0;
+  while ((p = s.find_first_not_of(" \t\n\r\f\v", p)) != S::npos) {
+    auto end = s.find_first_of(" \t\n\r\f\v", p);
+    out.push_back(s.substr(p, end == S::npos ? end : end - p));
+    if (end == S::npos) break;
+    p = end;
+  }
+  return out;
+}
 static Record kcf(const S &x, const Vocab &v) {
   Record r;
   std::map<int, KNode> nodes;
@@ -246,22 +266,23 @@ static Record kcf(const S &x, const Vocab &v) {
       continue;
     if (line == "///")
       break;
-    auto h = match(line, "^(NODE|EDGE)\\s+[0-9]+");
-    if (!h.empty()) {
-      section = h[1];
+    VS p = whitespace_tokens(line);
+    if (p.size() > 1 && (p[0] == "NODE" || p[0] == "EDGE") &&
+        p[1][0] >= '0' && p[1][0] <= '9') {
+      section = p[0];
       seen |= section == "NODE";
       continue;
     }
-    VS p = tokens(line, "\\S+");
+    // Header matching intentionally accepts a numeric prefix, as before.
     if (section == "NODE") {
-      if (p.size() < 2 || !has(p[0], "^[0-9]+$"))
+      if (p.size() < 2 || !decimal_digits(p[0]))
         continue;
       auto n = knode(p[1], v);
       if (n.kind == "mono")
         n.idx = r.add(n.mono, n.sub);
       nodes[std::stoi(p[0])] = n;
     } else if (section == "EDGE") {
-      if (p.size() < 3 || !has(p[0], "^[0-9]+$"))
+      if (p.size() < 3 || !decimal_digits(p[0]))
         fail("Malformed KCF edge");
       edges.push_back({kend(p[1]), kend(p[2])});
     }

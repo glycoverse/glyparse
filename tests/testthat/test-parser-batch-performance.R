@@ -75,3 +75,46 @@ test_that("the array wrapper supports older glyrepr constructors", {
     c("Glc(b1-", NA_character_)
   )
 })
+
+test_that("residue caches do not retain graph positions or children", {
+  linucs <- c(
+    "[][b-D-Glcp]{[(4+1)][a-D-Glcp]{}}",
+    "[][a-D-Glcp]{[(6+1)][b-D-Glcp]{}}",
+    "[][b-D-Glcp6S]{}"
+  )
+  kcf <- c(
+    "NODE 2\n1 Glc 0 0\n2 Gal 0 0\nEDGE 1\n1 2:b1 1:4",
+    "NODE 3\n1 Gal 0 0\n2 Glc 0 0\n3 Glc 0 0\nEDGE 2\n1 3:a1 2:4\n2 2:b1 1:6"
+  )
+  gwb <- c(
+    "freeEnd--1b1D-Glc,p--4b1D-Gal,p",
+    "freeEnd--1b1D-Gal,p--4b1D-Glc,p",
+    "freeEnd--1b1D-Glc,p(--6S)--4b1D-Gal,p"
+  )
+  for (format in c("linucs", "kcf", "gwb")) {
+    input <- get(format)
+    parser <- get(paste0("parse_", format))
+    expected <- vapply(input, function(x) as.character(parser(x)), character(1))
+    expect_identical(as.character(parser(input)), unname(expected))
+    expect_identical(as.character(parser(rev(input))), rev(unname(expected)))
+  }
+})
+
+test_that("plain Linear Code retains the general normalization contract", {
+  input <- c(
+    "Ma3(Ma6)Mb4GNb4GNb",
+    "NNa3Ab4GNb",
+    "G^b4Ab",
+    "Ab3/6Gb",
+    "Ab?G?",
+    "A[2P]b3Gb",
+    "Ab3(A[2T]b4)Gb",
+    "invalid",
+    "",
+    NA_character_
+  )
+  expect_identical(
+    convert_linear_to_iupac(input),
+    convert_linear_to_iupac_general(input)
+  )
+})

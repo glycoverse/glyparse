@@ -167,11 +167,27 @@ struct WResidue {
   S mono, anomer, sub;
   bool alditol = false;
 };
+struct LinResidue {
+  S kind, mono, sub, anomer;
+  bool alditol = false;
+};
+struct KNode {
+  S kind, mono, sub;
+  int idx = 0;
+};
+struct GNode {
+  S kind, mono, sub, anomer, ring, pos;
+  std::vector<GNode> children;
+};
 struct Vocab {
   mutable std::map<S, WResidue> wurcs_cache;
   mutable std::map<S, S> wurcs_failures;
   mutable std::map<std::pair<S, VS>, std::pair<S, S>> glycoct_cache;
   mutable std::map<std::pair<S, VS>, S> glycoct_failures;
+  mutable std::map<S, LinResidue> linucs_cache;
+  mutable std::map<S, KNode> kcf_cache;
+  mutable std::map<S, GNode> gwb_cache;
+  mutable std::map<std::pair<S, S>, S> converted_tokens;
   mutable std::map<S, S> patterns;
   mutable VS ordered_monos;
   // Vocabulary-derived patterns are shared by every string in this batch.
