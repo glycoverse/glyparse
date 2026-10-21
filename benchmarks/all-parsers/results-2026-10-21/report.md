@@ -2,6 +2,8 @@
 
 The GlycoCT regression is resolved on this workload. The original goal of every parser below 0.01 ms per record is **not fully achieved**. The user accepted the measured improvements and requested closeout. With the default two decoding workers, 8 of 13 format parsers have a warm arithmetic mean below 0.01 ms/record; with eight workers, 10 of 13 do. `auto_parse()` remains above the target.
 
+The complete [before/after comparison table](comparison.md) reports all 13 format parsers and automatic detection.
+
 ## Revisions and workload
 
 - Candidate: glyparse `a3be5ad` with glyrepr `c99d5e9`, optimized installed builds. Subsequent namespace qualification (`stats::na.omit`), packaging and documentation changes leave the measured algorithm unchanged.
