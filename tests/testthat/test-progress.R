@@ -21,3 +21,38 @@ purrr::iwalk(parser_progress_examples, function(input, parser_name) {
     expect_no_error(suppressMessages(parser(input, progress = TRUE)))
   })
 })
+
+test_that("progress updates retain parallel decoding and record order", {
+  previous <- options(glyparse.threads = 4L)
+  on.exit(options(previous), add = TRUE)
+  input <- rep(
+    c(
+      "RES 1b:b-dglc-HEX-1:5",
+      "invalid",
+      "RES 1b:b-dgal-HEX-1:5",
+      NA_character_
+    ),
+    length.out = 2305L
+  )
+  expected <- native_records(input, "glycoct")
+  decode <- native_records_cpp
+  sizes <- workers <- integer()
+  local_mocked_bindings(
+    native_records_cpp = function(
+      x,
+      format,
+      vocabulary,
+      threads,
+      constructible_only
+    ) {
+      sizes <<- c(sizes, length(x))
+      workers <<- c(workers, threads)
+      decode(x, format, vocabulary, threads, constructible_only)
+    }
+  )
+  actual <- suppressMessages(native_records(input, "glycoct", progress = TRUE))
+  expect_identical(actual, lapply(expected, identity))
+  expect_gt(length(sizes), 1L)
+  expect_gte(min(sizes), 256L)
+  expect_identical(workers, rep(4L, length(sizes)))
+})

@@ -3,9 +3,17 @@ namespace gp {
 static Record pglyco(const S &x) {
   Record r;
   r.anomer = "??";
-  VS ms = tokens(x, "[^/(), ]+");
-  Pairs map = {{"H", "Hex"},   {"N", "HexNAc"}, {"F", "dHex"}, {"A", "NeuAc"},
+  VS ms;
+  for (size_t begin = x.find_first_not_of("/(), "); begin != S::npos;) {
+    size_t end = x.find_first_of("/(), ", begin);
+    ms.push_back(x.substr(begin,end == S::npos ? end : end-begin));
+    if (end == S::npos) break;
+    begin = x.find_first_not_of("/(), ", end);
+  }
+  static const Pairs map = {{"H", "Hex"},   {"N", "HexNAc"}, {"F", "dHex"}, {"A", "NeuAc"},
                {"G", "NeuGc"}, {"aH", "HexN"},  {"pH", "Hex"}};
+  r.mono.reserve(ms.size()); r.sub.reserve(ms.size());
+  r.edges.reserve(2*ms.size()); r.linkage.reserve(ms.size());
   for (auto &m : ms)
     r.add(lookup(map, m, m), m == "pH" ? "?P" : "");
   VI stack;
@@ -40,15 +48,23 @@ static void strucgp_node(const S &x, Record &r, int parent, int depth = 0) {
     fail("Invalid StrucGP depth marker");
   auto n = std::count(x.begin(), x.end(), start);
   if (parent && n > 1) {
-    S pattern =
-        S(1, start) + ".*?" + S(1, std::tolower(static_cast<unsigned char>(start)));
-    for (const auto &branch : tokens(x, pattern))
-      strucgp_node(branch, r, parent, depth + 1);
+    char closing = std::tolower(static_cast<unsigned char>(start));
+    if (x.find_first_of("\r\n") == S::npos) {
+      size_t begin = x.find(start);
+      while (begin != S::npos) {
+        size_t end = x.find(closing, begin+1);
+        if (end == S::npos) break;
+        strucgp_node(x.substr(begin,end-begin+1), r, parent, depth+1);
+        begin = x.find(start,end+1);
+      }
+    } else {
+      S pattern = S(1,start) + ".*?" + S(1,closing);
+      for (const auto& branch : tokens(x,pattern)) strucgp_node(branch,r,parent,depth+1);
+    }
     return;
   }
-  S m = lookup(
-      {{"1", "Hex"}, {"2", "HexNAc"}, {"3", "NeuAc"}, {"4", "NeuGc"}, {"5", "dHex"}},
-      x.substr(1, 1));
+  static const char* names[] = {"Hex", "HexNAc", "NeuAc", "NeuGc", "dHex"};
+  S m = x[1] >= '1' && x[1] <= '5' ? names[x[1]-'1'] : "";
   if (m.empty())
     fail("Unknown StrucGP residue");
   int id = r.add(m);
@@ -58,11 +74,7 @@ static void strucgp_node(const S &x, Record &r, int parent, int depth = 0) {
            "?-?");
   strucgp_node(x.size() > 3 ? x.substr(2, x.size() - 3) : "", r, id, depth + 1);
 }
-struct LinResidue {
-  S kind, mono, sub, anomer;
-  bool alditol = false;
-};
-static LinResidue lin_residue(S x, const Vocab &v) {
+static LinResidue decode_lin_residue(S x, const Vocab &v) {
   if (x == "1(R)-carboxyethoxy")
     return {"implicit", "", "", ""};
   S subname = lookup({{"S", "S"},
@@ -133,6 +145,12 @@ static LinResidue lin_residue(S x, const Vocab &v) {
   }
   return {"mono", mono, join(subs, ","), a + v.pos(mono), alditol};
 }
+static LinResidue lin_residue(const S &x, const Vocab &v) {
+  auto found = v.linucs_cache.find(x);
+  if (found != v.linucs_cache.end())
+    return found->second;
+  return v.linucs_cache.emplace(x, decode_lin_residue(x, v)).first->second;
+}
 static S bracket(const S &x, size_t &p) {
   if (p >= x.size() || x[p] != '[')
     fail("Expected LINUCS bracket");
@@ -148,7 +166,13 @@ static void lin_node(const S &x, size_t &p, Record &r, int parent, const Vocab &
   if (depth > 1024)
     fail("LINUCS nesting limit");
   S l = bracket(x, p), s = bracket(x, p);
-  auto link = match(l, "^\\(([0-9]+|\\?)\\+([0-9]+|\\?)\\)$");
+  VS link;
+  auto plus = l.find('+');
+  if (l.size() >= 5 && l.front() == '(' && l.back() == ')' && plus != S::npos) {
+    S acceptor = l.substr(1,plus-1), donor = l.substr(plus+1,l.size()-plus-2);
+    auto valid = [](const S& s) { return s == "?" || (!s.empty() && s.find_first_not_of("0123456789") == S::npos); };
+    if (valid(acceptor) && valid(donor)) link = {l,acceptor,donor};
+  }
   if ((!parent && !l.empty()) || (parent && link.empty()))
     fail("Invalid LINUCS linkage");
   auto res = lin_residue(s, v);
@@ -180,26 +204,24 @@ static void lin_node(const S &x, size_t &p, Record &r, int parent, const Vocab &
     fail("Unclosed LINUCS children");
   ++p;
 }
-struct KNode {
-  S kind, mono, sub;
-  int idx = 0;
-};
 struct KEnd {
   int id;
   S a, pos;
 };
 static KEnd kend(const S &x) {
-  auto m = match(x, "^([0-9]+)(?::(.*))?$");
-  if (m.empty())
+  size_t p = 0;
+  while (p < x.size() && x[p] >= '0' && x[p] <= '9') ++p;
+  if (p == 0 || (p < x.size() && x[p] != ':') ||
+      x.find_first_of("\r\n") != S::npos)
     fail("Invalid KCF endpoint");
-  S l = m[2], a;
-  if (!l.empty() && has(l, "^[abAB?]")) {
+  S l = p == x.size() ? "" : x.substr(p + 1), a;
+  if (!l.empty() && (l[0] == 'a' || l[0] == 'b' || l[0] == 'A' || l[0] == 'B' || l[0] == '?')) {
     a = S(1, std::tolower((unsigned char)l[0]));
     l.erase(0, 1);
   }
-  return {std::stoi(m[1]), a, replace(l, "|", "/")};
+  return {std::stoi(x.substr(0, p)), a, replace(l, "|", "/")};
 }
-static KNode knode(const S &x, const Vocab &v) {
+static KNode decode_knode(const S &x, const Vocab &v) {
   VS cand = {x};
   bool config = x.size() > 1 && (x[0] == 'D' || x[0] == 'L') && x[1] != '-';
   if (config)
@@ -234,10 +256,36 @@ static KNode knode(const S &x, const Vocab &v) {
   fail("Unknown KCF node");
   return {};
 }
+static KNode knode(const S &x, const Vocab &v) {
+  auto found = v.kcf_cache.find(x);
+  if (found != v.kcf_cache.end())
+    return found->second;
+  return v.kcf_cache.emplace(x, decode_knode(x, v)).first->second;
+}
+static bool decimal_digits(const S &s) {
+  return !s.empty() && s.find_first_not_of("0123456789") == S::npos;
+}
+static VS whitespace_tokens(const S &s) {
+  VS out;
+  out.reserve(3);
+  size_t p = 0;
+  while ((p = s.find_first_not_of(" \t\n\r\f\v", p)) != S::npos) {
+    auto end = s.find_first_of(" \t\n\r\f\v", p);
+    out.push_back(s.substr(p, end == S::npos ? end : end - p));
+    if (end == S::npos || out.size() == 3) break;
+    p = end;
+  }
+  return out;
+}
 static Record kcf(const S &x, const Vocab &v) {
   Record r;
+  // Reserve a small estimate without trusting the optional header count.
+  size_t capacity = std::min(size_t(64), x.size()/20 + 1);
+  r.mono.reserve(capacity); r.sub.reserve(capacity);
+  r.edges.reserve(2*capacity); r.linkage.reserve(capacity);
   std::map<int, KNode> nodes;
   std::vector<std::pair<KEnd, KEnd>> edges;
+  edges.reserve(capacity);
   S section;
   bool seen = false;
   for (auto line : split(x, '\n', false)) {
@@ -246,22 +294,23 @@ static Record kcf(const S &x, const Vocab &v) {
       continue;
     if (line == "///")
       break;
-    auto h = match(line, "^(NODE|EDGE)\\s+[0-9]+");
-    if (!h.empty()) {
-      section = h[1];
+    VS p = whitespace_tokens(line);
+    if (p.size() > 1 && (p[0] == "NODE" || p[0] == "EDGE") &&
+        p[1][0] >= '0' && p[1][0] <= '9') {
+      section = p[0];
       seen |= section == "NODE";
       continue;
     }
-    VS p = tokens(line, "\\S+");
+    // Header matching intentionally accepts a numeric prefix, as before.
     if (section == "NODE") {
-      if (p.size() < 2 || !has(p[0], "^[0-9]+$"))
+      if (p.size() < 2 || !decimal_digits(p[0]))
         continue;
       auto n = knode(p[1], v);
       if (n.kind == "mono")
         n.idx = r.add(n.mono, n.sub);
       nodes[std::stoi(p[0])] = n;
     } else if (section == "EDGE") {
-      if (p.size() < 3 || !has(p[0], "^[0-9]+$"))
+      if (p.size() < 3 || !decimal_digits(p[0]))
         fail("Malformed KCF edge");
       edges.push_back({kend(p[1]), kend(p[2])});
     }
@@ -270,10 +319,12 @@ static Record kcf(const S &x, const Vocab &v) {
     fail("Missing KCF nodes");
   std::map<int, S> rootanomer;
   for (auto &e : edges) {
-    auto l = e.first, q = e.second;
-    if (!nodes.count(l.id) || !nodes.count(q.id))
-      fail("Missing KCF endpoint");
-    auto a = nodes[l.id], b = nodes[q.id];
+    const auto& l = e.first;
+    const auto& q = e.second;
+    auto left = nodes.find(l.id), right = nodes.find(q.id);
+    if (left == nodes.end() || right == nodes.end()) fail("Missing KCF endpoint");
+    const auto& a = left->second;
+    const auto& b = right->second;
     if (a.kind == "mono" && b.kind == "mono")
       r.edge(b.idx, a.idx,
              (l.a == "a" || l.a == "b" ? l.a : "?") + (l.pos.empty() ? "?" : l.pos) +

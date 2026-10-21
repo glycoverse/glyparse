@@ -11,28 +11,31 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // native_convert_cpp
-Rcpp::CharacterVector native_convert_cpp(Rcpp::CharacterVector x, const std::string& format, Rcpp::List vocabulary);
-RcppExport SEXP _glyparse_native_convert_cpp(SEXP xSEXP, SEXP formatSEXP, SEXP vocabularySEXP) {
+Rcpp::CharacterVector native_convert_cpp(Rcpp::CharacterVector x, const std::string& format, Rcpp::List vocabulary, int threads);
+RcppExport SEXP _glyparse_native_convert_cpp(SEXP xSEXP, SEXP formatSEXP, SEXP vocabularySEXP, SEXP threadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type format(formatSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type vocabulary(vocabularySEXP);
-    rcpp_result_gen = Rcpp::wrap(native_convert_cpp(x, format, vocabulary));
+    Rcpp::traits::input_parameter< int >::type threads(threadsSEXP);
+    rcpp_result_gen = Rcpp::wrap(native_convert_cpp(x, format, vocabulary, threads));
     return rcpp_result_gen;
 END_RCPP
 }
 // native_records_cpp
-Rcpp::List native_records_cpp(Rcpp::CharacterVector x, const std::string& format, Rcpp::List vocabulary);
-RcppExport SEXP _glyparse_native_records_cpp(SEXP xSEXP, SEXP formatSEXP, SEXP vocabularySEXP) {
+Rcpp::List native_records_cpp(Rcpp::CharacterVector x, const std::string& format, Rcpp::List vocabulary, int threads, bool constructible_only);
+RcppExport SEXP _glyparse_native_records_cpp(SEXP xSEXP, SEXP formatSEXP, SEXP vocabularySEXP, SEXP threadsSEXP, SEXP constructible_onlySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< const std::string& >::type format(formatSEXP);
     Rcpp::traits::input_parameter< Rcpp::List >::type vocabulary(vocabularySEXP);
-    rcpp_result_gen = Rcpp::wrap(native_records_cpp(x, format, vocabulary));
+    Rcpp::traits::input_parameter< int >::type threads(threadsSEXP);
+    Rcpp::traits::input_parameter< bool >::type constructible_only(constructible_onlySEXP);
+    rcpp_result_gen = Rcpp::wrap(native_records_cpp(x, format, vocabulary, threads, constructible_only));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -51,8 +54,8 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_glyparse_native_convert_cpp", (DL_FUNC) &_glyparse_native_convert_cpp, 3},
-    {"_glyparse_native_records_cpp", (DL_FUNC) &_glyparse_native_records_cpp, 3},
+    {"_glyparse_native_convert_cpp", (DL_FUNC) &_glyparse_native_convert_cpp, 4},
+    {"_glyparse_native_records_cpp", (DL_FUNC) &_glyparse_native_records_cpp, 5},
     {"_glyparse_native_aux_cpp", (DL_FUNC) &_glyparse_native_aux_cpp, 3},
     {NULL, NULL, 0}
 };

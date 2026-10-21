@@ -1,0 +1,93 @@
+[
+  {
+    "file": "derived_iupac_short.csv",
+    "bytes": 213236,
+    "sha256": "3841b844551203807cc49077ac3c55b2819c8e4cb70b2439c95b3049bcc06557",
+    "rows": 3000,
+    "unique": 3000
+  },
+  {
+    "file": "derived_kcf.csv",
+    "bytes": 757805,
+    "sha256": "ca32cb38054c8726d7326ae782bb54ba588a98953f0047b072c0cf1edd1f695f",
+    "rows": 3000,
+    "unique": 3000
+  },
+  {
+    "file": "derived_linear_code.csv",
+    "bytes": 134506,
+    "sha256": "82c6ec36a744fa6ab42820afe10eb0ba7be38325d5b05cdd7f66b532249a0ab8",
+    "rows": 3000,
+    "unique": 3000
+  },
+  {
+    "file": "derived_linucs.csv",
+    "bytes": 534936,
+    "sha256": "659989adae535d4105042df9f71b93ed5f6253b151c11ecd8cc92df799242ec7",
+    "rows": 3000,
+    "unique": 3000
+  },
+  {
+    "file": "derived_pglyco_struc.csv",
+    "bytes": 127031,
+    "sha256": "058e58eca312b22df2cd52b49ed25c0f77963cd275a289a689fd7920dda4de23",
+    "rows": 2841,
+    "unique": 2841
+  },
+  {
+    "file": "derived_strucgp_struc.csv",
+    "bytes": 127031,
+    "sha256": "9a02a990dbd69fea05daf04b891ed922bcacfd362240043c4eb7b22d12c9699d",
+    "rows": 2841,
+    "unique": 2841
+  },
+  {
+    "file": "glycan_sequences_glycam_iupac.csv",
+    "bytes": 722115,
+    "sha256": "83e69b3b07f3467998a7d7f0924240a001daf65c8a506b8acbead154ea717469",
+    "rows": 7481,
+    "unique": 7481
+  },
+  {
+    "file": "glycan_sequences_glycoct.csv",
+    "bytes": 23806334,
+    "sha256": "3525ccceb77ccd369100f105500315004f983928225b3756e2a044eb49176b9f",
+    "rows": 59847,
+    "unique": 59837
+  },
+  {
+    "file": "glycan_sequences_gwb.csv",
+    "bytes": 8079641,
+    "sha256": "3fec15ea5ad66dc9fe8b799f831b2ee36edfa9932f4585ab2b1bf9395f093477",
+    "rows": 51507,
+    "unique": 50767
+  },
+  {
+    "file": "glycan_sequences_iupac_compact.csv",
+    "bytes": 2084247,
+    "sha256": "84d93064ef42f788f88ad02d2e4e2246df3ebaabe6255a8252a80cdcce67c098",
+    "rows": 24531,
+    "unique": 24531
+  },
+  {
+    "file": "glycan_sequences_iupac_condensed.csv",
+    "bytes": 2056533,
+    "sha256": "f332d86564e290c771f3b6837d9c09b4aa4ad79fe52bec4db809d0ae923113c8",
+    "rows": 19933,
+    "unique": 19933
+  },
+  {
+    "file": "glycan_sequences_iupac_extended.csv",
+    "bytes": 3672532,
+    "sha256": "9aae8595f575caf7168e0aa38df5cbe2b1740e71c435d1bc4398b0c2a8392d1b",
+    "rows": 20407,
+    "unique": 20407
+  },
+  {
+    "file": "glycan_sequences_wurcs.csv",
+    "bytes": 17607032,
+    "sha256": "084f1efa9bb1623629250e7c9c07f045505c0d1ccaed0ac7c4bb8e42852933b3",
+    "rows": 59994,
+    "unique": 59993
+  }
+]

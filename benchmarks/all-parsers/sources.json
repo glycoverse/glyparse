@@ -1,0 +1,58 @@
+[
+  {
+    "format": "glycam_iupac",
+    "bcoid": "GLY_000287",
+    "release": "2.12.1",
+    "url": "https://data.glygen.org/ln2data/releases/data/v-2.12.1/reviewed/glycan_sequences_glycam_iupac.csv",
+    "bytes": 722115,
+    "sha256": "83e69b3b07f3467998a7d7f0924240a001daf65c8a506b8acbead154ea717469"
+  },
+  {
+    "format": "glycoct",
+    "bcoid": "GLY_000288",
+    "release": "2.12.1",
+    "url": "https://data.glygen.org/ln2data/releases/data/v-2.12.1/reviewed/glycan_sequences_glycoct.csv",
+    "bytes": 23806334,
+    "sha256": "3525ccceb77ccd369100f105500315004f983928225b3756e2a044eb49176b9f"
+  },
+  {
+    "format": "iupac_extended",
+    "bcoid": "GLY_000290",
+    "release": "2.12.1",
+    "url": "https://data.glygen.org/ln2data/releases/data/v-2.12.1/reviewed/glycan_sequences_iupac_extended.csv",
+    "bytes": 3672532,
+    "sha256": "9aae8595f575caf7168e0aa38df5cbe2b1740e71c435d1bc4398b0c2a8392d1b"
+  },
+  {
+    "format": "wurcs",
+    "bcoid": "GLY_000292",
+    "release": "2.12.1",
+    "url": "https://data.glygen.org/ln2data/releases/data/v-2.12.1/reviewed/glycan_sequences_wurcs.csv",
+    "bytes": 17607032,
+    "sha256": "084f1efa9bb1623629250e7c9c07f045505c0d1ccaed0ac7c4bb8e42852933b3"
+  },
+  {
+    "format": "gwb",
+    "bcoid": "GLY_000580",
+    "release": "2.12.1",
+    "url": "https://data.glygen.org/ln2data/releases/data/v-2.12.1/reviewed/glycan_sequences_gwb.csv",
+    "bytes": 8079641,
+    "sha256": "3fec15ea5ad66dc9fe8b799f831b2ee36edfa9932f4585ab2b1bf9395f093477"
+  },
+  {
+    "format": "iupac_condensed",
+    "bcoid": "GLY_001480",
+    "release": "2.12.1",
+    "url": "https://data.glygen.org/ln2data/releases/data/v-2.12.1/reviewed/glycan_sequences_iupac_condensed.csv",
+    "bytes": 2056533,
+    "sha256": "f332d86564e290c771f3b6837d9c09b4aa4ad79fe52bec4db809d0ae923113c8"
+  },
+  {
+    "format": "iupac_compact",
+    "bcoid": "GLY_001481",
+    "release": "2.12.1",
+    "url": "https://data.glygen.org/ln2data/releases/data/v-2.12.1/reviewed/glycan_sequences_iupac_compact.csv",
+    "bytes": 2084247,
+    "sha256": "84d93064ef42f788f88ad02d2e4e2246df3ebaabe6255a8252a80cdcce67c098"
+  }
+]

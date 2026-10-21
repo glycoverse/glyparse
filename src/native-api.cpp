@@ -1,50 +1,143 @@
 #include "native.h"
+namespace {
+// Workers only handle owned C++ strings/records. All R reads, allocations,
+// callbacks and interrupt checks stay on the calling thread.
+template <class Parse>
+std::vector<gp::Vocab> parse_batch(const std::vector<std::string>& input, const std::vector<bool>& missing,
+                 const gp::Vocab& vocabulary, int threads, Parse parse) {
+  threads = std::max(1, std::min(threads, 64));
+  if (input.size() < 256) threads = 1;
+  std::vector<gp::Vocab> vocabularies(threads, vocabulary);
+  std::atomic<size_t> next{0};
+  std::atomic<bool> stop{false};
+  struct Workers {
+    std::vector<std::thread> workers;
+    std::atomic<bool>& stop;
+    ~Workers() { stop = true; for (auto& worker : workers) if (worker.joinable()) worker.join(); }
+  } workers{{}, stop};
+  auto run = [&](int worker) {
+    while (!stop) {
+      size_t begin = next.fetch_add(128);
+      if (begin >= input.size()) break;
+      if (!worker) Rcpp::checkUserInterrupt();
+      for (size_t i = begin; i < std::min(begin+128, input.size()); ++i)
+        if (!missing[i]) parse(i, vocabularies[worker]);
+    }
+  };
+  for (int i = 1; i < threads; ++i) {
+    try { workers.workers.emplace_back(run, i); }
+    catch (const std::system_error&) { break; } // Continue on available workers.
+  }
+  run(0);
+  for (auto& worker : workers.workers) worker.join();
+  return vocabularies;
+}
+class RecordWriter {
+  Rcpp::CharacterVector fields;
+  Rcpp::LogicalVector reduced, ordinary;
+  std::map<std::string, Rcpp::CharacterVector> anomers;
+  std::map<int, Rcpp::CharacterVector> empty_subs;
+ public:
+  RecordWriter() : fields(Rcpp::CharacterVector::create("mono", "sub", "edges",
+      "linkage", "anomer", "alditol")), reduced(Rcpp::LogicalVector::create(true)),
+      ordinary(Rcpp::LogicalVector::create(false)) {}
+  Rcpp::List write(const gp::Record& r) {
+    if (!r.parts.empty() || !r.floats.empty()) return r.list();
+    Rcpp::List out(6);
+    Rf_setAttrib(out, R_NamesSymbol, fields);
+    SEXP mono = Rf_allocVector(STRSXP, r.mono.size()); SET_VECTOR_ELT(out, 0, mono);
+    for (size_t i = 0; i < r.mono.size(); ++i) SET_STRING_ELT(mono, i, Rf_mkChar(r.mono[i].c_str()));
+    bool empty = std::all_of(r.sub.begin(), r.sub.end(), [](const gp::S& s){ return s.empty(); });
+    if (empty) {
+      auto found = empty_subs.find(r.sub.size());
+      if (found == empty_subs.end()) found = empty_subs.emplace(r.sub.size(),
+        Rcpp::CharacterVector(r.sub.size(), "")).first;
+      SET_VECTOR_ELT(out, 1, found->second);
+    } else {
+      SEXP sub = Rf_allocVector(STRSXP, r.sub.size()); SET_VECTOR_ELT(out, 1, sub);
+      for (size_t i = 0; i < r.sub.size(); ++i) SET_STRING_ELT(sub, i, Rf_mkChar(r.sub[i].c_str()));
+    }
+    SEXP edges = Rf_allocVector(INTSXP, r.edges.size()); SET_VECTOR_ELT(out, 2, edges);
+    std::copy(r.edges.begin(), r.edges.end(), INTEGER(edges));
+    SEXP links = Rf_allocVector(STRSXP, r.linkage.size()); SET_VECTOR_ELT(out, 3, links);
+    for (size_t i = 0; i < r.linkage.size(); ++i) SET_STRING_ELT(links, i, Rf_mkChar(r.linkage[i].c_str()));
+    auto anomer = anomers.find(r.anomer);
+    if (anomer == anomers.end()) anomer = anomers.emplace(r.anomer,
+      Rcpp::CharacterVector::create(r.anomer)).first;
+    SET_VECTOR_ELT(out, 4, anomer->second);
+    SET_VECTOR_ELT(out, 5, r.alditol ? static_cast<SEXP>(reduced) : static_cast<SEXP>(ordinary));
+    return out;
+  }
+};
+void copy_inputs(Rcpp::CharacterVector x, std::vector<std::string>& input,
+                 std::vector<bool>& missing) {
+  input.resize(x.size()); missing.resize(x.size());
+  for (R_xlen_t i = 0; i < x.size(); ++i) {
+    missing[i] = STRING_ELT(x,i) == NA_STRING;
+    if (!missing[i]) input[i] = CHAR(STRING_ELT(x,i));
+  }
+}
+}
 // [[Rcpp::export]]
 Rcpp::CharacterVector native_convert_cpp(Rcpp::CharacterVector x, const std::string &format,
-                                         Rcpp::List vocabulary) {
+                                         Rcpp::List vocabulary, int threads = 2) {
   gp::Vocab v(vocabulary);
-  Rcpp::CharacterVector out(x.size(), NA_STRING);
-  for (R_xlen_t i = 0; i < x.size(); ++i) {
-    if (i % 128 == 0)
-      Rcpp::checkUserInterrupt();
-    if (x[i] == NA_STRING)
-      continue;
+  std::vector<std::string> input, converted(x.size());
+  std::vector<bool> missing;
+  std::vector<unsigned char> valid(x.size(), 0);
+  copy_inputs(x, input, missing);
+  parse_batch(input, missing, v, threads, [&](size_t i, gp::Vocab& vocab) {
     try {
-      std::string s = Rcpp::as<std::string>(x[i]);
-      out[i] = format == "detect" ? gp::detect(s, v) : gp::convert(s, format, v);
-    } catch (const std::exception &) {
-      // Keep failed detection in a group so auto_parse preserves its position.
-      if (format == "detect")
-        out[i] = "parse_linear_code";
+      converted[i] = format == "detect" ? gp::detect(input[i], vocab) : gp::convert(input[i], format, vocab);
+      valid[i] = 1;
+    } catch (const std::exception&) {
+      if (format == "detect") { converted[i] = "parse_linear_code"; valid[i] = 1; }
     }
-  }
+  });
+  Rcpp::CharacterVector out(x.size(), NA_STRING);
+  for (R_xlen_t i = 0; i < x.size(); ++i) if (valid[i]) out[i] = converted[i];
   out.attr("names") = x.attr("names");
   return out;
 }
 // [[Rcpp::export]]
 Rcpp::List native_records_cpp(Rcpp::CharacterVector x, const std::string &format,
-                              Rcpp::List vocabulary) {
+                              Rcpp::List vocabulary, int threads = 2, bool constructible_only = false) {
   gp::Vocab v(vocabulary);
+  std::vector<std::string> input, failures(x.size());
+  std::vector<bool> missing;
+  std::vector<gp::Record> records(x.size());
+  std::vector<unsigned char> valid(x.size(), 0);
+  // Retain descriptor-count diagnostics independently of work scheduling.
+  std::set<gp::S> descriptors;
+  copy_inputs(x, input, missing);
+  auto vocabularies = parse_batch(input, missing, v, threads, [&](size_t i, gp::Vocab& vocab) {
+    try { records[i] = gp::parse_direct(input[i], format, vocab); valid[i] = 1; }
+    catch (const std::exception& e) { failures[i] = e.what(); }
+  });
+  for (const auto& vocab : vocabularies)
+    for (const auto& entry : vocab.wurcs_cache) descriptors.insert(entry.first);
   Rcpp::List out(x.size());
   Rcpp::CharacterVector reasons(x.size(), NA_STRING);
   Rcpp::LogicalVector warnings(x.size());
+  RecordWriter writer;
   for (R_xlen_t i = 0; i < x.size(); ++i) {
-    if (i % 128 == 0)
-      Rcpp::checkUserInterrupt();
-    if (x[i] == NA_STRING)
-      continue;
-    try {
-      auto r = gp::parse_direct(Rcpp::as<std::string>(x[i]), format, v);
-      out[i] = r.list();
-      warnings[i] = r.warn;
-    } catch (const std::exception &e) {
-      reasons[i] = e.what();
+    if (i % 128 == 0) Rcpp::checkUserInterrupt();
+    if (valid[i]) {
+      const auto& record = records[i];
+      warnings[i] = record.warn;
+      // A single out-tree must have n-1 edges. No floating component can
+      // repair this when none is declared. Avoid materializing records that
+      // the mandatory graph validator would necessarily reject.
+      bool impossible = record.parts.empty() &&
+        record.edges.size()/2 + 1 != record.mono.size();
+      if (!constructible_only || !impossible) out[i] = writer.write(record);
     }
+    else if (!missing[i]) reasons[i] = failures[i];
   }
   out.attr("names") = x.attr("names");
   out.attr("reasons") = reasons;
   out.attr("warnings") = warnings;
-  out.attr("residue_parses") = static_cast<int>(v.wurcs_cache.size());
+  out.attr("residue_parses") = static_cast<int>(descriptors.size());
   return out;
 }
 // [[Rcpp::export]]
