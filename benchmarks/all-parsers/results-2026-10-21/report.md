@@ -46,6 +46,7 @@ The preceding report showed 0.05183 ms/record versus 0.04692 ms/record in the ea
 - All 267,882 public-parser outputs match the frozen baseline at both worker limits: canonical strings, missing positions, graph-key order, vertex/edge/graph attributes and edge topology.
 - Native GlycoCT/WURCS records, failure reasons, warning flags and descriptor counts match for all 119,841 inputs. Another 23,121 converter/direct-parser mutations and 8,737 pGlyco/StrucGP variants match the reference.
 - Installed-package regression suites pass, including forced garbage collection, graph serialization, mutation isolation, serial/parallel parity, invalid-topology validation and older-constructor fallbacks.
+- Full local `R CMD check --no-manual` (including examples and vignettes) passed for both packages with 0 errors, 0 warnings and 0 notes.
 - Package checks and CI are recorded in [glyparse #55](https://github.com/glycoverse/glyparse/pull/55) and [glyrepr #104](https://github.com/glycoverse/glyrepr/pull/104); this benchmark is not a claim that every parser met the requested target.
 
 ## Reproduction

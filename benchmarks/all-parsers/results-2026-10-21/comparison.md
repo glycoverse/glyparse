@@ -23,4 +23,4 @@ Optimized installed builds, identical inputs, three warm full-batch repetitions.
 
 Seven official GlyGen 2.12.1 formats use the pinned full CSVs, including the supplied WURCS and GlycoCT files. Six formats use up to 3,000 distinct encodings derived from real WURCS structures. `auto_parse()` uses 6,500 mixed-format inputs. All canonical outputs, missing positions, graph attributes and topology match the baseline. The requested 0.01 ms target is not fully achieved; 8/13 format parsers meet it at the default worker limit.
 
-[Full report, including eight-worker, median, maximum and fresh-process measurements](https://github.com/glycoverse/glyparse/blob/codex/parser-performance/benchmarks/all-parsers/results-2026-10-21/report.md). Raw before/after timings and input hashes are committed alongside that report.
+[Full report, including eight-worker, median, maximum and fresh-process measurements](report.md). Raw before/after timings and input hashes are committed alongside that report.
