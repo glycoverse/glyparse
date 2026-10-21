@@ -4,11 +4,11 @@ The GlycoCT regression is resolved on this workload. The original goal of every 
 
 ## Revisions and workload
 
-- Candidate: glyparse `a3be5ad` with glyrepr `c99d5e9`, optimized installed builds. Later documentation-only commits do not change the measured implementation.
+- Candidate: glyparse `a3be5ad` with glyrepr `c99d5e9`, optimized installed builds. Subsequent namespace qualification (`stats::na.omit`), packaging and documentation changes leave the measured algorithm unchanged.
 - Previous all-parser pair: glyparse `c45c0ad` with glyrepr `22f5efa`. Earlier WURCS/GlycoCT pair: glyparse `1830759` with glyrepr `ed3a98f`.
 - R 4.6.1, aarch64 macOS 26.5.2, igraph 2.3.4; complete session information is included beside this report.
 - Seven official formats are pinned to [GlyGen 2.12.1](https://data.glygen.org/ln2data/releases/data/v-2.12.1/reviewed/); URLs and published-file SHA256 values are in [sources.json](../sources.json). Six formats are derived from real, connected, unmodified WURCS glycans, with up to 3,000 distinct encodings per format. They are not official downloads for those six formats.
-- The 13 corpora contain 261,382 rows. Mixed-format automatic detection adds 6,500 rows, sampled with seed 20261021. Input hashes, rows and unique counts are in [input-manifest.json](input-manifest.json).
+- The user-supplied WURCS and GlycoCT files have the same SHA256 values as the pinned official copies. The 13 corpora contain 261,382 rows. Mixed-format automatic detection adds 6,500 rows, sampled with seed 20261021. Input hashes, rows and unique counts are in [input-manifest.json](input-manifest.json).
 
 ## Complete public parser timings
 
@@ -44,7 +44,7 @@ The preceding report showed 0.05183 ms/record versus 0.04692 ms/record in the ea
 - All 267,882 public-parser outputs match the frozen baseline at both worker limits: canonical strings, missing positions, graph-key order, vertex/edge/graph attributes and edge topology.
 - Native GlycoCT/WURCS records, failure reasons, warning flags and descriptor counts match for all 119,841 inputs. Another 23,121 converter/direct-parser mutations and 8,737 pGlyco/StrucGP variants match the reference.
 - Installed-package regression suites pass, including forced garbage collection, graph serialization, mutation isolation, serial/parallel parity, invalid-topology validation and older-constructor fallbacks.
-- Package checks and CI are recorded in the pull requests; this benchmark is not a claim that every parser met the requested target.
+- Package checks and CI are recorded in [glyparse #55](https://github.com/glycoverse/glyparse/pull/55) and [glyrepr #104](https://github.com/glycoverse/glyrepr/pull/104); this benchmark is not a claim that every parser met the requested target.
 
 ## Reproduction
 

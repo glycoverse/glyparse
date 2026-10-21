@@ -1,12 +1,12 @@
 # glyparse (development version)
 
-* Large native parsing and normalization batches use up to two CPU workers. Set `options(glyparse.threads = 1L)` for serial decoding or choose up to 64 workers; R validation and graph construction stay on the calling thread. See `?glyparse_options`.
+* Large native parsing and normalization batches use up to two CPU workers. Set `options(glyparse.threads = 1L)` for serial decoding or choose up to 64 workers; R validation and graph construction stay on the calling thread. See `?glyparse_options`. (#55)
 
-* GlycoCT, LINUCS, pGlyco, IUPAC Extended, GlyCAM, and IUPAC Compact batches avoid repeated token scans and intermediate allocation.
+* GlycoCT, LINUCS, pGlyco, IUPAC Extended, GlyCAM, and IUPAC Compact batches avoid repeated token scans and intermediate allocation. (#55)
 
-* IUPAC Short, IUPAC Compact, IUPAC Extended, GlyCAM, GlycoWorkbench, LINUCS, KCF, and plain Linear Code parse batches faster through residue reuse and linear token scanning. Unusual Linear Code and IUPAC Short syntax retains the general converter.
+* IUPAC Short, IUPAC Compact, IUPAC Extended, GlyCAM, GlycoWorkbench, LINUCS, KCF, and plain Linear Code parse batches faster through residue reuse and linear token scanning. Unusual Linear Code and IUPAC Short syntax retains the general converter. (#55)
 
-* `parse_glycoct()` and `parse_wurcs()` parse large batches faster through shared residue decoding and linear scanning. Repeated non-root alditol warnings are reported once per batch; newer glyrepr versions also avoid constructing suppressed failure diagnostics.
+* `parse_glycoct()` and `parse_wurcs()` parse large batches faster through shared residue decoding and linear scanning. Repeated non-root alditol warnings are reported once per batch; newer glyrepr versions also avoid constructing suppressed failure diagnostics. (#55)
 
 * Most format parsing, IUPAC conversion, and automatic format detection now run in C++, while preserving vectorization, names, missing values, and failure handling. Linear Code retains an R fallback for modified or unusual notation. Installing from source requires a C++17 compiler.
 
