@@ -21,12 +21,18 @@ native_vocabulary <- local({
 
 # Batch native parsing isolates invalid records without entering R per string.
 native_convert <- function(x, format) {
-  native_convert_cpp(x, format, native_vocabulary())
+  native_convert_cpp(x, format, native_vocabulary(), native_threads())
 }
 
 native_records <- function(x, format, progress = FALSE) {
   parse_batch <- function(values) {
-    records <- native_records_cpp(values, format, native_vocabulary())
+    records <- native_records_cpp(
+      values,
+      format,
+      native_vocabulary(),
+      native_threads(),
+      constructible_only = TRUE
+    )
     # One warning describes the same lossy conversion for the whole batch.
     if (any(attr(records, "warnings"))) {
       if (format == "wurcs") {
@@ -63,3 +69,24 @@ convert_glycam_iupac_to_condensed <- function(x) {
   native_convert(x, "glycam_iupac")
 }
 convert_gwb_to_condensed <- function(x) native_convert(x, "gwb")
+
+# Limit the default batch to two CPU workers. Parsing only uses owned C++ data
+# on workers; graph construction and all R operations remain on the caller.
+native_threads <- function() {
+  threads <- getOption("glyparse.threads", 2L)
+  checkmate::assert_int(threads, lower = 1, upper = 64)
+  as.integer(threads)
+}
+
+#' Native Parsing Options
+#'
+#' Native format decoding and normalization use up to two CPU workers for
+#' batches of at least 256 distinct, normalized inputs. Smaller batches are
+#' decoded serially. Set `options(glyparse.threads = 1L)` to disable parallel
+#' decoding, or set an integer between 1 and 64 to choose the worker limit.
+#' Each worker has its own residue cache. R object allocation, validation,
+#' progress reporting, and graph construction run on the calling thread.
+#' No complete input or parsed result is cached between calls.
+#'
+#' @name glyparse_options
+NULL

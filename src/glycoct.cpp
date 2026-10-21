@@ -76,11 +76,29 @@ static VS linkage_fields(const S &s) {
     ++p;
   return {s.substr(0, p), from, parent, child, to};
 }
-static S bounds(const S &s) {
-  auto m = match(s, "-((?:[0-9]+|x):(?:[0-9]+|x))");
-  return m.empty() ? "" : m[1];
+// Locate the same first ring-bound match without starting a regex engine for
+// each entry in the residue dictionary.
+static std::pair<size_t, size_t> ring_span(const S &s) {
+  for (size_t dash = s.find('-'); dash != S::npos;
+       dash = s.find('-', dash + 1)) {
+    size_t p = dash + 1;
+    if (p < s.size() && s[p] == 'x') ++p;
+    else if (!digits(s, p)) continue;
+    if (p == s.size() || s[p++] != ':') continue;
+    if (p < s.size() && s[p] == 'x') ++p;
+    else if (!digits(s, p)) continue;
+    return {dash, p};
+  }
+  return {S::npos, S::npos};
 }
-static S core(const S &s) { return sub(s, "-(?:[0-9]+|x):(?:[0-9]+|x)"); }
+static S bounds(const S &s) {
+  auto span = ring_span(s);
+  return span.first == S::npos ? "" : s.substr(span.first + 1, span.second - span.first - 1);
+}
+static S core(const S &s) {
+  auto span = ring_span(s);
+  return span.first == S::npos ? s : s.substr(0, span.first) + s.substr(span.second);
+}
 static bool cyclic(const S &b) {
   auto m = match(b, "^([0-9]+):([0-9]+)$");
   if (m.empty())
@@ -357,23 +375,42 @@ static CBlock block(const VS &lines, bool und) {
     fail("Invalid UND metadata");
   return b;
 }
+struct CMono { S anomer, position; bool alditol; };
 struct CData {
   Record record;
   VI ids;
-  std::vector<CResidue> mono;
+  std::vector<CMono> mono;
 };
 static CData assemble(const CBlock &b, const Vocab &v) {
   CData d;
-  std::map<int, CResidue> residues;
-  for (auto &r : b.residues)
-    residues[r.id] = r;
-  for (auto &r : b.residues) {
+  d.ids.reserve(b.residues.size()); d.mono.reserve(b.residues.size());
+  d.record.mono.reserve(b.residues.size()); d.record.sub.reserve(b.residues.size());
+  d.record.edges.reserve(2*b.edges.size()); d.record.linkage.reserve(b.edges.size());
+  int max_id = 0;
+  for (const auto& r : b.residues) max_id = std::max(max_id, r.id);
+  bool dense = max_id <= static_cast<int>(4*b.residues.size()+16);
+  VI offsets(dense ? max_id+1 : 0, -1);
+  std::unordered_map<int,int> sparse;
+  for (size_t i = 0; i < b.residues.size(); ++i) {
+    if (dense) offsets[b.residues[i].id] = i;
+    else sparse[b.residues[i].id] = i;
+  }
+  auto index = [&](int id) {
+    if (dense) return id >= 0 && id <= max_id ? offsets[id] : -1;
+    auto found = sparse.find(id);
+    return found == sparse.end() ? -1 : found->second;
+  };
+  std::vector<VS> substituents(b.residues.size());
+  for (const auto& edge : b.edges) {
+    int from = index(edge.from), to = index(edge.to);
+    if (from >= 0 && to >= 0 && b.residues[to].kind == "sub")
+      substituents[from].push_back(b.residues[to].content + "\r" + edge.parent + "\r" + edge.child);
+  }
+  for (size_t ri = 0; ri < b.residues.size(); ++ri) {
+    const auto& r = b.residues[ri];
     if (r.kind != "mono")
       continue;
-    VS subs;
-    for (auto &e : b.edges)
-      if (e.from == r.id && residues.count(e.to) && residues[e.to].kind == "sub")
-        subs.push_back(residues[e.to].content + "\r" + e.parent + "\r" + e.child);
+    const VS& subs = substituents[ri];
     // The descriptor and its ordered substituents fully determine chemistry.
     // Keep this cache local to the vocabulary/batch, including failed residues.
     auto key = std::make_pair(r.content, subs);
@@ -398,7 +435,7 @@ static CData assemble(const CBlock &b, const Vocab &v) {
     }
     d.record.add(m.first, m.second);
     d.ids.push_back(r.id);
-    d.mono.push_back(r);
+    d.mono.push_back({r.anomer, r.position, r.alditol});
   }
   if (d.ids.empty())
     fail("No GlycoCT monosaccharides");
@@ -516,6 +553,8 @@ Record glycoct_parse(const S &x, const Vocab &v) {
   if (in && unds.empty())
     fail("Missing UND block");
   auto md = assemble(block(main, false), v);
+  if (unds.empty())
+    return std::move(md.record);
   Record r = md.record;
   std::map<int, int> mainids;
   for (size_t i = 0; i < md.ids.size(); ++i)
@@ -553,7 +592,8 @@ Record glycoct_parse(const S &x, const Vocab &v) {
     }
     return unique(p);
   };
-  auto occ = occupied(md.record), carbon = occupied(md.record, true);
+  auto occ = parts.empty() ? Slots{} : occupied(md.record);
+  auto carbon = subs.empty() ? Slots{} : occupied(md.record, true);
   for (auto &p : parts) {
     auto roots = p.data.record.roots();
     if (roots.size() != 1)

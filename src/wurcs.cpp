@@ -202,7 +202,10 @@ Record wurcs_parse(const S &x, const Vocab &v) {
   }
   std::vector<WResidue> residues;
   Record r;
-  for (auto &s : split(m[2], '-')) {
+  auto sequence = split(m[2], '-');
+  residues.reserve(sequence.size()); r.mono.reserve(sequence.size());
+  r.sub.reserve(sequence.size()); r.edges.reserve(2*sequence.size()); r.linkage.reserve(sequence.size());
+  for (auto &s : sequence) {
     int i = std::stoi(s);
     if (i < 1 || i > (int)uniq.size())
       fail("Invalid WURCS residue sequence");
@@ -223,6 +226,17 @@ Record wurcs_parse(const S &x, const Vocab &v) {
       auto e = split(l, '-');
       if (e.size() != 2)
         fail("Invalid WURCS linkage");
+      if (e[0].find('|') == S::npos && e[1].find('|') == S::npos) {
+        auto a = endpoint(e[0], residues.size()), b = endpoint(e[1], residues.size());
+        auto is_donor = [&](const std::pair<int,S>& end) {
+          const auto& residue = residues[end.first-1];
+          S pos = residue.anomer.substr(1);
+          return !residue.alditol && (end.second == "?" || (pos != "?" && pos == end.second));
+        };
+        if (is_donor(a) && !is_donor(b)) std::swap(a,b);
+        r.edge(a.first, b.first, residues[b.first-1].anomer.substr(0,1) + b.second + "-" + a.second);
+        continue;
+      }
       bool left = donor(e[0], residues), right = donor(e[1], residues);
       if ((left && !right) || (!left && !right && e[1].find('|') != S::npos))
         std::swap(e[0], e[1]);
@@ -265,8 +279,9 @@ Record wurcs_parse(const S &x, const Vocab &v) {
       i = comps[i - 1];
     return i;
   };
-  for (size_t i = 0; i < r.edges.size(); i += 2)
-    comps[root(r.edges[i + 1]) - 1] = root(r.edges[i]);
+  if (!floats.empty())
+    for (size_t i = 0; i < r.edges.size(); i += 2)
+      comps[root(r.edges[i + 1]) - 1] = root(r.edges[i]);
   auto occ = floats.empty() ? Slots{} : occupied(r);
   VI floatingroots;
   for (auto &f : floats) {

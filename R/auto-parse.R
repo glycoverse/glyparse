@@ -66,7 +66,17 @@ auto_parse <- function(
       progress = progress
     )
   })
-  unique_result <- do.call(c, parsed)[order(unlist(groups, use.names = FALSE))]
+  # Merge the already validated graph stores once. Repeated vctrs prototype
+  # merges otherwise recheck an increasingly large store for each format.
+  keys <- rep(NA_character_, length(input$unique_x))
+  for (i in seq_along(groups)) {
+    keys[groups[[i]]] <- as.character(parsed[[i]])
+  }
+  graphs <- unlist(lapply(parsed, attr, "graphs"), recursive = FALSE)
+  graphs <- graphs[!duplicated(names(graphs))]
+  used <- unique(keys[!is.na(keys)])
+  graphs <- if (length(used)) graphs[used] else list()
+  unique_result <- glyrepr::new_glycan_structure(keys, graphs)
   abort_on_invalid_parse(
     input$unique_x[is.na(unique_result)],
     on_failure,

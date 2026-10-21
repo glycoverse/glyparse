@@ -79,11 +79,11 @@ static S childformat(const GNode &n, const Vocab &v) {
   return gformat(n, v) + "(" + (n.anomer.empty() ? "?" + v.pos(n.mono) : n.anomer) +
          "-" + n.pos + ")";
 }
-static S gformat(const GNode &n, const Vocab &v, bool root, bool alditol) {
+static void gformat_into(const GNode &n, const Vocab &v, bool root, bool alditol, S& out) {
   if (n.kind != "mono" || (n.ring == "o" && !(root && alditol)))
     fail("Invalid GlycoWorkbench root");
   S mono = n.mono, subs;
-  VS arms;
+  std::vector<const GNode*> arms;
   int deoxy = 0, ulo = 0;
   for (auto &c : n.children) {
     if (c.kind == "sub") {
@@ -100,17 +100,25 @@ static S gformat(const GNode &n, const Vocab &v, bool root, bool alditol) {
         fail("Unsupported ulosonic modification");
       alditol = alditol || mono == "Fru";
     } else
-      arms.push_back(childformat(c, v));
+      arms.push_back(&c);
   }
-  S prefix;
-  for (size_t i = 0; i < arms.size(); ++i)
-    prefix += i ? "[" + arms[i] + "]" : arms[i];
-  S out = prefix + mono + subs;
-  if (!root)
-    return out;
-  if (alditol)
-    return out + "-ol(?" + v.pos(mono) + "-";
-  return out + (n.anomer.empty() ? "" : "(" + n.anomer + "-");
+  for (size_t i = 0; i < arms.size(); ++i) {
+    const auto& child = *arms[i];
+    if (i) out += "[";
+    gformat_into(child, v, false, false, out);
+    out += "(" + (child.anomer.empty() ? "?" + v.pos(child.mono) : child.anomer) + "-" + child.pos + ")";
+    if (i) out += "]";
+  }
+  out += mono + subs;
+  if (!root) return;
+  if (alditol) out += "-ol(?" + v.pos(mono) + "-";
+  else if (!n.anomer.empty()) out += "(" + n.anomer + "-";
+}
+static S gformat(const GNode& n, const Vocab& v, bool root, bool alditol) {
+  S out;
+  out.reserve(128);
+  gformat_into(n, v, root, alditol, out);
+  return out;
 }
 static void collect(const GNode &n, std::vector<const GNode *> &out) {
   if (n.kind != "mono")
@@ -149,19 +157,14 @@ S gwb_convert(const S &source, const Vocab &v) {
   S prefix;
   for (auto &n : floating) {
     VI parents;
-    VS positions = split(n.pos, '/');
+    int positions = 0;
+    bool unknown = n.pos.find('?') != S::npos;
+    for (char c : n.pos) if (c >= '1' && c <= '9') positions |= 1 << (c-'0');
     for (size_t i = 0; i < ns.size(); ++i) {
-      VS occ;
-      for (auto &c : ns[i]->children) {
-        auto ps = split(c.pos, '/');
-        if (ps.size() == 1 && ps[0] != "?")
-          occ.push_back(ps[0]);
-      }
-      bool ok = contains(positions, S("?"));
-      for (auto &pos : positions)
-        ok |= !contains(occ, pos);
-      if (ok)
-        parents.push_back(size + i + 1);
+      int occupied = 0;
+      for (const auto& c : ns[i]->children)
+        if (c.pos.size() == 1 && c.pos[0] >= '1' && c.pos[0] <= '9') occupied |= 1 << (c.pos[0]-'0');
+      if (unknown || (positions & ~occupied)) parents.push_back(size+i+1);
     }
     if (parents.empty())
       fail("No feasible uncertain antenna parent");

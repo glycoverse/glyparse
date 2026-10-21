@@ -10,3 +10,4 @@ reference:
   contents:
   - auto_parse
   - starts_with("parse_")
+  - glyparse_options

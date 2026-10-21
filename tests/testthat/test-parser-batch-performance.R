@@ -118,3 +118,90 @@ test_that("plain Linear Code retains the general normalization contract", {
     convert_linear_to_iupac_general(input)
   )
 })
+
+test_that("CPU workers preserve parser results and per-record diagnostics", {
+  fixtures <- list(
+    wurcs = c("WURCS=2.0/1,1,0/[a2122h-1b_1-5]/1/", "invalid", NA_character_),
+    glycoct = c(
+      "RES\n1b:b-dglc-HEX-1:5",
+      "RES\n1b:o-dglc-HEX-0:0",
+      NA_character_
+    ),
+    kcf = c("NODE 2\n1 Glc 0 0\n2 Gal 0 0\nEDGE 1\n1 2:b1 1:4", "invalid"),
+    linucs = c("[][b-D-Glcp]{[(4+1)][a-D-Glcp]{}}", "invalid")
+  )
+  for (format in names(fixtures)) {
+    x <- rep(fixtures[[format]], length.out = 2051)
+    serial <- native_records_cpp(x, format, native_vocabulary(), 1L)
+    parallel <- native_records_cpp(x, format, native_vocabulary(), 2L)
+    expect_identical(parallel, serial, info = format)
+  }
+  for (format in c("iupac_short", "iupac_extended", "glycam_iupac", "detect")) {
+    x <- rep(
+      c(
+        "Galb4Glcb-",
+        "alpha-D-Galp-(1->4)-beta-D-Glcp-(1->",
+        "DGalpb1-4DGlcpb1-OH",
+        NA_character_,
+        "invalid"
+      ),
+      length.out = 2051
+    )
+    expect_identical(
+      native_convert_cpp(x, format, native_vocabulary(), 2L),
+      native_convert_cpp(x, format, native_vocabulary(), 1L),
+      info = format
+    )
+  }
+})
+
+test_that("shared native record fields survive GC and copy on modification", {
+  x <- c("RES\n1b:b-dglc-HEX-1:5", "RES\n1b:b-dgal-HEX-1:5")
+  reference <- native_records_cpp(x, "glycoct", native_vocabulary())
+  previous <- gctorture2(50L)
+  on.exit(gctorture2(previous), add = TRUE)
+  actual <- native_records_cpp(x, "glycoct", native_vocabulary())
+  gctorture2(previous)
+  expect_identical(actual, reference)
+  actual[[1]]$sub[[1]] <- "6S"
+  actual[[1]]$anomer[[1]] <- "a1"
+  actual[[1]]$alditol[[1]] <- TRUE
+  expect_identical(actual[[2]], reference[[2]])
+})
+
+test_that("impossible out-trees are filtered without skipping valid arrays", {
+  x <- c(
+    "RES\n1b:b-dglc-HEX-1:5\n2b:b-dgal-HEX-1:5",
+    "RES\n1b:b-dglc-HEX-1:5\n2b:b-dgal-HEX-1:5\nLIN\n1:1o(4+1)2d"
+  )
+  raw <- native_records_cpp(x, "glycoct", native_vocabulary(), 1L)
+  filtered <- native_records_cpp(x, "glycoct", native_vocabulary(), 1L, TRUE)
+  expect_null(filtered[[1]])
+  expect_identical(filtered[[2]], raw[[2]])
+  expect_identical(attr(filtered, "warnings"), attr(raw, "warnings"))
+  expected <- suppressWarnings(glyrepr::structure_from_arrays(
+    raw,
+    on_failure = "na"
+  ))
+  expect_identical(
+    as.character(parse_glycoct(x, on_failure = "na")),
+    as.character(expected)
+  )
+})
+
+test_that("normalized parsing supports older character constructors", {
+  constructor <- glyrepr::as_glycan_structure
+  testthat::local_mocked_bindings(
+    as_glycan_structure = function(x, on_failure) {
+      constructor(x, on_failure = on_failure)
+    },
+    .package = "glyrepr"
+  )
+  expect_identical(
+    as.character(parse_iupac_short(
+      c("Galb4Glcb-", "invalid"),
+      on_failure = "na"
+    )),
+    c("Gal(b1-4)Glc(b1-", NA_character_)
+  )
+})

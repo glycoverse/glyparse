@@ -6,12 +6,17 @@
 #include <cctype>
 #include <functional>
 #include <map>
+#include <atomic>
+#include <memory>
+#include <mutex>
+#include <thread>
 #include <regex>
 #include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 namespace gp {
 using S = std::string;
@@ -23,11 +28,18 @@ inline bool ends(const S &s, const S &p) {
   return s.size() >= p.size() && s.compare(s.size() - p.size(), p.size(), p) == 0;
 }
 inline const std::regex &rx(const S &p) {
-  static std::map<S, std::regex> cache;
-  auto i = cache.find(p);
-  if (i == cache.end())
-    i = cache.emplace(p, std::regex(p)).first;
-  return i->second;
+  // Compiled expressions are immutable. Each worker has a lookup cache, while
+  // the owning pool survives calls so short-lived workers do not recompile it.
+  static std::map<S, std::unique_ptr<std::regex>> pool;
+  static std::mutex mutex;
+  static thread_local std::map<S, const std::regex*> local;
+  auto found = local.find(p);
+  if (found != local.end()) return *found->second;
+  std::lock_guard<std::mutex> lock(mutex);
+  auto i = pool.find(p);
+  if (i == pool.end()) i = pool.emplace(p, std::unique_ptr<std::regex>(new std::regex(p))).first;
+  local.emplace(p, i->second.get());
+  return *i->second;
 }
 inline bool has(const S &s, const S &p) { return std::regex_search(s, rx(p)); }
 inline VS match(const S &s, const S &p) {
@@ -141,6 +153,7 @@ template <class T> inline bool contains(const std::vector<T> &x, const T &v) {
 }
 inline VI seq(int n) {
   VI x;
+  if (n > 0) x.reserve(n);
   for (int i = 1; i <= n; ++i)
     x.push_back(i);
   return x;
@@ -214,17 +227,18 @@ struct Vocab {
       fail("Mismatched native vocabulary columns");
     for (size_t i = 0; i < monos.size(); ++i)
       source_anomers[monos[i]] = source_pos[i];
+    std::unordered_set<S> concrete_names(concrete.begin(), concrete.end());
     for (size_t i = 0; i < concrete.size(); ++i) {
       const S &m = concrete[i];
       anomers[m] = pos[i];
       if (m.size() > 2 && (starts(m, "D-") || starts(m, "L-")) &&
-          contains(concrete, m.substr(2)))
+          concrete_names.count(m.substr(2)))
         unusual[m.substr(2)] = m;
       auto p = m.find('f');
       if (p != S::npos) {
         S base = m;
         base.erase(p, 1);
-        if (contains(concrete, base))
+        if (concrete_names.count(base))
           furanose[base] = m;
       }
     }
@@ -275,10 +289,12 @@ struct Record {
     linkage.push_back(l);
   }
   VI roots() const {
-    VI children;
+    std::vector<bool> child(mono.size(), false);
     for (size_t i = 1; i < edges.size(); i += 2)
-      children.push_back(edges[i]);
-    return diff(seq(mono.size()), children);
+      if (edges[i] >= 1 && edges[i] <= static_cast<int>(mono.size())) child[edges[i]-1] = true;
+    VI roots;
+    for (size_t i = 0; i < mono.size(); ++i) if (!child[i]) roots.push_back(i+1);
+    return roots;
   }
   Rcpp::List list() const {
     Rcpp::List a = Rcpp::List::create(
@@ -291,14 +307,14 @@ struct Record {
         ps.push_back(Rcpp::List::create(
             Rcpp::Named("root") = p.root, Rcpp::Named("nodes") = p.nodes,
             Rcpp::Named("linkage") = p.linkage, Rcpp::Named("parents") = p.parents));
-      a["floating_parts"] = ps;
+      a.push_back(ps, "floating_parts");
     }
     if (!floats.empty()) {
       Rcpp::List fs;
       for (auto &p : floats)
         fs.push_back(Rcpp::List::create(Rcpp::Named("substituent") = p.substituent,
                                         Rcpp::Named("parents") = p.parents));
-      a["floating_substituents"] = fs;
+      a.push_back(fs, "floating_substituents");
     }
     return a;
   }

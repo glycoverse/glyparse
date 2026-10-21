@@ -22,7 +22,15 @@ static S compact(S x, const Vocab &v) {
     return "\\(([0-9?]*(?:" + alternatives(longest(v.subs)) + "))\\)(" +
            alternatives(v.sorted_monos()) + ")";
   });
-  for (;;) {
+  bool possible_modifier = false;
+  for (size_t i = x.find('('); i != S::npos; i = x.find('(', i+1)) {
+    size_t end = x.find(')', i+1);
+    if (end == S::npos) break;
+    S token = x.substr(i+1,end-i-1);
+    size_t first = token.find_first_not_of("0123456789?");
+    if (first != S::npos && contains(v.subs, token.substr(first))) { possible_modifier = true; break; }
+  }
+  while (possible_modifier) {
     S y = rewrite(x, p, [](const VS &m) {
       return m[2] + (std::isalpha((unsigned char)m[1][0]) ? "?" : "") + m[1];
     });
@@ -32,22 +40,38 @@ static S compact(S x, const Vocab &v) {
   }
   x = replace(replace(x, "(", "["), ")", "]");
   x = replace(x, "|", "/");
-  x = rewrite(x, "([ab?])([0-9?])-([0-9?](?:/[0-9?])*)",
-              [](const VS &m) { return "(" + m[1] + m[2] + "-" + m[3] + ")"; });
+  S linked;
+  linked.reserve(x.size()+16);
+  auto position_char = [](char c) { return c == '?' || (c >= '0' && c <= '9'); };
+  for (size_t i = 0; i < x.size();) {
+    if (i+3 < x.size() && S("ab?").find(x[i]) != S::npos &&
+        position_char(x[i+1]) && x[i+2] == '-' && position_char(x[i+3])) {
+      size_t end = i+4;
+      while (end+1 < x.size() && x[end] == '/' && position_char(x[end+1])) end += 2;
+      linked += "(" + x.substr(i,end-i) + ")";
+      i = end;
+    } else linked += x[i++];
+  }
+  x = std::move(linked);
   // A terminal residue cannot cross a branch or linkage delimiter.
   // Restrict the large vocabulary expression to the reducing-end suffix.
   size_t terminal_start = x.find_last_of(")]");
   terminal_start = terminal_start == S::npos ? 0 : terminal_start + 1;
   S prefix = x.substr(0, terminal_start);
   x = x.substr(terminal_start);
+  auto terminal_key = std::make_pair(S("compact-terminal"), x);
+  auto cached_terminal = v.converted_tokens.find(terminal_key);
+  if (cached_terminal != v.converted_tokens.end()) return prefix + cached_terminal->second;
   if (ends(x, "+aldi")) {
     x.resize(x.size() - 5);
     x = rewrite(x, terminal_pattern(v),
                 [](const VS &m) { return m[1] + m[2] + "-ol"; });
   }
-  return prefix + rewrite(x, terminal_pattern(v), [&](const VS &m) {
+  S terminal = rewrite(x, terminal_pattern(v), [&](const VS &m) {
     return m[1] + m[2] + m[3] + "(" + (m[4].empty() ? "?" : m[4]) + v.pos(m[1]) + "-";
   });
+  v.converted_tokens.emplace(terminal_key, terminal);
+  return prefix + terminal;
 }
 // Common unmodified short notation has an unambiguous linear tokenization.
 // Modified or unusual tokens retain the general vocabulary-based converter.
@@ -124,6 +148,45 @@ static S short_iupac(const S &x, const Vocab &v) {
   }
   return out + last[1] + "(" + last[2] + v.pos(last[1]) + "-";
 }
+// A complete ordinary token stream can be scanned without regex backtracking.
+// Unusual syntax still uses the original token finder (including skipped text).
+static VS extended_tokens(const S& x) {
+  VS out;
+  size_t p = 0;
+  auto position = [&](size_t& q) {
+    auto atom = [&]() {
+      if (q < x.size() && x[q] == '?') { ++q; return true; }
+      size_t begin = q;
+      while (q < x.size() && x[q] >= '0' && x[q] <= '9') ++q;
+      return q != begin;
+    };
+    if (!atom()) return false;
+    while (q < x.size() && x[q] == '/') { ++q; if (!atom()) return false; }
+    return true;
+  };
+  while (p < x.size()) {
+    if (x[p] == '[' || x[p] == ']') { out.push_back(x.substr(p++,1)); continue; }
+    if (x.compare(p, S::npos, "?-Hex") == 0 || x.compare(p, S::npos, "?-HexN") == 0 ||
+        x.compare(p, S::npos, "?-HexNAc") == 0) { out.push_back(x.substr(p)); return out; }
+    size_t begin = p;
+    if (x[p] == '-') ++p;
+    if (p < x.size() && x[p] == '?') ++p;
+    else if (x.compare(p,2,"\xCE\xB1") == 0 || x.compare(p,2,"\xCE\xB2") == 0) p += 2;
+    else return {};
+    if (p+3 > x.size() || x[p] != '-' || S("DL?").find(x[p+1]) == S::npos || x[p+2] != '-') return {};
+    p += 3;
+    size_t mono = p;
+    while (p < x.size() && (std::isalnum((unsigned char)x[p]) || x[p] == '?')) ++p;
+    if (p == mono || x.compare(p,2,"-(") != 0) return {};
+    p += 2;
+    if (!position(p) || x.compare(p,2,"->") != 0) return {};
+    p += 2;
+    size_t end = p;
+    if (position(end) && end < x.size() && x[end] == ')') p = end+1;
+    out.push_back(x.substr(begin,p-begin));
+  }
+  return out;
+}
 static S extended(S x, const Vocab &v) {
   x = replace(replace(x, "alpha", "\xCE\xB1"), "beta", "\xCE\xB2");
   x = replace(x, "\xE2\x86\x92", "->");
@@ -133,7 +196,8 @@ static S extended(S x, const Vocab &v) {
               ")\\))?";
   S hep = "-?([DL])-gro-" + greek + "-D-manHepp([[:alnum:]?]*?)-\\((" + pos +
           ")->(?:(" + pos + ")\\))?";
-  VS ts = tokens(x, hep + "|" + regular + "|\\?-(?:HexNAc|HexN|Hex)$|\\[|\\]");
+  VS ts = extended_tokens(x);
+  if (ts.empty()) ts = tokens(x, hep + "|" + regular + "|\\?-(?:HexNAc|HexN|Hex)$|\\[|\\]");
   S out;
   for (S t : ts) {
     if (t == "[" || t == "]") {
@@ -178,11 +242,52 @@ static S extended(S x, const Vocab &v) {
   }
   return out;
 }
+static VS glycam_tokens(const S& x) {
+  VS out;
+  size_t p = 0;
+  auto alnum = [](char c) { return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'); };
+  auto letter = [](char c) { return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'); };
+  auto pos = [](char c) { return c == '?' || (c >= '0' && c <= '9'); };
+  while (p < x.size()) {
+    if (x[p] == '[' || x[p] == ']') { out.push_back(x.substr(p++,1)); continue; }
+    size_t begin = p;
+    if (!alnum(x[p])) return {};
+    ++p;
+    bool found = false;
+    while (p < x.size()) {
+      size_t q = p;
+      while (q < x.size() && x[q] == '[') {
+        ++q;
+        for (;;) {
+          if (q == x.size() || !pos(x[q++])) return {};
+          size_t word = q;
+          while (q < x.size() && letter(x[q])) ++q;
+          if (q == word || q == x.size()) return {};
+          if (x[q] != ',') break;
+          ++q;
+        }
+        if (x[q++] != ']') return {};
+      }
+      if (q+3 < x.size() && S("ab?").find(x[q]) != S::npos && pos(x[q+1]) && x[q+2] == '-') {
+        size_t end = q+3;
+        if (pos(x[end])) ++end;
+        else if (letter(x[end])) { do { ++end; } while (end < x.size() && alnum(x[end])); }
+        else return {};
+        out.push_back(x.substr(begin,end-begin)); p = end; found = true; break;
+      }
+      if (!alnum(x[p])) return {};
+      ++p;
+    }
+    if (!found) return {};
+  }
+  return out;
+}
 static S glycam(const S &x, const Vocab &v) {
   S mod = "\\[[0-9?][A-Za-z]+(?:,[0-9?][A-Za-z]+)*\\]";
   S residue =
       "([A-Za-z0-9]+?)(?:" + mod + ")*([ab?])([0-9?])-([0-9?]|[A-Za-z][A-Za-z0-9]*)";
-  VS ts = tokens(x, residue + "|\\[|\\]");
+  VS ts = glycam_tokens(x);
+  if (ts.empty()) ts = tokens(x, residue + "|\\[|\\]");
   if (ts.empty() || join(ts) != x)
     fail("Invalid GlyCAM tokens");
   S out;

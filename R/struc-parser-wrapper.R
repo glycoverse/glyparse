@@ -99,9 +99,13 @@ normalized_struc_parser_wrapper <- function(
     normalizer,
     progress = progress
   )
-  unique_result <- suppressWarnings(glyrepr::as_glycan_structure(
-    normalized_unique,
-    on_failure = "na"
+  structure_args <- list(x = normalized_unique, on_failure = "na")
+  if ("warn" %in% names(formals(glyrepr::as_glycan_structure))) {
+    structure_args$warn <- FALSE
+  }
+  unique_result <- suppressWarnings(do.call(
+    glyrepr::as_glycan_structure,
+    structure_args
   ))
   invalid_mask <- is.na(unique_result)
   abort_on_invalid_parse(
