@@ -4,6 +4,12 @@ phase <- args[1]
 out <- normalizePath(args[2])
 .libPaths(c(normalizePath(args[3]), .libPaths()))
 library(glyparse)
+options(
+  glyparse.threads = as.integer(Sys.getenv(
+    "GLYPARSE_THREADS",
+    as.character(getOption("glyparse.threads", 2L))
+  ))
+)
 files <- list.files(file.path(out, 'data'), full.names = TRUE, pattern = 'csv$')
 inputs <- list()
 sources <- character()
@@ -118,6 +124,7 @@ for (p in if (length(selection)) selection else names(inputs)) {
   write.csv(metadata, oldfile, row.names = FALSE)
 }
 capture.output(
+  list(native_workers = getOption("glyparse.threads", 2L)),
   sessionInfo(),
   file = file.path(out, paste0(phase, '-session.txt'))
 )

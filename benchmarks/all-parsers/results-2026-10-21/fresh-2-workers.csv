@@ -1,0 +1,15 @@
+parser,rows,elapsed,successful
+parse_iupac_short,3000,0.231,3000
+parse_linear_code,3000,0.201,3000
+parse_linucs,3000,0.22,3000
+parse_pglyco_struc,2841,0.218,2841
+parse_strucgp_struc,2841,0.219,2841
+parse_glycam_iupac,7481,0.239,7481
+parse_glycoct,59847,1.649,51426
+parse_gwb,51507,1.013,50220
+parse_iupac_compact,24531,0.498,24531
+parse_iupac_condensed,19933,0.342,19933
+parse_iupac_extended,20407,0.616,20406
+parse_wurcs,59994,1.768,49728
+"parse_kcf",3000,0.283,3000
+"auto_parse",6500,0.438,6339

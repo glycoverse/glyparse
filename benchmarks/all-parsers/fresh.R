@@ -4,6 +4,12 @@ p <- args[1]
 out <- normalizePath(args[2])
 .libPaths(c(normalizePath(args[3]), .libPaths()))
 library(glyparse)
+options(
+  glyparse.threads = as.integer(Sys.getenv(
+    "GLYPARSE_THREADS",
+    as.character(getOption("glyparse.threads", 2L))
+  ))
+)
 files <- list.files(file.path(out, 'data'), full.names = TRUE, pattern = 'csv$')
 inputs <- list()
 for (file in files) {
