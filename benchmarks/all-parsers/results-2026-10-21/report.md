@@ -6,7 +6,7 @@ The complete [before/after comparison table](comparison.md) reports all 13 forma
 
 ## Revisions and workload
 
-- Candidate: glyparse `a3be5ad` with glyrepr `c99d5e9`, optimized installed builds. Subsequent namespace qualification (`stats::na.omit`), packaging and documentation changes leave the measured algorithm unchanged.
+- Candidate: glyparse `a3be5ad` with glyrepr `c99d5e9`, optimized installed builds. Subsequent namespace qualification (`stats::na.omit`), packaging, documentation and progress-enabled chunk-sizing changes leave the measured `progress = FALSE` path unchanged.
 - Previous all-parser pair: glyparse `c45c0ad` with glyrepr `22f5efa`. Earlier WURCS/GlycoCT pair: glyparse `1830759` with glyrepr `ed3a98f`.
 - R 4.6.1, aarch64 macOS 26.5.2, igraph 2.3.4; complete session information is included beside this report.
 - Seven official formats are pinned to [GlyGen 2.12.1](https://data.glygen.org/ln2data/releases/data/v-2.12.1/reviewed/); URLs and published-file SHA256 values are in [sources.json](../sources.json). Six formats are derived from real, connected, unmodified WURCS glycans, with up to 3,000 distinct encodings per format. They are not official downloads for those six formats.
@@ -52,3 +52,7 @@ The preceding report showed 0.05183 ms/record versus 0.04692 ms/record in the ea
 ## Reproduction
 
 Follow [the benchmark instructions](../README.md), installing each package pair into its own library. Use the exact CSV hashes and the same corpus for both revisions. Set `GLYPARSE_THREADS=8` only for the explicit eight-worker comparison; the default is two. Run builds/tests separately from timed calls. Native records are checked before graph assembly, and unsupported syntax continues through the public reference fallback.
+
+## Review follow-up: progress-enabled decoding
+
+Progress updates originally split native input into 128-row chunks, below the 256-row parallel threshold. The fix sizes chunks to at least 1,024 rows and at least 128 rows per configured worker. A regression test verifies that progress updates retain the worker limit, parallel-sized calls, order and missing records. All 131,523 inputs across the six record-based formats match the full baseline graph outputs with `progress = TRUE`. On the 59,847-row GlycoCT corpus, three native-decoding-stage measurements improved from 2.463/2.570/2.686 s to 0.824/0.955/0.827 s. These stage-only timings are distinct from the complete public-parser measurements above.

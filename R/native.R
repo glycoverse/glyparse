@@ -25,12 +25,13 @@ native_convert <- function(x, format) {
 }
 
 native_records <- function(x, format, progress = FALSE) {
+  threads <- native_threads()
   parse_batch <- function(values) {
     records <- native_records_cpp(
       values,
       format,
       native_vocabulary(),
-      native_threads(),
+      threads,
       constructible_only = TRUE
     )
     # One warning describes the same lossy conversion for the whole batch.
@@ -52,7 +53,9 @@ native_records <- function(x, format, progress = FALSE) {
   if (!progress) {
     return(parse_batch(x))
   }
-  chunks <- split(x, ceiling(seq_along(x) / 128L))
+  # Leave enough native work for every configured worker between updates.
+  chunk_size <- max(1024L, 128L * threads)
+  chunks <- split(x, ceiling(seq_along(x) / chunk_size))
   unlist(
     purrr::map(chunks, parse_batch, .progress = TRUE),
     recursive = FALSE,
