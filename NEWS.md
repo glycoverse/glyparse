@@ -1,4 +1,4 @@
-# glyparse (development version)
+# glyparse 1.0.0
 
 ## Breaking changes
 
