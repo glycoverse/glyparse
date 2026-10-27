@@ -189,11 +189,11 @@ test_that("impossible out-trees are filtered without skipping valid arrays", {
   )
 })
 
-test_that("normalized parsing supports older character constructors", {
+test_that("normalized parsing supports character constructors without warn", {
   constructor <- glyrepr::as_glycan_structure
   testthat::local_mocked_bindings(
-    as_glycan_structure = function(x, on_failure) {
-      constructor(x, on_failure = on_failure)
+    as_glycan_structure = function(x, on_failure, progress = FALSE) {
+      constructor(x, on_failure = on_failure, progress = progress)
     },
     .package = "glyrepr"
   )
