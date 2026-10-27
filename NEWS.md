@@ -1,4 +1,6 @@
-# glyparse 1.0.0
+# glyparse (development version)
+
+* IUPAC parsers and their `auto_parse()` paths now show parsing progress during structure construction when `progress = TRUE`. (#56)
 
 ## Breaking changes
 
@@ -10,10 +12,6 @@
 * Large native parsing and normalization batches use up to two CPU workers. Set `options(glyparse.threads = 1L)` for serial decoding or choose up to 64 workers; see `?glyparse_options`. (#55)
 * `auto_parse()` processes each detected format in a batch while preserving input order, names, missing values, and failure handling. (#54)
 * `parse_glycoct()` and `parse_wurcs()` parse large batches faster and report repeated non-root alditol warnings once per batch. (#55)
-
-## Minor improvements
-
-* IUPAC parsers and their `auto_parse()` paths now show parsing progress during structure construction when `progress = TRUE`. (#56)
 
 # glyparse 0.8.1
 
