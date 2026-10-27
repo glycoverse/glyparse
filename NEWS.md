@@ -1,6 +1,6 @@
 # glyparse (development version)
 
-* IUPAC parsers and their `auto_parse()` paths now show parsing progress during structure construction when `progress = TRUE`.
+* IUPAC parsers and their `auto_parse()` paths now show parsing progress during structure construction when `progress = TRUE`. (#56)
 
 ## Breaking changes
 
