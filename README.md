@@ -6,7 +6,7 @@
 <!-- badges: start -->
 
 [![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/glyparse)](https://CRAN.R-project.org/package=glyparse)
 [![R-universe
@@ -20,7 +20,8 @@ Parse different glycan structure text nomenclature into
 `glyrepr::glycan_structure`.
 
 Currently, the following formats are supported: IUPAC-extended,
-IUPAC-condensed, IUPAC-short, WURCS, GlycoCT, StrucGP-style,
+IUPAC-condensed, IUPAC-short, IUPAC-compact, Glycam-IUPAC, WURCS,
+GlycoCT, GlycoWorkbench, KCF, LinearCode, Linucs, StrucGP-style,
 pGlyco-style.
 
 ## Installation
@@ -60,10 +61,10 @@ pak::pkg_install("glycoverse/glyparse")
 
 ## Documentation
 
--   🚀 Get started:
-    [Here](https://glycoverse.github.io/glyparse/articles/glyparse.html)
--   📚 Reference:
-    [Here](https://glycoverse.github.io/glyparse/reference/index.html)
+- 🚀 Get started:
+  [Here](https://glycoverse.github.io/glyparse/articles/glyparse.html)
+- 📚 Reference:
+  [Here](https://glycoverse.github.io/glyparse/reference/index.html)
 
 ## Role in `glycoverse`
 

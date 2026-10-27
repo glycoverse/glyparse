@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 # glyparse <a href="https://glycoverse.github.io/glyparse/"><img src="man/figures/logo.png" align="right" height="138" /></a>
 
 <!-- badges: start -->
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![CRAN status](https://www.r-pkg.org/badges/version/glyparse)](https://CRAN.R-project.org/package=glyparse)
 [![R-universe version](https://glycoverse.r-universe.dev/glyparse/badges/version)](https://glycoverse.r-universe.dev/glyparse)
 [![R-CMD-check](https://github.com/glycoverse/glyparse/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/glycoverse/glyparse/actions/workflows/R-CMD-check.yaml)
@@ -26,7 +26,7 @@ knitr::opts_chunk$set(
 Parse different glycan structure text nomenclature into `glyrepr::glycan_structure`.
 
 Currently, the following formats are supported: IUPAC-extended, IUPAC-condensed,
-IUPAC-short, WURCS, GlycoCT, StrucGP-style, pGlyco-style.
+IUPAC-short, IUPAC-compact, Glycam-IUPAC, WURCS, GlycoCT, GlycoWorkbench, KCF, LinearCode, Linucs, StrucGP-style, pGlyco-style.
 
 ## Installation
 
