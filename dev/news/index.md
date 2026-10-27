@@ -18,7 +18,7 @@
 
 - Most format parsers, IUPAC converters, and automatic format detection
   now use native code for faster batch processing. Installing from
-  source requires a C++17 compiler and glyrepr \>= 1.1.0.
+  source requires a C++17 compiler and glyrepr \>= 1.2.0.
   ([\#54](https://github.com/glycoverse/glyparse/issues/54),
   [\#55](https://github.com/glycoverse/glyparse/issues/55))
 - Large native parsing and normalization batches use up to two CPU
