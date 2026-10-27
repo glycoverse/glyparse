@@ -22,6 +22,58 @@ purrr::iwalk(parser_progress_examples, function(input, parser_name) {
   })
 })
 
+test_that("IUPAC parsers forward progress to structure construction", {
+  constructor <- glyrepr::as_glycan_structure
+  progress_values <- logical()
+  local_mocked_bindings(
+    as_glycan_structure = function(
+      x,
+      on_failure,
+      progress = FALSE,
+      warn = TRUE
+    ) {
+      progress_values <<- c(progress_values, progress)
+      constructor(x, on_failure = on_failure, progress = progress, warn = warn)
+    },
+    .package = "glyrepr"
+  )
+  parser_names <- c(
+    "auto_parse",
+    "parse_glycam_iupac",
+    "parse_iupac_compact",
+    "parse_iupac_condensed",
+    "parse_iupac_extended",
+    "parse_iupac_short"
+  )
+
+  for (parser_name in parser_names) {
+    parser <- get(parser_name, envir = asNamespace("glyparse"))
+    input <- c(
+      first = parser_progress_examples[[parser_name]],
+      missing = NA_character_,
+      duplicate = parser_progress_examples[[parser_name]]
+    )
+    progress_values <- logical()
+    expected <- parser(input)
+    disabled <- parser(input, progress = FALSE)
+    enabled <- suppressMessages(parser(input, progress = TRUE))
+
+    expect_identical(progress_values, c(FALSE, FALSE, TRUE), info = parser_name)
+    expect_identical(
+      as.character(disabled),
+      as.character(expected),
+      info = parser_name
+    )
+    expect_identical(
+      as.character(enabled),
+      as.character(expected),
+      info = parser_name
+    )
+    expect_identical(names(enabled), names(input), info = parser_name)
+    expect_identical(unname(is.na(enabled)), c(FALSE, TRUE, FALSE))
+  }
+})
+
 test_that("progress updates retain parallel decoding and record order", {
   previous <- options(glyparse.threads = 4L)
   on.exit(options(previous), add = TRUE)

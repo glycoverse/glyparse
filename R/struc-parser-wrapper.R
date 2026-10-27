@@ -99,7 +99,11 @@ normalized_struc_parser_wrapper <- function(
     normalizer,
     progress = progress
   )
-  structure_args <- list(x = normalized_unique, on_failure = "na")
+  structure_args <- list(
+    x = normalized_unique,
+    on_failure = "na",
+    progress = progress
+  )
   if ("warn" %in% names(formals(glyrepr::as_glycan_structure))) {
     structure_args$warn <- FALSE
   }

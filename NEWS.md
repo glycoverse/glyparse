@@ -1,5 +1,7 @@
 # glyparse (development version)
 
+* IUPAC parsers and their `auto_parse()` paths now show parsing progress during structure construction when `progress = TRUE`.
+
 ## Breaking changes
 
 * `parse_glycoct()`, `parse_kcf()`, `parse_linucs()`, `parse_pglyco_struc()`, `parse_strucgp_struc()`, and `parse_wurcs()` always validate parsed structures. Their `validate` argument is deprecated and warns when supplied; remove it from calls.
