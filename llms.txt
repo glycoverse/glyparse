@@ -4,7 +4,8 @@ Parse different glycan structure text nomenclature into
 [`glyrepr::glycan_structure`](https://glycoverse.github.io/glyrepr/reference/glycan_structure.html).
 
 Currently, the following formats are supported: IUPAC-extended,
-IUPAC-condensed, IUPAC-short, WURCS, GlycoCT, StrucGP-style,
+IUPAC-condensed, IUPAC-short, IUPAC-compact, Glycam-IUPAC, WURCS,
+GlycoCT, GlycoWorkbench, KCF, LinearCode, Linucs, StrucGP-style,
 pGlyco-style.
 
 ## Installation

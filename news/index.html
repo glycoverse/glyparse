@@ -41,12 +41,16 @@
 </ul></div>
 <div class="section level3">
 <h3 id="performance-improvements-1-0-0">Performance improvements<a class="anchor" aria-label="anchor" href="#performance-improvements-1-0-0"></a></h3>
-<ul><li>Most format parsers, IUPAC converters, and automatic format detection now use native code for faster batch processing. Installing from source requires a C++17 compiler and glyrepr &gt;= 1.1.0. (<a href="https://github.com/glycoverse/glyparse/issues/54" class="external-link">#54</a>, <a href="https://github.com/glycoverse/glyparse/issues/55" class="external-link">#55</a>)</li>
+<ul><li>Most format parsers, IUPAC converters, and automatic format detection now use native code for faster batch processing. Installing from source requires a C++17 compiler and glyrepr &gt;= 1.2.0. (<a href="https://github.com/glycoverse/glyparse/issues/54" class="external-link">#54</a>, <a href="https://github.com/glycoverse/glyparse/issues/55" class="external-link">#55</a>)</li>
 <li>Large native parsing and normalization batches use up to two CPU workers. Set <code>options(glyparse.threads = 1L)</code> for serial decoding or choose up to 64 workers; see <code><a href="../reference/glyparse_options.html">?glyparse_options</a></code>. (<a href="https://github.com/glycoverse/glyparse/issues/55" class="external-link">#55</a>)</li>
 <li>
 <code><a href="../reference/auto_parse.html">auto_parse()</a></code> processes each detected format in a batch while preserving input order, names, missing values, and failure handling. (<a href="https://github.com/glycoverse/glyparse/issues/54" class="external-link">#54</a>)</li>
 <li>
 <code><a href="../reference/parse_glycoct.html">parse_glycoct()</a></code> and <code><a href="../reference/parse_wurcs.html">parse_wurcs()</a></code> parse large batches faster and report repeated non-root alditol warnings once per batch. (<a href="https://github.com/glycoverse/glyparse/issues/55" class="external-link">#55</a>)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="minor-improvements-1-0-0">Minor improvements<a class="anchor" aria-label="anchor" href="#minor-improvements-1-0-0"></a></h3>
+<ul><li>IUPAC parsers and their <code><a href="../reference/auto_parse.html">auto_parse()</a></code> paths now show parsing progress during structure construction when <code>progress = TRUE</code>. (<a href="https://github.com/glycoverse/glyparse/issues/56" class="external-link">#56</a>)</li>
 </ul></div>
 </div>
     <div class="section level2">
