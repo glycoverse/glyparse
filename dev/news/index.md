@@ -2,6 +2,12 @@
 
 ## glyparse (development version)
 
+- IUPAC parsers and their
+  [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
+  paths now show parsing progress during structure construction when
+  `progress = TRUE`.
+  ([\#56](https://github.com/glycoverse/glyparse/issues/56))
+
 ### Breaking changes
 
 - [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md),

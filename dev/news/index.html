@@ -34,7 +34,8 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="glyparse-development-version">glyparse (development version)<a class="anchor" aria-label="anchor" href="#glyparse-development-version"></a></h2>
-<div class="section level3">
+<ul><li>IUPAC parsers and their <code><a href="../reference/auto_parse.html">auto_parse()</a></code> paths now show parsing progress during structure construction when <code>progress = TRUE</code>. (<a href="https://github.com/glycoverse/glyparse/issues/56" class="external-link">#56</a>)</li>
+</ul><div class="section level3">
 <h3 id="breaking-changes-development-version">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-development-version"></a></h3>
 <ul><li>
 <code><a href="../reference/parse_glycoct.html">parse_glycoct()</a></code>, <code><a href="../reference/parse_kcf.html">parse_kcf()</a></code>, <code><a href="../reference/parse_linucs.html">parse_linucs()</a></code>, <code><a href="../reference/parse_pglyco_struc.html">parse_pglyco_struc()</a></code>, <code><a href="../reference/parse_strucgp_struc.html">parse_strucgp_struc()</a></code>, and <code><a href="../reference/parse_wurcs.html">parse_wurcs()</a></code> always validate parsed structures. Their <code>validate</code> argument is deprecated and warns when supplied; remove it from calls.</li>
