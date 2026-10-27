@@ -2,36 +2,7 @@
 
 ## glyparse (development version)
 
-- Large native parsing and normalization batches use up to two CPU
-  workers. Set `options(glyparse.threads = 1L)` for serial decoding or
-  choose up to 64 workers; R validation and graph construction stay on
-  the calling thread. See
-  [`?glyparse_options`](https://glycoverse.github.io/glyparse/dev/reference/glyparse_options.md).
-  ([\#55](https://github.com/glycoverse/glyparse/issues/55))
-
-- GlycoCT, LINUCS, pGlyco, IUPAC Extended, GlyCAM, and IUPAC Compact
-  batches avoid repeated token scans and intermediate allocation.
-  ([\#55](https://github.com/glycoverse/glyparse/issues/55))
-
-- IUPAC Short, IUPAC Compact, IUPAC Extended, GlyCAM, GlycoWorkbench,
-  LINUCS, KCF, and plain Linear Code parse batches faster through
-  residue reuse and linear token scanning. Unusual Linear Code and IUPAC
-  Short syntax retains the general converter.
-  ([\#55](https://github.com/glycoverse/glyparse/issues/55))
-
-- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
-  and
-  [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
-  parse large batches faster through shared residue decoding and linear
-  scanning. Repeated non-root alditol warnings are reported once per
-  batch; newer glyrepr versions also avoid constructing suppressed
-  failure diagnostics.
-  ([\#55](https://github.com/glycoverse/glyparse/issues/55))
-
-- Most format parsing, IUPAC conversion, and automatic format detection
-  now run in C++, while preserving vectorization, names, missing values,
-  and failure handling. Linear Code retains an R fallback for modified
-  or unusual notation. Installing from source requires a C++17 compiler.
+### Breaking changes
 
 - [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md),
   [`parse_kcf()`](https://glycoverse.github.io/glyparse/dev/reference/parse_kcf.md),
@@ -40,14 +11,31 @@
   [`parse_strucgp_struc()`](https://glycoverse.github.io/glyparse/dev/reference/parse_strucgp_struc.md),
   and
   [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
-  construct structures directly from residue and edge arrays using
-  glyrepr \>= 1.0.0.9000, avoiding intermediate graphs. Array validation
-  is mandatory; the deprecated `validate` argument is ignored and warns
-  when supplied.
+  always validate parsed structures. Their `validate` argument is
+  deprecated and warns when supplied; remove it from calls.
 
+### Performance improvements
+
+- Most format parsers, IUPAC converters, and automatic format detection
+  now use native code for faster batch processing. Installing from
+  source requires a C++17 compiler and glyrepr \>= 1.1.0.
+  ([\#54](https://github.com/glycoverse/glyparse/issues/54),
+  [\#55](https://github.com/glycoverse/glyparse/issues/55))
+- Large native parsing and normalization batches use up to two CPU
+  workers. Set `options(glyparse.threads = 1L)` for serial decoding or
+  choose up to 64 workers; see
+  [`?glyparse_options`](https://glycoverse.github.io/glyparse/dev/reference/glyparse_options.md).
+  ([\#55](https://github.com/glycoverse/glyparse/issues/55))
 - [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
-  processes each detected format in a batch, preserving input order,
-  names, missing values, and failure handling.
+  processes each detected format in a batch while preserving input
+  order, names, missing values, and failure handling.
+  ([\#54](https://github.com/glycoverse/glyparse/issues/54))
+- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/dev/reference/parse_glycoct.md)
+  and
+  [`parse_wurcs()`](https://glycoverse.github.io/glyparse/dev/reference/parse_wurcs.md)
+  parse large batches faster and report repeated non-root alditol
+  warnings once per batch.
+  ([\#55](https://github.com/glycoverse/glyparse/issues/55))
 
 ## glyparse 0.8.1
 
