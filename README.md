@@ -60,10 +60,10 @@ pak::pkg_install("glycoverse/glyparse")
 
 ## Documentation
 
-- 🚀 Get started:
-  [Here](https://glycoverse.github.io/glyparse/articles/glyparse.html)
-- 📚 Reference:
-  [Here](https://glycoverse.github.io/glyparse/reference/index.html)
+-   🚀 Get started:
+    [Here](https://glycoverse.github.io/glyparse/articles/glyparse.html)
+-   📚 Reference:
+    [Here](https://glycoverse.github.io/glyparse/reference/index.html)
 
 ## Role in `glycoverse`
 

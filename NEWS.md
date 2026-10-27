@@ -1,17 +1,15 @@
 # glyparse (development version)
 
-* Large native parsing and normalization batches use up to two CPU workers. Set `options(glyparse.threads = 1L)` for serial decoding or choose up to 64 workers; R validation and graph construction stay on the calling thread. See `?glyparse_options`. (#55)
+## Breaking changes
 
-* GlycoCT, LINUCS, pGlyco, IUPAC Extended, GlyCAM, and IUPAC Compact batches avoid repeated token scans and intermediate allocation. (#55)
+* `parse_glycoct()`, `parse_kcf()`, `parse_linucs()`, `parse_pglyco_struc()`, `parse_strucgp_struc()`, and `parse_wurcs()` always validate parsed structures. Their `validate` argument is deprecated and warns when supplied; remove it from calls.
 
-* IUPAC Short, IUPAC Compact, IUPAC Extended, GlyCAM, GlycoWorkbench, LINUCS, KCF, and plain Linear Code parse batches faster through residue reuse and linear token scanning. Unusual Linear Code and IUPAC Short syntax retains the general converter. (#55)
+## Performance improvements
 
-* `parse_glycoct()` and `parse_wurcs()` parse large batches faster through shared residue decoding and linear scanning. Repeated non-root alditol warnings are reported once per batch; newer glyrepr versions also avoid constructing suppressed failure diagnostics. (#55)
-
-* Most format parsing, IUPAC conversion, and automatic format detection now run in C++, while preserving vectorization, names, missing values, and failure handling. Linear Code retains an R fallback for modified or unusual notation. Installing from source requires a C++17 compiler.
-
-* `parse_glycoct()`, `parse_kcf()`, `parse_linucs()`, `parse_pglyco_struc()`, `parse_strucgp_struc()`, and `parse_wurcs()` construct structures directly from residue and edge arrays using glyrepr >= 1.0.0.9000, avoiding intermediate graphs. Array validation is mandatory; the deprecated `validate` argument is ignored and warns when supplied.
-* `auto_parse()` processes each detected format in a batch, preserving input order, names, missing values, and failure handling.
+* Most format parsers, IUPAC converters, and automatic format detection now use native code for faster batch processing. Installing from source requires a C++17 compiler and glyrepr >= 1.1.0. (#54, #55)
+* Large native parsing and normalization batches use up to two CPU workers. Set `options(glyparse.threads = 1L)` for serial decoding or choose up to 64 workers; see `?glyparse_options`. (#55)
+* `auto_parse()` processes each detected format in a batch while preserving input order, names, missing values, and failure handling. (#54)
+* `parse_glycoct()` and `parse_wurcs()` parse large batches faster and report repeated non-root alditol warnings once per batch. (#55)
 
 # glyparse 0.8.1
 
