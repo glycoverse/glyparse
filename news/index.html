@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">glyparse</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.8.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,23 @@
       <small>Source: <a href="https://github.com/glycoverse/glyparse/blob/main/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.0" id="glyparse-100">glyparse 1.0.0<a class="anchor" aria-label="anchor" href="#glyparse-100"></a></h2>
+<div class="section level3">
+<h3 id="breaking-changes-1-0-0">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-1-0-0"></a></h3>
+<ul><li>
+<code><a href="../reference/parse_glycoct.html">parse_glycoct()</a></code>, <code><a href="../reference/parse_kcf.html">parse_kcf()</a></code>, <code><a href="../reference/parse_linucs.html">parse_linucs()</a></code>, <code><a href="../reference/parse_pglyco_struc.html">parse_pglyco_struc()</a></code>, <code><a href="../reference/parse_strucgp_struc.html">parse_strucgp_struc()</a></code>, and <code><a href="../reference/parse_wurcs.html">parse_wurcs()</a></code> always validate parsed structures. Their <code>validate</code> argument is deprecated and warns when supplied; remove it from calls.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="performance-improvements-1-0-0">Performance improvements<a class="anchor" aria-label="anchor" href="#performance-improvements-1-0-0"></a></h3>
+<ul><li>Most format parsers, IUPAC converters, and automatic format detection now use native code for faster batch processing. Installing from source requires a C++17 compiler and glyrepr &gt;= 1.1.0. (<a href="https://github.com/glycoverse/glyparse/issues/54" class="external-link">#54</a>, <a href="https://github.com/glycoverse/glyparse/issues/55" class="external-link">#55</a>)</li>
+<li>Large native parsing and normalization batches use up to two CPU workers. Set <code>options(glyparse.threads = 1L)</code> for serial decoding or choose up to 64 workers; see <code><a href="../reference/glyparse_options.html">?glyparse_options</a></code>. (<a href="https://github.com/glycoverse/glyparse/issues/55" class="external-link">#55</a>)</li>
+<li>
+<code><a href="../reference/auto_parse.html">auto_parse()</a></code> processes each detected format in a batch while preserving input order, names, missing values, and failure handling. (<a href="https://github.com/glycoverse/glyparse/issues/54" class="external-link">#54</a>)</li>
+<li>
+<code><a href="../reference/parse_glycoct.html">parse_glycoct()</a></code> and <code><a href="../reference/parse_wurcs.html">parse_wurcs()</a></code> parse large batches faster and report repeated non-root alditol warnings once per batch. (<a href="https://github.com/glycoverse/glyparse/issues/55" class="external-link">#55</a>)</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.8.1" id="glyparse-081">glyparse 0.8.1<a class="anchor" aria-label="anchor" href="#glyparse-081"></a></h2><p class="text-muted">CRAN release: 2026-08-28</p>
 <div class="section level3">

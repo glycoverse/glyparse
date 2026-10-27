@@ -7,7 +7,12 @@ GlycoCT is a format used by databases like GlyTouCan and GlyGen.
 ## Usage
 
 ``` r
-parse_glycoct(x, on_failure = "error", progress = FALSE, validate = TRUE)
+parse_glycoct(
+  x,
+  on_failure = "error",
+  progress = FALSE,
+  validate = lifecycle::deprecated()
+)
 ```
 
 ## Arguments
@@ -28,8 +33,8 @@ parse_glycoct(x, on_failure = "error", progress = FALSE, validate = TRUE)
 
 - validate:
 
-  Whether to validate parsed glycan graphs before constructing the
-  result.
+  Deprecated and ignored. Array records are always validated by
+  [`glyrepr::structure_from_arrays()`](https://glycoverse.github.io/glyrepr/reference/structure_from_arrays.html).
 
 ## Value
 

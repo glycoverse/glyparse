@@ -27,9 +27,15 @@ pak::pkg_install("glyparse")
 
 Or install the latest GitHub release:
 
+Install the latest releases of this package and its required Glycoverse
+dependencies together from GitHub:
+
 ``` r
 
-pak::pkg_install("glycoverse/glyparse@*release")
+pak::pkg_install(c(
+  "glycoverse/glyrepr@*release",
+  "glycoverse/glyparse@*release"
+))
 ```
 
 Or install the development version from

@@ -30,3 +30,5 @@
   : Parse StrucGP Structures
 - [`parse_wurcs()`](https://glycoverse.github.io/glyparse/reference/parse_wurcs.md)
   : Parse WURCS Structures
+- [`glyparse_options`](https://glycoverse.github.io/glyparse/reference/glyparse_options.md)
+  : Native Parsing Options

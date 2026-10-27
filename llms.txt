@@ -27,9 +27,15 @@ pak::pkg_install("glyparse")
 
 Or install the latest GitHub release:
 
+Install the latest releases of this package and its required Glycoverse
+dependencies together from GitHub:
+
 ``` r
 
-pak::pkg_install("glycoverse/glyparse@*release")
+pak::pkg_install(c(
+  "glycoverse/glyrepr@*release",
+  "glycoverse/glyparse@*release"
+))
 ```
 
 Or install the development version from
@@ -134,6 +140,8 @@ parse_wurcs("WURCS=2.0/3,5,4/[a2122h-1b_1-5_2*NCC/3=O][a1122h-1b_1-5][a1122h-1a_
   : Parse StrucGP Structures
 - [`parse_wurcs()`](https://glycoverse.github.io/glyparse/reference/parse_wurcs.md)
   : Parse WURCS Structures
+- [`glyparse_options`](https://glycoverse.github.io/glyparse/reference/glyparse_options.md)
+  : Native Parsing Options
 
 # Articles
 

@@ -1,5 +1,42 @@
 # Changelog
 
+## glyparse 1.0.0
+
+### Breaking changes
+
+- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/reference/parse_glycoct.md),
+  [`parse_kcf()`](https://glycoverse.github.io/glyparse/reference/parse_kcf.md),
+  [`parse_linucs()`](https://glycoverse.github.io/glyparse/reference/parse_linucs.md),
+  [`parse_pglyco_struc()`](https://glycoverse.github.io/glyparse/reference/parse_pglyco_struc.md),
+  [`parse_strucgp_struc()`](https://glycoverse.github.io/glyparse/reference/parse_strucgp_struc.md),
+  and
+  [`parse_wurcs()`](https://glycoverse.github.io/glyparse/reference/parse_wurcs.md)
+  always validate parsed structures. Their `validate` argument is
+  deprecated and warns when supplied; remove it from calls.
+
+### Performance improvements
+
+- Most format parsers, IUPAC converters, and automatic format detection
+  now use native code for faster batch processing. Installing from
+  source requires a C++17 compiler and glyrepr \>= 1.1.0.
+  ([\#54](https://github.com/glycoverse/glyparse/issues/54),
+  [\#55](https://github.com/glycoverse/glyparse/issues/55))
+- Large native parsing and normalization batches use up to two CPU
+  workers. Set `options(glyparse.threads = 1L)` for serial decoding or
+  choose up to 64 workers; see
+  [`?glyparse_options`](https://glycoverse.github.io/glyparse/reference/glyparse_options.md).
+  ([\#55](https://github.com/glycoverse/glyparse/issues/55))
+- [`auto_parse()`](https://glycoverse.github.io/glyparse/reference/auto_parse.md)
+  processes each detected format in a batch while preserving input
+  order, names, missing values, and failure handling.
+  ([\#54](https://github.com/glycoverse/glyparse/issues/54))
+- [`parse_glycoct()`](https://glycoverse.github.io/glyparse/reference/parse_glycoct.md)
+  and
+  [`parse_wurcs()`](https://glycoverse.github.io/glyparse/reference/parse_wurcs.md)
+  parse large batches faster and report repeated non-root alditol
+  warnings once per batch.
+  ([\#55](https://github.com/glycoverse/glyparse/issues/55))
+
 ## glyparse 0.8.1
 
 CRAN release: 2026-08-28
