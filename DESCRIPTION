@@ -26,7 +26,7 @@ URL: https://glycoverse.github.io/glyparse/, https://github.com/glycoverse/glypa
 Imports: 
     checkmate,
     cli,
-    glyrepr (>= 1.1.0),
+    glyrepr (>= 1.2.0),
     lifecycle,
     purrr (>= 1.0.0),
     Rcpp,
