@@ -58,7 +58,9 @@ class RecordWriter {
       for (size_t i = 0; i < r.sub.size(); ++i) SET_STRING_ELT(sub, i, Rf_mkChar(r.sub[i].c_str()));
     }
     SEXP edges = Rf_allocVector(INTSXP, r.edges.size()); SET_VECTOR_ELT(out, 2, edges);
-    std::copy(r.edges.begin(), r.edges.end(), INTEGER(edges));
+    // Zero-length R vectors may expose an invalid sentinel data pointer.
+    if (!r.edges.empty())
+      std::copy(r.edges.begin(), r.edges.end(), INTEGER(edges));
     SEXP links = Rf_allocVector(STRSXP, r.linkage.size()); SET_VECTOR_ELT(out, 3, links);
     for (size_t i = 0; i < r.linkage.size(); ++i) SET_STRING_ELT(links, i, Rf_mkChar(r.linkage[i].c_str()));
     auto anomer = anomers.find(r.anomer);

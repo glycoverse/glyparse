@@ -96,3 +96,41 @@ test_that("native ports preserve established tokenization and recovery", {
     "D-IdoA(?1-"
   )
 })
+
+test_that("native records preserve zero-edge structures and mixed batches", {
+  mono <- "WURCS=2.0/1,1,0/[a2122h-1a_1-5]/1/"
+  linked <- "WURCS=2.0/1,2,1/[a2122h-1a_1-5]/1-1/a4-b1"
+  x <- c(
+    single = mono,
+    linked = linked,
+    missing = NA_character_,
+    invalid = "bad",
+    empty = ""
+  )
+  vocabulary <- native_vocabulary()
+  serial <- native_records_cpp(x, "wurcs", vocabulary, threads = 1L)
+  expect_identical(serial[[1]]$mono, "Glc")
+  expect_identical(serial[[1]]$edges, integer())
+  expect_identical(serial[[1]]$linkage, character())
+  expect_length(serial[[2]]$mono, 2L)
+  expect_length(serial[[2]]$edges, 2L)
+  expect_length(serial[[2]]$linkage, 1L)
+  expect_identical(names(serial), names(x))
+  expect_identical(
+    unname(vapply(serial, is.null, logical(1))),
+    c(FALSE, FALSE, TRUE, TRUE, TRUE)
+  )
+  expect_true(is.na(attr(serial, "reasons")[[3]]))
+  expect_false(anyNA(attr(serial, "reasons")[4:5]))
+  expect_length(native_records_cpp(character(), "wurcs", vocabulary), 0L)
+  expect_length(parse_wurcs(character()), 0L)
+
+  # Exceed the 256-record worker threshold, including repeated edge-free records.
+  batch <- rep(x, 60L)
+  one <- native_records_cpp(batch, "wurcs", vocabulary, threads = 1L)
+  many <- native_records_cpp(batch, "wurcs", vocabulary, threads = 4L)
+  expect_identical(many, one)
+  parsed <- parse_wurcs(x, on_failure = "na")
+  expect_identical(names(parsed), names(x))
+  expect_identical(unname(is.na(parsed)), c(FALSE, FALSE, TRUE, TRUE, TRUE))
+})
