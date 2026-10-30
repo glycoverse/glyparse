@@ -2,6 +2,12 @@
 
 ## glyparse 1.0.0
 
+- IUPAC parsers and their
+  [`auto_parse()`](https://glycoverse.github.io/glyparse/reference/auto_parse.md)
+  paths now show parsing progress during structure construction when
+  `progress = TRUE`.
+  ([\#56](https://github.com/glycoverse/glyparse/issues/56))
+
 ### Breaking changes
 
 - [`parse_glycoct()`](https://glycoverse.github.io/glyparse/reference/parse_glycoct.md),
@@ -36,14 +42,6 @@
   parse large batches faster and report repeated non-root alditol
   warnings once per batch.
   ([\#55](https://github.com/glycoverse/glyparse/issues/55))
-
-### Minor improvements
-
-- IUPAC parsers and their
-  [`auto_parse()`](https://glycoverse.github.io/glyparse/reference/auto_parse.md)
-  paths now show parsing progress during structure construction when
-  `progress = TRUE`.
-  ([\#56](https://github.com/glycoverse/glyparse/issues/56))
 
 ## glyparse 0.8.1
 
