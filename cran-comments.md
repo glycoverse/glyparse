@@ -1,24 +1,9 @@
 ## R CMD check results
 
-R 4.6.1 on macOS arm64, with the minimum required glyrepr 1.2.0.
-The final glyparse 1.0.0 source archive completed
-`devtools::check(remote = TRUE, manual = TRUE)` with
-0 errors, 0 warnings, and 0 notes on 2026-10-30.
-All 15 URLs passed urlchecker; README and PDF/HTML manuals were rebuilt.
+0 errors | 0 warnings | 1 notes
 
-## CRAN reverse dependencies
+* Days since last update: 0
 
-On 2026-10-30, used the CRAN-recommended
-`tools::check_packages_in_dir()` with CRAN-only reverse dependencies and
-`tools::check_packages_in_dir_changes()` to compare glyparse 0.8.1 with
-the repaired candidate. Coverage was determined with
-`tools::package_dependencies(reverse = TRUE, which = "most", recursive = "strong")`.
-
-Both CRAN reverse dependencies, glydraw 0.9.0 and glymotif 1.0.1, passed
-with status OK against both versions. No check-status regressions were found.
-
-## Windows-devel
-
-The current repaired candidate was accepted for Windows-devel checking on
-2026-10-28. No result email was received; the maintainer explicitly waived
-waiting for this result on 2026-10-30. No Windows-devel pass is claimed.
+  This patch release fixes a potential issue reported by CRAN’s M1-SAN checks
+  and also adds regression tests for related edge cases.
+  The fix passed local R CMD check and R-hub M1-SAN checks.
