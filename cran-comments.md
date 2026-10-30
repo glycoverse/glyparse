@@ -1,11 +1,10 @@
-## Preparation checks
+## R CMD check results
 
 R 4.6.1 on macOS arm64, with the minimum required glyrepr 1.2.0.
-The repaired development candidate (0.8.1.9000) completed
-`devtools::check(remote = TRUE, manual = TRUE)` with 0 errors, 0 warnings,
-and 1 NOTE solely for the development version number.
+The final glyparse 1.0.0 source archive completed
+`devtools::check(remote = TRUE, manual = TRUE)` with
+0 errors, 0 warnings, and 0 notes on 2026-10-30.
 All 15 URLs passed urlchecker; README and PDF/HTML manuals were rebuilt.
-The final release archive will be checked before submission.
 
 ## CRAN reverse dependencies
 
