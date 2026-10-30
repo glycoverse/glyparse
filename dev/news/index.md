@@ -2,7 +2,12 @@
 
 ## glyparse (development version)
 
+- Single-residue structures parse without accessing zero-length edge
+  storage, avoiding undefined behavior detected by memory sanitizers.
+
 ## glyparse 1.0.0
+
+CRAN release: 2026-10-30
 
 - IUPAC parsers and their
   [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
