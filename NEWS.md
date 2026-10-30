@@ -1,4 +1,4 @@
-# glyparse (development version)
+# glyparse 1.0.1
 
 * Fix a potential issue of the C++ code detected by memory sanitizers on M1 mac.
 
