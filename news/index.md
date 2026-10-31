@@ -1,12 +1,15 @@
 # Changelog
 
+## glyparse 1.0.1
+
+CRAN release: 2026-10-31
+
+- Fix a potential issue of the C++ code detected by memory sanitizers on
+  M1 mac.
+
 ## glyparse 1.0.0
 
-- IUPAC parsers and their
-  [`auto_parse()`](https://glycoverse.github.io/glyparse/reference/auto_parse.md)
-  paths now show parsing progress during structure construction when
-  `progress = TRUE`.
-  ([\#56](https://github.com/glycoverse/glyparse/issues/56))
+CRAN release: 2026-10-30
 
 ### Breaking changes
 
@@ -20,7 +23,7 @@
   always validate parsed structures. Their `validate` argument is
   deprecated and warns when supplied; remove it from calls.
 
-### Performance improvements
+### Minor improvements and bug fixes
 
 - Most format parsers, IUPAC converters, and automatic format detection
   now use native code for faster batch processing. Installing from
@@ -42,6 +45,11 @@
   parse large batches faster and report repeated non-root alditol
   warnings once per batch.
   ([\#55](https://github.com/glycoverse/glyparse/issues/55))
+- IUPAC parsers and their
+  [`auto_parse()`](https://glycoverse.github.io/glyparse/reference/auto_parse.md)
+  paths now show parsing progress during structure construction when
+  `progress = TRUE`.
+  ([\#56](https://github.com/glycoverse/glyparse/issues/56))
 
 ## glyparse 0.8.1
 
