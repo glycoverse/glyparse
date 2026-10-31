@@ -2,6 +2,10 @@
 
 ## glyparse (development version)
 
+## glyparse 1.0.1
+
+CRAN release: 2026-10-31
+
 - Fix a potential issue of the C++ code detected by memory sanitizers on
   M1 mac.
 
