@@ -94,3 +94,17 @@ test_that("parse_iupac_short works for a complex example with multiple substitue
   structure <- parse_iupac_short(x)
   expect_equal(as.character(structure), "Glc3Me6S(a1-3)Man(a1-")
 })
+
+test_that("substituents preserve the base residue's anomeric carbon", {
+  x <- c(
+    "Neu5Ac9Aca3Galb-", "Neu5Ac9Aca-", "Neu5Gc9Acb-", "Fru6Sa-",
+    "Glc3Mea-"
+  )
+  expected <- c(
+    "Neu5Ac9Ac(a2-3)Gal(b1-", "Neu5Ac9Ac(a2-", "Neu5Gc9Ac(b2-",
+    "Fru6S(a2-", "Glc3Me(a1-"
+  )
+  expect_identical(convert_short_to_condensed(x), expected)
+  expect_identical(as.character(parse_iupac_short(x)), expected)
+  expect_identical(as.character(auto_parse(x)), expected)
+})
