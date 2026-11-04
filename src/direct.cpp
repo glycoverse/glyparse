@@ -36,6 +36,28 @@ static Record pglyco(const S &x) {
     fail("Invalid pGlyco structure");
   return r;
 }
+static void validate_strucgp_markers(const S &x) {
+  std::vector<char> stack;
+  for (size_t i = 0; i < x.size();) {
+    char c = x[i];
+    if (c >= 'A' && c <= 'Z') {
+      if ((stack.empty() && i != 0) || i + 1 >= x.size() ||
+          x[i + 1] < '1' || x[i + 1] > '5')
+        fail("Invalid StrucGP node");
+      stack.push_back(c);
+      i += 2;
+    } else if (c >= 'a' && c <= 'z') {
+      if (stack.empty() || c != std::tolower(static_cast<unsigned char>(stack.back())))
+        fail("Unbalanced StrucGP depth marker");
+      stack.pop_back();
+      ++i;
+    } else {
+      fail("Invalid StrucGP depth marker");
+    }
+  }
+  if (x.empty() || !stack.empty())
+    fail("Unbalanced StrucGP depth marker");
+}
 static void strucgp_node(const S &x, Record &r, int parent, int depth = 0) {
   if (x.empty())
     return;
@@ -355,6 +377,7 @@ Record parse_direct(const S &x, const S &format, const Vocab &v) {
   if (format == "pglyco")
     return pglyco(x);
   if (format == "strucgp") {
+    validate_strucgp_markers(x);
     Record r;
     r.anomer = "??";
     strucgp_node(x, r, 0);

@@ -1,5 +1,7 @@
 # glyparse (development version)
 
+* `parse_strucgp_struc()` rejects unmatched depth markers and malformed content instead of silently turning truncated input into valid structures.
+
 # glyparse 1.0.1
 
 * Fix a potential issue of the C++ code detected by memory sanitizers on M1 mac.
