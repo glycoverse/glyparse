@@ -1,5 +1,7 @@
 # glyparse (development version)
 
+* `parse_pglyco_struc()` and `auto_parse()` reject structures with unclosed pGlyco branches instead of silently accepting truncated input.
+
 # glyparse 1.0.1
 
 * Fix a potential issue of the C++ code detected by memory sanitizers on M1 mac.
