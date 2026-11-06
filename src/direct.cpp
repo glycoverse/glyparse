@@ -32,6 +32,8 @@ static Record pglyco(const S &x) {
       stack.pop_back();
     }
   }
+  if (!stack.empty())
+    fail("Unbalanced pGlyco branch");
   if (n != (int)ms.size() || n == 0 || (n == 1 && x.find(')') == S::npos))
     fail("Invalid pGlyco structure");
   return r;
