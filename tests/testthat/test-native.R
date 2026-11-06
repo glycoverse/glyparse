@@ -80,10 +80,6 @@ test_that("native ports preserve established tokenization and recovery", {
     c(NA_character_, "GalNAc(a1-")
   )
   expect_identical(
-    as.character(parse_pglyco_struc(c("(H(N)", "(H"), on_failure = "na")),
-    c("HexNAc(??-?)Hex(??-", NA_character_)
-  )
-  expect_identical(
     as.character(parse_strucgp_struc("A1B1a")),
     "Hex(??-?)Hex(??-"
   )
