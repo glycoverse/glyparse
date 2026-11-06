@@ -1,6 +1,7 @@
 # glyparse (development version)
 
-* `parse_strucgp_struc()` rejects unmatched depth markers and malformed content instead of silently turning truncated input into valid structures.
+* `parse_strucgp_struc()` rejects unmatched depth markers and malformed content instead of silently turning truncated input into valid structures. (#60)
+* `parse_iupac_short()` now preserves the base monosaccharide's donor carbon for modified residues, such as C2 for `Neu5Ac9Ac` and `Fru6S`, instead of incorrectly defaulting to C1.
 
 # glyparse 1.0.1
 
