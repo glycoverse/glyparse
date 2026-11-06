@@ -64,7 +64,12 @@ test_that("StrucGP array assembly preserves branched topology", {
 
 test_that("StrucGP rejects unmatched markers and skipped content", {
   invalid <- c(
-    "A1B2bX", "A1B2b", "A1B2a", "A1B2baB3b", "A1B2bXB3ba"
+    "A1B1a",
+    "A1B2bX",
+    "A1B2b",
+    "A1B2a",
+    "A1B2baB3b",
+    "A1B2bXB3ba"
   )
   expect_error(parse_strucgp_struc(invalid), "Can't parse")
   expect_true(all(is.na(parse_strucgp_struc(invalid, on_failure = "na"))))
@@ -74,5 +79,8 @@ test_that("StrucGP rejects unmatched markers and skipped content", {
   result <- parse_strucgp_struc(input, on_failure = "na")
   expect_identical(names(result), names(input))
   expect_identical(unname(is.na(result)), c(FALSE, TRUE, TRUE))
-  expect_equal(unname(result[1]), parse_strucgp_struc("A1B2bB3ba"))
+  expect_identical(
+    unname(as.character(result[1])),
+    as.character(parse_strucgp_struc("A1B2bB3ba"))
+  )
 })

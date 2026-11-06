@@ -84,10 +84,6 @@ test_that("native ports preserve established tokenization and recovery", {
     c("HexNAc(??-?)Hex(??-", NA_character_)
   )
   expect_identical(
-    as.character(parse_strucgp_struc("A1B1a")),
-    "Hex(??-?)Hex(??-"
-  )
-  expect_identical(
     as.character(parse_linucs("[][b-D-Glcp]{[(4+1)][a-D-Glcp\n]{}}")),
     "Glc(a1-4)Glc(b1-"
   )
