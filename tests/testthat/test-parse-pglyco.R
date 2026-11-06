@@ -75,3 +75,19 @@ test_that("pGlyco array assembly preserves branched topology", {
     rep("??-?", 8)
   )
 })
+
+test_that("pGlyco rejects unclosed branches", {
+  invalid <- c("(H(N)", "(H", "(N(H)", "(N(H", "(N(F)(N(H))")
+  expect_error(parse_pglyco_struc(invalid), "Can't parse")
+  expect_true(all(is.na(parse_pglyco_struc(invalid, on_failure = "na"))))
+  expect_true(all(is.na(auto_parse(invalid, on_failure = "na"))))
+
+  input <- c(valid = "(N(H))", invalid = "(N(H)", missing = NA)
+  result <- parse_pglyco_struc(input, on_failure = "na")
+  expect_identical(names(result), names(input))
+  expect_identical(unname(is.na(result)), c(FALSE, TRUE, TRUE))
+  expect_identical(
+    unname(as.character(result[1])),
+    as.character(parse_pglyco_struc("(N(H))"))
+  )
+})
