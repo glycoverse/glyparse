@@ -34,7 +34,9 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="glyparse-development-version">glyparse (development version)<a class="anchor" aria-label="anchor" href="#glyparse-development-version"></a></h2>
-</div>
+<ul><li>
+<code><a href="../reference/parse_iupac_short.html">parse_iupac_short()</a></code> now preserves the base monosaccharide’s donor carbon for modified residues, such as C2 for <code>Neu5Ac9Ac</code> and <code>Fru6S</code>, instead of incorrectly defaulting to C1.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.1" id="glyparse-101">glyparse 1.0.1<a class="anchor" aria-label="anchor" href="#glyparse-101"></a></h2><p class="text-muted">CRAN release: 2026-10-31</p>
 <ul><li>Fix a potential issue of the C++ code detected by memory sanitizers on M1 mac.</li>

@@ -2,6 +2,11 @@
 
 ## glyparse (development version)
 
+- [`parse_iupac_short()`](https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_short.md)
+  now preserves the base monosaccharide’s donor carbon for modified
+  residues, such as C2 for `Neu5Ac9Ac` and `Fru6S`, instead of
+  incorrectly defaulting to C1.
+
 ## glyparse 1.0.1
 
 CRAN release: 2026-10-31
