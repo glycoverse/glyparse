@@ -110,6 +110,13 @@ static S simple_short(const S &x, const Vocab &v) {
   }
   return "";
 }
+static S short_anomer_position(const S &residue, const Vocab &v) {
+  // The short token can include substituents, but those do not change the
+  // underlying monosaccharide's donor carbon. Prefer the longest known name.
+  for (const auto &mono : v.sorted_monos())
+    if (starts(residue, mono)) return v.pos(mono);
+  return v.pos(residue);
+}
 static S short_iupac(const S &x, const Vocab &v) {
   S simple = simple_short(x, v);
   if (!simple.empty()) return simple;
@@ -141,12 +148,12 @@ static S short_iupac(const S &x, const Vocab &v) {
       auto cached = v.converted_tokens.find(key);
       if (cached == v.converted_tokens.end()) {
         auto m = match(t, residue);
-        cached = v.converted_tokens.emplace(key, m[1] + "(" + m[2] + v.pos(m[1]) + "-" + m[3] + ")").first;
+        cached = v.converted_tokens.emplace(key, m[1] + "(" + m[2] + short_anomer_position(m[1], v) + "-" + m[3] + ")").first;
       }
       out += cached->second;
     }
   }
-  return out + last[1] + "(" + last[2] + v.pos(last[1]) + "-";
+  return out + last[1] + "(" + last[2] + short_anomer_position(last[1], v) + "-";
 }
 // A complete ordinary token stream can be scanned without regex backtracking.
 // Unusual syntax still uses the original token finder (including skipped text).
