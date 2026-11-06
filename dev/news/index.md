@@ -2,6 +2,10 @@
 
 ## glyparse (development version)
 
+- [`parse_strucgp_struc()`](https://glycoverse.github.io/glyparse/dev/reference/parse_strucgp_struc.md)
+  rejects unmatched depth markers and malformed content instead of
+  silently turning truncated input into valid structures.
+  ([\#60](https://github.com/glycoverse/glyparse/issues/60))
 - [`parse_pglyco_struc()`](https://glycoverse.github.io/glyparse/dev/reference/parse_pglyco_struc.md)
   and
   [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
