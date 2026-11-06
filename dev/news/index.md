@@ -2,6 +2,12 @@
 
 ## glyparse (development version)
 
+- [`parse_pglyco_struc()`](https://glycoverse.github.io/glyparse/dev/reference/parse_pglyco_struc.md)
+  and
+  [`auto_parse()`](https://glycoverse.github.io/glyparse/dev/reference/auto_parse.md)
+  reject structures with unclosed pGlyco branches instead of silently
+  accepting truncated input.
+  ([\#59](https://github.com/glycoverse/glyparse/issues/59))
 - [`parse_iupac_short()`](https://glycoverse.github.io/glyparse/dev/reference/parse_iupac_short.md)
   now preserves the base monosaccharide’s donor carbon for modified
   residues, such as C2 for `Neu5Ac9Ac` and `Fru6S`, instead of
