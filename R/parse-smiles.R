@@ -12,11 +12,13 @@
 #' traversals, branch orders, and ring labels do not change the result.
 #'
 #' Supported inputs are connected tree glycans with unbranched, saturated
-#' carbon backbones of 5--9 atoms and five- or six-membered sugar rings.
+#' carbon backbones of 5--9 atoms and five- or six-membered sugar rings, or
+#' a reducing-end alditol (including terminal-deoxy alditols).
 #' Supported chemistry includes the monosaccharides recognized by
 #' `parse_wurcs()` within this scope, such as hexoses, pentoses, deoxy sugars,
 #' hexosamines, uronic acids, and sialic acids. Supported substituents include
-#' amino, N- and O-acetyl/glycolyl, and neutral sulfate/phosphate groups.
+#' amino, N- and O-methyl/acetyl/glycolyl, neutral sulfate/phosphate groups,
+#' and supported carboxyl derivatives such as methyl esters and amides.
 #' Glycosidic bridges must be O-linked with at least one anomeric endpoint.
 #'
 #' Tetrahedral `@` and `@@` tags are interpreted relative to their neighbors,
@@ -26,12 +28,18 @@
 #' input fails. For non-reducing glycans with anomeric-to-anomeric bonds, a
 #' deterministic root is chosen from the labeled residue graph. It may
 #' differ from a WURCS file's conventional root without changing the glycan.
+#' Alditol carbon chains are numbered deterministically using amino positions,
+#' parent-sugar configuration, and the complete attached chemistry. Symmetric
+#' alditols can therefore have reflected attachment positions relative to a
+#' source WURCS, while describing the same molecule. Only a root alditol is
+#' supported: non-root alditols fail rather than losing their reduced state.
 #'
 #' This is not a general-purpose SMILES reader. Unsupported syntax or chemistry
 #' fails rather than being silently removed: examples include charges,
 #' isotopes, separate explicit hydrogen atoms, aromatic atoms, stereochemical
 #' classes other than tetrahedral `@`/`@@`, disconnected salts, aglycones,
-#' open-chain sugars/alditols, non-O glycosidic bonds, cyclic residue graphs,
+#' open-chain sugars other than supported alditols, non-O glycosidic bonds,
+#' non-anomeric inter-residue bridges, cyclic residue graphs,
 #' and unrecognized modifications. Only neutral C, N, O, S, and P atoms are
 #' accepted. Limits are 10,000 atoms and 52 residues per input. SMILES are not
 #' detected by [auto_parse()]; call this function explicitly.

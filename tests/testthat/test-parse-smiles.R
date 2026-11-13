@@ -4,8 +4,8 @@ test_that("native SMILES matches real GlyGen WURCS residue graphs", {
   skip_if_not_installed("igraph")
   d <- read.csv(test_path("fixtures", "glygen-smiles-wurcs.csv"))
   a <- parse_smiles(d$sequence_smiles_isomeric, on_failure = "na")
-  b <- parse_wurcs(d$sequence_wurcs, on_failure = "na")
-  rejected <- d$glytoucan_ac == "G89097YO"
+  b <- suppressWarnings(parse_wurcs(d$sequence_wurcs, on_failure = "na"))
+  rejected <- d$glytoucan_ac %in% c("G89097YO", "G27289CV")
   expect_equal(is.na(a), rejected)
   # These source SMILES contain no stereochemical information, unlike their
   # paired WURCS. Do not manufacture alpha/beta to match the database.
@@ -80,7 +80,7 @@ test_that("malformed and out-of-scope SMILES fail without dropping atoms", {
     "c1ccccc1",
     paste0(smiles_glucose, ".O"),
     paste0(smiles_glucose, " title"),
-    paste0(smiles_glucose, "C"), # methyl glycoside: no silent aglycone removal
+    sub("(O1)O", "(O1)OC", smiles_glucose, fixed = TRUE), # methyl glycoside
     sub("\\[C@@H\\]", "[C@TH1H]", smiles_glucose),
     "O=CC(O)C(O)C(O)C(O)CO" # open chain not currently represented
   )
@@ -109,4 +109,47 @@ test_that("SMILES native batch execution is thread-independent", {
       progress = TRUE
     ))
   )
+})
+
+
+test_that("symmetric alditol numbering includes the complete attached chemistry", {
+  d <- read.csv(test_path("fixtures", "smiles-symmetric-alditols.csv"))
+  for (group in unique(d$group)) {
+    result <- parse_smiles(d$smiles[d$group == group])
+    expect_false(anyNA(result))
+    expect_length(unique(as.character(result)), 1L)
+  }
+})
+
+test_that("WURCS explicit relative anomers are not inferred from unknown backbones", {
+  specified <- c(
+    "WURCS=2.0/1,1,0/[axxxh-1b_1-4]/1/",
+    "WURCS=2.0/1,1,0/[axxxh-1a_1-5]/1/"
+  )
+  expect_identical(
+    as.character(parse_wurcs(specified)),
+    c("Pen(b1-", "Pen(a1-")
+  )
+  unspecified <- sub("-1[ab]_", "-1x_", specified)
+  expect_identical(as.character(parse_wurcs(unspecified)), rep("Pen(?1-", 2))
+})
+
+
+test_that("supported methyl groups do not authorize dropping an aglycone", {
+  expect_identical(
+    as.character(parse_smiles(paste0(smiles_glucose, "C"))),
+    "Glc6Me(b1-"
+  )
+  glycoside <- sub("(O1)O", "(O1)OC", smiles_glucose, fixed = TRUE)
+  expect_true(is.na(parse_smiles(glycoside, on_failure = "na")))
+})
+
+test_that("non-root alditols fail rather than copying a lossy WURCS result", {
+  d <- read.csv(test_path("fixtures", "glygen-smiles-wurcs.csv"))
+  d <- d[d$glytoucan_ac == "G27289CV", ]
+  expect_true(is.na(parse_smiles(
+    d$sequence_smiles_isomeric,
+    on_failure = "na"
+  )))
+  expect_warning(parse_wurcs(d$sequence_wurcs), "Only the main reducing-end")
 })

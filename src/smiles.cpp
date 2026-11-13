@@ -186,6 +186,7 @@ struct Sugar {
   VI chain;
   int ring, start, end;
   S descriptor;
+  bool reversible = false;
 };
 struct Link {
   int a, b, pa, pb;
@@ -268,6 +269,72 @@ S encode_smiles(const S &input) {
           candidates.push_back({chain, ring, start, end, ""});
         }
     }
+    if (candidates.empty()) {
+      // Acyclic polyols have no anomeric center. Require every carbon to
+      // carry one O/N substituent; this excludes arbitrary alkyl aglycones.
+      bool polyol = true;
+      int deoxy_ends = 0;
+      for (size_t p = 0; p < chain.size(); ++p) {
+        int a = chain[p], count = 0;
+        for (int b : m.atoms[a].neighbors)
+          if (m.atoms[b].element != 'C') {
+            if ((m.atoms[b].element != 'O' && m.atoms[b].element != 'N') ||
+                m.order(a, b) != 1)
+              polyol = false;
+            // An ether between carbons of the same chain is not an alditol.
+            for (int c : m.atoms[b].neighbors)
+              if (c != a &&
+                  std::find(chain.begin(), chain.end(), c) != chain.end())
+                polyol = false;
+            ++count;
+          }
+        bool terminal = p == 0 || p + 1 == chain.size();
+        if (terminal && count == 0 && m.atoms[a].hydrogen == 3)
+          ++deoxy_ends;
+        else if (count != 1 || m.atoms[a].hydrogen != (terminal ? 2 : 1))
+          polyol = false;
+      }
+      if (polyol && deoxy_ends <= 1) {
+        // A polyol can be numbered from either end. Prefer the low amino
+        // locant, then established alditol parent names; never atom indices.
+        auto score = [&](const VI &cc) {
+          VI amino, attachments;
+          S skeleton;
+          for (size_t p = 0; p < cc.size(); ++p) {
+            int a = cc[p], h = -1;
+            for (int b : m.atoms[a].neighbors)
+              if (m.atoms[b].element != 'C')
+                h = b;
+            if (h < 0) {
+              skeleton += 'm';
+              continue;
+            }
+            if (m.atoms[h].element == 'N')
+              amino.push_back(p + 1);
+            if (m.atoms[h].neighbors.size() > 1)
+              attachments.push_back(p + 1);
+            if (p > 0 && p + 1 < cc.size()) {
+              int sign = orientation(m, a, {cc[p - 1], cc[p + 1], h, -1});
+              skeleton += sign == 0 ? 'x' : sign == 1 ? '1' : '2';
+            } else
+              skeleton += 'h';
+          }
+          if (amino.empty())
+            amino.push_back(100);
+          const VS preferred = {"h2122h", "h2112h", "h1122h",
+                                "h212h",  "hxxxxh", "hxxxh"};
+          auto it = std::find(preferred.begin(), preferred.end(), skeleton);
+          int rank = it - preferred.begin();
+          return std::make_tuple(amino, rank, skeleton, attachments);
+        };
+        VI reverse = chain;
+        std::reverse(reverse.begin(), reverse.end());
+        bool reversible = score(reverse) == score(chain);
+        if (score(reverse) < score(chain))
+          chain = reverse;
+        candidates.push_back({chain, -1, -1, -1, "", reversible});
+      }
+    }
     if (candidates.size() != 1)
       continue;
     Sugar sugar = candidates[0];
@@ -278,7 +345,8 @@ S encode_smiles(const S &input) {
       position[a] = p + 1;
       used[a] = 1;
     }
-    used[sugar.ring] = 1;
+    if (sugar.ring >= 0)
+      used[sugar.ring] = 1;
     sugars.push_back(sugar);
   }
   if (sugars.empty() || sugars.size() > 52)
@@ -321,6 +389,11 @@ S encode_smiles(const S &input) {
     int center = rest[0];
     const auto &c = m.atoms[center];
     if (c.element == 'C') {
+      if (c.neighbors.size() == 1 && c.hydrogen == 3 &&
+          m.order(hetero, center) == 1) {
+        claim(center);
+        return S(1, a.element) + "C";
+      }
       VI oxy, tail;
       for (int b : c.neighbors)
         if (b != hetero) {
@@ -405,18 +478,21 @@ S encode_smiles(const S &input) {
       }
       bool terminal = p == 0 || p + 1 == s.chain.size();
       if (terminal && hetero.size() == 2) {
-        int doubles = 0, singles = 0;
+        int oxo = -1, attachment = -1;
         for (int b : hetero) {
-          if (m.atoms[b].element != 'O' || m.atoms[b].neighbors.size() != 1)
-            fail("Unsupported carboxyl group");
-          if (m.order(a, b) == 2)
-            ++doubles;
-          else if (m.order(a, b) == 1)
-            ++singles;
-          claim(b);
+          if (m.atoms[b].element == 'O' && m.order(a, b) == 2 &&
+              m.atoms[b].neighbors.size() == 1)
+            oxo = b;
+          else if (m.order(a, b) == 1 &&
+                   (m.atoms[b].element == 'O' || m.atoms[b].element == 'N'))
+            attachment = b;
         }
-        if (doubles != 1 || singles != 1 || atom.stereo)
-          fail("Unsupported terminal carbon");
+        if (oxo < 0 || attachment < 0 || atom.stereo)
+          fail("Unsupported carboxyl group");
+        claim(oxo);
+        S mod = substituent(attachment, a);
+        if (!mod.empty())
+          mods.push_back("_" + std::to_string(p + 1) + "*" + mod);
         skeleton += 'A';
         continue;
       }
@@ -448,9 +524,11 @@ S encode_smiles(const S &input) {
     char anomer = 'x';
     if (anomer_sign && reference_sign)
       anomer = anomer_sign == reference_sign ? 'a' : 'b';
-    s.descriptor = skeleton + "-" + std::to_string(s.start + 1) + anomer + "_" +
-                   std::to_string(s.start + 1) + "-" +
-                   std::to_string(s.end + 1) + join(mods);
+    s.descriptor = s.start < 0
+                       ? skeleton + join(mods)
+                       : skeleton + "-" + std::to_string(s.start + 1) + anomer +
+                             "_" + std::to_string(s.start + 1) + "-" +
+                             std::to_string(s.end + 1) + join(mods);
   }
   if (std::find(used.begin(), used.end(), 0) != used.end())
     fail("Non-glycan or unsupported atoms remain");
@@ -475,10 +553,60 @@ S encode_smiles(const S &input) {
     std::sort(children.begin(), children.end());
     return sugars[node].descriptor + "{" + join(children, ";") + "}";
   };
+  // Equal local scores do not resolve a symmetric polyol decorated by
+  // different glycans at reflected positions. Compare the complete labeled
+  // sides (and reflected modification positions) before choosing numbering.
+  for (size_t node = 0; node < sugars.size(); ++node) {
+    auto &s = sugars[node];
+    if (!s.reversible)
+      continue;
+    auto pieces = split(s.descriptor, '_');
+    VS reflected;
+    for (size_t j = 1; j < pieces.size(); ++j) {
+      auto star = pieces[j].find('*');
+      if (star == S::npos)
+        fail("Invalid alditol modification");
+      int p = std::stoi(pieces[j].substr(0, star));
+      reflected.push_back(std::to_string(s.chain.size() + 1 - p) +
+                          pieces[j].substr(star));
+    }
+    std::sort(reflected.begin(), reflected.end());
+    S reverse_descriptor =
+        pieces[0] + (reflected.empty() ? "" : "_" + join(reflected, "_"));
+    VS forward, backward;
+    for (const auto &e : links) {
+      int other = e.a == static_cast<int>(node)   ? e.b
+                  : e.b == static_cast<int>(node) ? e.a
+                                                  : -1;
+      if (other < 0)
+        continue;
+      int here = e.a == static_cast<int>(node) ? e.pa : e.pb,
+          there = e.a == static_cast<int>(node) ? e.pb : e.pa;
+      S side = ":" + std::to_string(there) + ":" + signature(other, node, {});
+      forward.push_back(std::to_string(here) + side);
+      backward.push_back(std::to_string(s.chain.size() + 1 - here) + side);
+    }
+    std::sort(forward.begin(), forward.end());
+    std::sort(backward.begin(), backward.end());
+    if (std::make_pair(reverse_descriptor, backward) <
+        std::make_pair(s.descriptor, forward)) {
+      s.descriptor = reverse_descriptor;
+      std::reverse(s.chain.begin(), s.chain.end());
+      for (auto &e : links) {
+        if (e.a == static_cast<int>(node))
+          e.pa = s.chain.size() + 1 - e.pa;
+        if (e.b == static_cast<int>(node))
+          e.pb = s.chain.size() + 1 - e.pb;
+      }
+    }
+  }
   for (auto &e : links) {
     bool a = e.pa == sugars[e.a].start + 1, b = e.pb == sugars[e.b].start + 1;
-    if (!a && !b)
+    if (!a && !b) {
+      if (sugars[e.a].start < 0 || sugars[e.b].start < 0)
+        fail("Non-root alditol cannot be represented without information loss");
       fail("Non-anomeric sugar bridge unsupported");
+    }
     if (a && b && signature(e.b, e.a, {}) < signature(e.a, e.b, {})) {
       std::swap(e.a, e.b);
       std::swap(e.pa, e.pb);

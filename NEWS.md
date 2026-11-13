@@ -1,6 +1,7 @@
 # glyparse (development version)
 
 * `parse_smiles()` parses a defined subset of glycan SMILES with native R/C++ code, including atom-order-aware tetrahedral stereochemistry, ring forms, glycosidic linkages, and common modifications. It requires no external chemistry runtime and rejects unsupported atoms rather than stripping them.
+* Native SMILES parsing also supports reducing-end alditols, terminal-deoxy alditols, methyl substituents, and supported carboxyl esters/amides. Symmetric alditol numbering accounts for complete attached groups; non-root alditols and non-anomeric bridges are rejected instead of producing lossy structures.
 
 * `parse_strucgp_struc()` rejects unmatched depth markers and malformed content instead of silently turning truncated input into valid structures. (#60)
 * `parse_pglyco_struc()` and `auto_parse()` reject structures with unclosed pGlyco branches instead of silently accepting truncated input. (#59)

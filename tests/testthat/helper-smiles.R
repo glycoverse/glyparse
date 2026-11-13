@@ -1,6 +1,6 @@
 # Root-independent identity for fully localized tree glycans. Retain each
 # monosaccharide, substituent, anomer, and both endpoints of every linkage.
-# This is needed only for non-reducing glycans, whose root is conventional.
+# Account for conventional roots and symmetric alditol carbon numbering.
 smiles_graph_identity <- function(x) {
   g <- glyrepr::get_structure_graphs(x)
   v <- igraph::vertex_attr(g)
@@ -11,6 +11,9 @@ smiles_graph_identity <- function(x) {
   anomer[child] <- sub("-.*", "", e$linkage)
   anomer[setdiff(seq_along(anomer), child)] <- igraph::graph_attr(g, "anomer")
   labels <- paste(v$mono, v$sub, anomer, sep = ":")
+  root <- setdiff(seq_along(anomer), child)
+  alditol <- isTRUE(igraph::graph_attr(g, "alditol"))
+  labels[root] <- paste0(labels[root], if (alditol) ":alditol" else "")
   donor <- sub("^[ab?]", "", sub("-.*", "", e$linkage))
   acceptor <- sub(".*-", "", e$linkage)
   visit <- function(node, previous = 0L) {
@@ -31,5 +34,15 @@ smiles_graph_identity <- function(x) {
     )
     paste0(labels[node], "{", paste(sort(tails), collapse = ";"), "}")
   }
-  min(vapply(seq_along(labels), visit, ""))
+  identity <- min(vapply(seq_along(labels), visit, ""))
+  # Mannitol's h1122h skeleton is identical on reversing the carbon chain
+  # and reversing all tetrahedral orientations. Fully unknown hxxxxh is
+  # likewise symmetric. Reverse every root attachment together, never each
+  # position independently; this retains relative branch placement.
+  if (alditol && v$mono[root] %in% c("Man", "Hex") && v$sub[root] == "") {
+    at_root <- parent == root
+    acceptor[at_root] <- as.character(7L - as.integer(acceptor[at_root]))
+    identity <- min(identity, vapply(seq_along(labels), visit, ""))
+  }
+  identity
 }
