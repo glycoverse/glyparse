@@ -144,6 +144,17 @@ Rcpp::List native_records_cpp(Rcpp::CharacterVector x, const std::string &format
 }
 // [[Rcpp::export]]
 Rcpp::RObject native_aux_cpp(const std::string &op, Rcpp::List args, Rcpp::List vocabulary) {
+  if (op == "smiles_diagnostics") {
+    Rcpp::CharacterVector x = args["x"], result(x.size(), NA_STRING), error(x.size(), NA_STRING);
+    for (R_xlen_t i = 0; i < x.size(); ++i) {
+      if (x[i] == NA_STRING) continue;
+      Rcpp::checkUserInterrupt();
+      try { result[i] = gp::smiles_to_wurcs(Rcpp::as<std::string>(x[i])); }
+      catch (const std::exception &e) { error[i] = e.what(); }
+    }
+    return Rcpp::List::create(Rcpp::Named("wurcs")=result, Rcpp::Named("error")=error);
+  }
+
   using namespace gp;
   Vocab v(vocabulary);
   if (starts(op, "wurcs_"))
