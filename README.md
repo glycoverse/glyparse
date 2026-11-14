@@ -22,12 +22,7 @@ Parse different glycan structure text nomenclature into
 Currently, the following formats are supported: IUPAC-extended,
 IUPAC-condensed, IUPAC-short, IUPAC-compact, Glycam-IUPAC, WURCS,
 GlycoCT, GlycoWorkbench, KCF, LinearCode, Linucs, StrucGP-style,
-pGlyco-style, and a defined subset of glycan SMILES.
-
-Use `parse_smiles()` explicitly for SMILES. It uses native R/C++ rather
-than an external chemistry runtime. Unsupported molecules fail instead
-of silently losing aglycones or modifications; see `?parse_smiles` for
-the supported scope.
+pGlyco-style, and glycan SMILES.
 
 ## Installation
 

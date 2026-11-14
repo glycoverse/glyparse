@@ -46,8 +46,7 @@ a runtime or test-time dependency: only the resulting strings are stored.
   endpoint positions and each residue's anomer retained, independently of
   the conventional root.
 
-Use `tools/validate-smiles-glygen.R` from the source checkout to repeat the
-full paired-dataset comparison. Input data are not queried at package runtime.
+Input data are not queried at package runtime.
 
 ## Additional stereochemical and symmetry regression tests
 

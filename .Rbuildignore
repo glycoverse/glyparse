@@ -14,4 +14,3 @@
 ^revdep$
 ^benchmarks$
 ^\.git$
-^tools$
