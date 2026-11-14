@@ -26,7 +26,7 @@ knitr::opts_chunk$set(
 Parse different glycan structure text nomenclature into `glyrepr::glycan_structure`.
 
 Currently, the following formats are supported: IUPAC-extended, IUPAC-condensed,
-IUPAC-short, IUPAC-compact, Glycam-IUPAC, WURCS, GlycoCT, GlycoWorkbench, KCF, LinearCode, Linucs, StrucGP-style, pGlyco-style.
+IUPAC-short, IUPAC-compact, Glycam-IUPAC, WURCS, GlycoCT, GlycoWorkbench, KCF, LinearCode, Linucs, StrucGP-style, pGlyco-style, and glycan SMILES.
 
 ## Installation
 

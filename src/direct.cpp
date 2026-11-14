@@ -395,6 +395,8 @@ Record parse_direct(const S &x, const S &format, const Vocab &v) {
   }
   if (format == "kcf")
     return kcf(x, v);
+  if (format == "smiles")
+    return smiles_parse(x, v);
   if (format == "wurcs")
     return wurcs_parse(x, v);
   if (format == "glycoct")

@@ -22,7 +22,7 @@ Parse different glycan structure text nomenclature into
 Currently, the following formats are supported: IUPAC-extended,
 IUPAC-condensed, IUPAC-short, IUPAC-compact, Glycam-IUPAC, WURCS,
 GlycoCT, GlycoWorkbench, KCF, LinearCode, Linucs, StrucGP-style,
-pGlyco-style.
+pGlyco-style, and glycan SMILES.
 
 ## Installation
 

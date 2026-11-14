@@ -339,6 +339,8 @@ FloatingSub normalize_sub(const VI &, const VI &, S, const Slots &);
 S convert(const S &, const S &, const Vocab &);
 S detect(const S &, const Vocab &);
 Record parse_direct(const S &, const S &, const Vocab &);
+S smiles_to_wurcs(const S &);
+Record smiles_parse(const S &, const Vocab &);
 Record wurcs_parse(const S &, const Vocab &);
 Record glycoct_parse(const S &, const Vocab &);
 S gwb_convert(const S &, const Vocab &);
